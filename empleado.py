@@ -142,7 +142,9 @@ def empleado_del_mes():
     for subreddit in config.SUBREDDITS:
         #Buscar Publicaciones
         for submission in reddit.subreddit(subreddit).new(limit=30):
-            #Buscar comentarios
+            #Buscar comentarios 
+            submission.comments.replace_more(limit=0)
+            
             for comment in submission.comments.list():
                 #Buscar comandos
                 if "!tip" in comment.body:
@@ -228,7 +230,7 @@ def servicio_al_cliente():
                 else:
                     mensaje.reply(f"ID:  {item[0]}  |  Timestamp: {readable} |  Cantidad: {item[2]} |  Movimiento: {item[3]}  |  Origen: {item[4]}")
 
-        elif "!saldo" in mensaje.body or "!saldazo" in mensaje:
+        elif "!saldo" in mensaje.body or "!saldazo" in mensaje.body:
 
             consulta = saldazo(str(mensaje.author))
 
