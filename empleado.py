@@ -7,39 +7,21 @@ import random
 
 conn_log = sqlite3.connect("boveda.sqlite3")
 
-resp_saldo = ["Tu saldo es:", "Se me perdio tu cartera......no te creas:","Gusta redondear los centavos?:","Creo que una de tus monedas es falsa: ", "Puntos de Soriana"]
+resp_saldo = open("frases_saldo.txt", "r", encoding="utf-8").read().splitlines()
 
-resp_tip_envio = ["Mandaste tus huachicoins papu! sin pagar comision.",
-                  "Listo, joven.",
-                  "Ojala a mi me pagaran esa cantidad",
-                  "Enviando werito",
-                  "Esta un poco lento el sistema, pero si jalo con el cliente anterior"]
+resp_tip_envio = open("frases_envio.txt", "r", encoding="utf-8").read().splitlines()
 
-resp_empleado_error = ["No lo se, no te entendi! Borra esto e intentalo de nuevo.",
-                       "No me hagas preguntas complejas, apenas termine la secundaria",
-                       "Mira, ya te dije que eso no lo tenemos aqui",
-                       "En la otra caja le cobran wero",
-                       "Se cayo el sistema joven",
-                       "Tu orden me trabo los momos, mi patron se va a enojar"]
+resp_empleado_error = open("frases_error.txt", "r", encoding="utf-8").read().splitlines()
 
-resp_tip_cuenta = ["Hubo un error, espera, no tienes cuenta en HuachiNet!",
-                   "Mira rey, sin cuenta, no hay movimientos",
-                   "Aber calmese señora, ya le dije que no la tenemos en el sistema",
-                   "Maricanuebo sin cuenta en HuachiNet"]
+resp_tip_cuenta = open("frases_cuenta.txt", "r", encoding="utf-8").read().splitlines()
 
-resp_tip_sinbineros = ["Ya se te acabo el credito",
-                       "Mas bien me vas a terminar debiendo, depositale mas a tu cuenta.",
-                       "Pongase a jalar, que se ocupan mas huachicoins",
-                       "Pide lismona para completa la transaccion",
-                       "Ni con los puntos del soriana alcanzas a completa el monto",
-                       "Hijole, no puedo ayudarte a completar la cantidad"]
+resp_tip_sinbineros = open("frases_sinbineros.txt", "r", encoding="utf-8").read().splitlines()
 
-resp_tip_empleado = ["Oye! Muchas gracias!, mi salario es basura!",
-                     "Gracias, una paso mas a la dignidad, que la vida tanto me ha robado!",
-                     "Awebo, ya salio para la cagua!",
-                     "Te pusiste guap@, la proxima el vikingo va por mi cuenta! te dejo ponerle queso gratis, nomas una apachurrada porque luego mi jefe se da cuenta.",
-                     "No esperaba esto, bueno si, mi trabajo es poco, pero es honesto.",
-                     "Si se te pega otra monedita por ahi, no me awito"]
+resp_tip_empleado = open("frases_empleado.txt", "r", encoding="utf-8").read().splitlines()
+
+reddit = praw.Reddit(client_id=config.APP_ID, client_secret=config.APP_SECRET,
+                             user_agent=config.USER_AGENT, username=config.REDDIT_USERNAME,
+                             password=config.REDDIT_PASSWORD) 
 
 def buscar_log(comment_id):
     """Buscar si el comentario ha sido previamente procesado por el empleado del mes"""
@@ -77,7 +59,7 @@ def saldazo(redditor_id) -> str:
     #Primero verificar que el remitente tenga una cuenta
     if Huachis.Verificar_Usuario(redditor_id) == False:
         
-        return "Hubo un problema, no perteneces a la HuachiNet, ubicate niñ@!"
+        return random.choice(resp_tip_cuenta)
 
     else:
         return random.choice(resp_saldo) + f" {Huachis.saldo_total} Huachicoins"
@@ -100,21 +82,44 @@ def tip(remitente,destinatario,cantidad) -> str:
             return random.choice(resp_tip_sinbineros) + f" ({cantidad} Huachicoins)"
 
         else:
-            #Verificar si el destinatario existe en la HuachiNet
-            if Huachis.Verificar_Usuario(destinatario) == False:
-                #Abrimos cuenta y le damos dineros de bienvenida
-                Huachis.Bono_Bienvenida(destinatario)
-            
-            #Iniciamos transaccion
-            Huachis.Enviar_Bineros(destinatario,cantidad)
+            #calcula la edad del destinatario para evitar spam de cuentas recien creadas
+            cuenta_dias = edad_cuenta(destinatario)
 
-            if destinatario == "Empleado_del_mes":
+            if cuenta_dias < 28:
 
-                return random.choice(resp_tip_empleado) + f" ({cantidad} Huachicoins)"
+                return "La cuenta a la que quieres enviar no tiene la madurez suficiente para entrar al sistema, es un pinche mocoso miado, dejalo ahi."
 
             else:
+                #Verificar si el destinatario existe en la HuachiNet
+                if Huachis.Verificar_Usuario(destinatario) == False:
+                    #Abrimos cuenta y le damos dineros de bienvenida
+                    Huachis.Bono_Bienvenida(destinatario)
+                
+                    reddit.redditor(destinatario).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el post sticky en Techo Negro para mas informacion de como usarse, proximamente podrias usar tus huachicoins en mujico, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial o !saldo / !saldazo")
+            
+                #Iniciamos transaccion
+                Huachis.Enviar_Bineros(destinatario,cantidad)
 
-                return random.choice(resp_tip_envio) + f" ({cantidad} Huachicoins)"
+                if destinatario == "Empleado_del_mes":
+
+                    return random.choice(resp_tip_empleado) + f" ({cantidad} Huachicoins)"
+
+                else:
+                
+                    return random.choice(resp_tip_envio) + f" ({cantidad} Huachicoins)"
+
+def edad_cuenta(redditor_id) -> int:
+    """calcular la edad en dias de la cuenta"""
+
+    timestamp_usuario =  reddit.redditor(redditor_id)
+    
+    f_cuenta = datetime.fromtimestamp(timestamp_usuario.created_utc)
+
+    f_hoy = datetime.utcnow()
+
+    diff =  f_hoy - f_cuenta
+
+    return int(diff.days)
 
 def historial(redditor_id) -> list:
     """Revisar el historial de movimientos del cliente"""
@@ -124,18 +129,14 @@ def historial(redditor_id) -> list:
     #Primero verificar que el remitente tenga una cuenta
     if Huachis.Verificar_Usuario(redditor_id) == False:
         
-        return "Dafuq, no perteneces a la HuachiNet, Ubicate Niñ@!"
+        return random.choice(resp_tip_cuenta)
 
     else:
 
         return (Huachis.historial,Huachis.saldo_total,Huachis.depositos,Huachis.retiros)
 
 def empleado_del_mes():
-    """El motor de nuestra huachieconomia"""
-
-    reddit = praw.Reddit(client_id=config.APP_ID, client_secret=config.APP_SECRET,
-                         user_agent=config.USER_AGENT, username=config.REDDIT_USERNAME,
-                         password=config.REDDIT_PASSWORD)        
+    """El motor de nuestra huachieconomia"""       
 
     #Buscar subreddits
     for subreddit in config.SUBREDDITS:
@@ -163,15 +164,18 @@ def empleado_del_mes():
 
                             print(f'----\n{transaccion}')
 
-                            #Actualizar log unicamente en mensaje exitoso
+                            #Actualizar log
                             actualizar_log(str(comment.id))
                             
                             #Responder al cliente
                             comment.reply(transaccion)
+
                         
                         except:
                             #Enviar mensaje de error si el empleado no entendio lo que recibio
                             comment.reply(random.choice(resp_empleado_error))
+                            #Actualizar el log
+                            actualizar_log(str(comment.id))
 
                 elif "!saldo" in comment.body or "!saldazo" in comment.body:
 
@@ -196,13 +200,11 @@ def empleado_del_mes():
                         except:
                             #Enviar mensaje de error si el empleado no entendio lo que recibio
                             comment.reply(random.choice(resp_empleado_error))
+                            #Actualizar el log
+                            actualizar_log(str(comment.id))
 
 def servicio_al_cliente():
     """Responder a los papus y a las mamus sobre sus cuentas"""
-
-    reddit = praw.Reddit(client_id=config.APP_ID, client_secret=config.APP_SECRET,
-                             user_agent=config.USER_AGENT, username=config.REDDIT_USERNAME,
-                             password=config.REDDIT_PASSWORD) 
 
     unread_messages = []
 
@@ -225,6 +227,12 @@ def servicio_al_cliente():
                 
                 else:
                     mensaje.reply(f"ID:  {item[0]}  |  Timestamp: {readable} |  Cantidad: {item[2]} |  Movimiento: {item[3]}  |  Origen: {item[4]}")
+
+        elif "!saldo" in mensaje.body or "!saldazo" in mensaje:
+
+            consulta = saldazo(str(mensaje.author))
+
+            mensaje.reply(consulta)
             
         #Preparar para marcar como leido
         unread_messages.append(mensaje)
@@ -233,7 +241,7 @@ def servicio_al_cliente():
 
 
 if __name__ == "__main__":
-
+    
     empleado_del_mes()
 
     print("\nTransacciones al corriente señor!")
