@@ -35,19 +35,34 @@
  ----------------------
  #Con este enviamos dinero al autor del comentario o de la publicacion deseada.
  #Este comando debe ir al final del cuerpo del mensaje, despues del !tip unicamente puede ir la cantidad enviada, cualquier otro caracter que encuentre provocara error.
- #Ejemplo de uso: 
-         TIL que el agua moja !tip 5
+ 
+         #Ejemplos de uso 
          
-         Me gusto tu comentario.
-         !tip 5
+         1- TIL que el agua moja !tip 5
+         
+         2- Me gusto tu comentario.
+            !tip 5
  
  !saldo | !saldazo
  ----------------------
  #Para consultar el saldo de nuestra wallet, si se utiliza en la seccion de comentarios, el empleado hara publica la consulta, en caso de privacidad, se puede utilizar el comando enviandolo por mensaje directo al empleado_del_mes.
  
- !Historial
+         #Ejemplo de uso
+         
+         1- Quiero ver mi !saldazo
+         
+         2- !saldo
+         
+ !historial
  ---------------------
  #Se utiliza para conocer el historial completo de los movimientos de tu cuenta, desde su origen. Este comando unicamente funciona mediante directo al empleado_del_mes.
+ 
+         Enviar DM:
+           u/Empleado_del_mes
+           
+           (Subject) Estado de Cuenta
+           
+           (mensaje) !historial
  
  
  Detalles Tecnicos
