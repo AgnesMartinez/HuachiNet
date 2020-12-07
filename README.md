@@ -3,13 +3,14 @@
  
  Experimento social, arte digital, un momo, como gustes llamarlo, pero que no te digan y que no te cuenten, porque ya esta aqui la nueva diversion para chicos y grandes, ganar   karma es cosa del pasado, ahora gana huachicoins por tus publicaciones y comentarios. 
  
- Asi es, la huachicoin, la primera moneda digital respaldada por huachicol, la unica en su clase, el costo de una moneda es el equivalente al precio de un barril de huachicol en el mercado, aunque este precio es fluctuante segun la oferta y la demanda, la huachicoin es un activo estable.
+ Asi es, la huachicoin, la primera moneda digital respaldada por huachicol, la unica en su clase, el costo de una moneda es el equivalente al precio de un barril de huachicol en el mercado, aunque este precio tiene fluctuaciones segun la oferta y la demanda del mercado, la huachicoin es un activo estable.
  
  
  Tokeconomics
  ---------------------
  
  1 Huachicoin = 1 Huachicoin. 
+ 
  Siempre.
  
  Puntos Clave de la HuachiNet
@@ -17,7 +18,7 @@
  
  -A diferencia de las otras criptomonedas, la huachicoin es centralizada y super elitista, la entrada a la red es unicamente bajo invitacion.
  
- -Existen 10 millones de huachicoins en este momento, pero aun se pueden extraer mas del subsuelo.
+ -Existen 10 millones de huachicoins en este momento, pero se pueden extraer mas del subsuelo.
  
  -No existe ICO, ni venta privada, la distribucion sera organica conforme crezca la adopcion de la red.
  
@@ -33,8 +34,9 @@
  
  !tip <cantidad>
  ----------------------
- #Con este enviamos dinero al autor del comentario o de la publicacion deseada.
- #Este comando debe ir al final del cuerpo del mensaje, despues del !tip unicamente puede ir la cantidad enviada, cualquier otro caracter que encuentre provocara error.
+ Con este enviamos dinero al autor del comentario o de la publicacion a la que queremos enviar una propina.
+ 
+ Este comando debe ir al final del cuerpo del mensaje, despues del !tip unicamente puede ir la cantidad a enviar, cualquier otro caracter que encuentre provocara error.
  
          #Ejemplos de uso 
          
@@ -45,7 +47,7 @@
  
  !saldo | !saldazo
  ----------------------
- #Para consultar el saldo de nuestra wallet, si se utiliza en la seccion de comentarios, el empleado hara publica la consulta, en caso de privacidad, se puede utilizar el comando enviandolo por mensaje directo al empleado_del_mes.
+ Consultar el saldo de tu cuenta es posible con este comando, si se utiliza en la seccion de comentarios, se hara publica tu consulta, en caso de privacidad, utiliza el comando a traves de mensaje directo al u/Empleado_del_mes.
  
          #Ejemplo de uso
          
@@ -55,7 +57,7 @@
          
  !historial
  ---------------------
- #Se utiliza para conocer el historial completo de los movimientos de tu cuenta, desde su origen. Este comando unicamente funciona mediante directo al empleado_del_mes.
+ Conoce el historial de movimientos de tu cuenta con este comando. Este comando unicamente funciona mediante directo al empleado_del_mes.
  
          Enviar DM:
            u/Empleado_del_mes
@@ -74,4 +76,3 @@
  
  El programa esta dividido en varias partes, cuenta con el Huachicore para realizar todos los movimientos bancarios, un script para construir la base de datos, el script para ejecutar al bot, en este caso, el empleado del mes y varios archivos txt donde se almacenan las frases que utiliza el bot.
  
- Utiliza una clase propia, el Huachicore.
