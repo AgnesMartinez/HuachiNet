@@ -2,7 +2,7 @@ from core import HuachiNet
 import praw
 import config
 import sqlite3
-import datetime
+from datetime import datetime
 import random
 
 conn_log = sqlite3.connect("boveda.sqlite3")
@@ -62,7 +62,7 @@ def saldazo(redditor_id) -> str:
         return random.choice(resp_tip_cuenta)
 
     else:
-        return random.choice(resp_saldo) + f" {Huachis.saldo_total} Huachicoins"
+        return random.choice(resp_saldo) + f" {Huachis.saldo_total} Huachicoin(s)"
 
 def tip(remitente,destinatario,cantidad) -> str:
     """Dar propina por publicaciones y comentarios"""
@@ -79,11 +79,15 @@ def tip(remitente,destinatario,cantidad) -> str:
         #Verificar que se tenga saldo suficiente para la transaccion
         if Huachis.saldo_total < cantidad:
 
-            return random.choice(resp_tip_sinbineros) + f" ({cantidad} Huachicoins)"
+            return random.choice(resp_tip_sinbineros)
 
         else:
             #calcula la edad del destinatario para evitar spam de cuentas recien creadas
-            cuenta_dias = edad_cuenta(destinatario)
+            if destinatario == "Empleado_del_mes":
+                cuenta_dias = 30
+            
+            else:
+                cuenta_dias = edad_cuenta(destinatario)
 
             if cuenta_dias < 28:
 
@@ -102,11 +106,11 @@ def tip(remitente,destinatario,cantidad) -> str:
 
                 if destinatario == "Empleado_del_mes":
 
-                    return random.choice(resp_tip_empleado) + f" ({cantidad} Huachicoins)"
+                    return random.choice(resp_tip_empleado) + f" [{cantidad} Huachicoin(s) Enviado(s)]"
 
                 else:
                 
-                    return random.choice(resp_tip_envio) + f" ({cantidad} Huachicoins)"
+                    return random.choice(resp_tip_envio) + f" [{cantidad} Huachicoin(s) Enviado(s)]"
 
 def edad_cuenta(redditor_id) -> int:
     """calcular la edad en dias de la cuenta"""
@@ -141,7 +145,7 @@ def empleado_del_mes():
     #Buscar subreddits
     for subreddit in config.SUBREDDITS:
         #Buscar Publicaciones
-        for submission in reddit.subreddit(subreddit).new(limit=30):
+        for submission in reddit.subreddit(subreddit).new(limit=50):
             #Buscar comentarios 
             submission.comments.replace_more(limit=0)
             
@@ -218,11 +222,11 @@ def servicio_al_cliente():
 
             estado_cuenta = historial(str(mensaje.author))
 
-            mensaje.reply(f"Estado de Cuenta: {mensaje.author}  |  Saldo: {estado_cuenta[1]} Huachicoins     |  Cantidad de Depositos: {len(estado_cuenta[2])}  |  Cantidad de Retiros: {len(estado_cuenta[3])}")
+            mensaje.reply(f"Estado de Cuenta: {mensaje.author}  |  Saldo: {estado_cuenta[1]} Huachicoin(s)     |  Cantidad de Depositos: {len(estado_cuenta[2])}  |  Cantidad de Retiros: {len(estado_cuenta[3])}")
 
             for item in estado_cuenta[0]:
 
-                readable = datetime.datetime.fromtimestamp(float(item[1])).ctime()
+                readable = datetime.fromtimestamp(float(item[1])).ctime()
 
                 if "Retiro" in item:
                     mensaje.reply(f"ID:  {item[0]}  |  Timestamp: {readable}  |  Cantidad: {item[2]}  |  Movimiento: {item[3]}  |  Destino: {item[4]}")
@@ -244,13 +248,15 @@ def servicio_al_cliente():
 
 if __name__ == "__main__":
     
-    empleado_del_mes()
+    while True:
+    
+        empleado_del_mes()
 
-    print("\nTransacciones al corriente señor!")
+        print("\nTransacciones al corriente señor!")
 
-    servicio_al_cliente()
+        servicio_al_cliente()
 
-    print("\nYa respondi a todas las quejas patron!")
+        print("\nYa respondi a todas las quejas patron!")
 
 
 
