@@ -2,7 +2,7 @@ from core import HuachiNet
 import praw
 import config
 import sqlite3
-import datetime
+from datetime import datetime
 import random
 
 conn_log = sqlite3.connect("boveda.sqlite3")
@@ -62,7 +62,7 @@ def saldazo(redditor_id) -> str:
         return random.choice(resp_tip_cuenta)
 
     else:
-        return random.choice(resp_saldo) + f" {Huachis.saldo_total} Huachicoins"
+        return random.choice(resp_saldo) + f" {Huachis.saldo_total} Huachicoin(s)"
 
 def tip(remitente,destinatario,cantidad) -> str:
     """Dar propina por publicaciones y comentarios"""
@@ -79,15 +79,19 @@ def tip(remitente,destinatario,cantidad) -> str:
         #Verificar que se tenga saldo suficiente para la transaccion
         if Huachis.saldo_total < cantidad:
 
-            return random.choice(resp_tip_sinbineros) + f" ({cantidad} Huachicoins)"
+            return random.choice(resp_tip_sinbineros)
 
         else:
             #calcula la edad del destinatario para evitar spam de cuentas recien creadas
-            cuenta_dias = edad_cuenta(destinatario)
+            if destinatario == "Empleado_del_mes":
+                cuenta_dias = 30
+            
+            else:
+                cuenta_dias = edad_cuenta(destinatario)
 
             if cuenta_dias < 28:
 
-                return "La cuenta a la que quieres enviar no tiene la madurez suficiente para entrar al sistema, es un pinche mocoso miado, dejalo ahi."
+                return "El usuario al que quieres enviar no tiene la madurez suficiente para entrar al sistema, es un pinche mocoso miado, dejalo ahi."
 
             else:
                 #Verificar si el destinatario existe en la HuachiNet
@@ -95,18 +99,18 @@ def tip(remitente,destinatario,cantidad) -> str:
                     #Abrimos cuenta y le damos dineros de bienvenida
                     Huachis.Bono_Bienvenida(destinatario)
                 
-                    reddit.redditor(destinatario).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el post sticky en Techo Negro para mas informacion de como usarse, proximamente podrias usar tus huachicoins en mujico, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial o !saldo / !saldazo")
+                    reddit.redditor(destinatario).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el post sticky en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial o !saldo / !saldazo")
             
                 #Iniciamos transaccion
                 Huachis.Enviar_Bineros(destinatario,cantidad)
 
                 if destinatario == "Empleado_del_mes":
 
-                    return random.choice(resp_tip_empleado) + f" ({cantidad} Huachicoins)"
+                    return random.choice(resp_tip_empleado) + f" [{cantidad} Huachicoin(s) Enviado(s)]"
 
                 else:
                 
-                    return random.choice(resp_tip_envio) + f" ({cantidad} Huachicoins)"
+                    return random.choice(resp_tip_envio) + f" [{cantidad} Huachicoin(s) Enviado(s)]"
 
 def edad_cuenta(redditor_id) -> int:
     """calcular la edad en dias de la cuenta"""
@@ -141,9 +145,9 @@ def empleado_del_mes():
     #Buscar subreddits
     for subreddit in config.SUBREDDITS:
         #Buscar Publicaciones
-        for submission in reddit.subreddit(subreddit).new(limit=30):
+        for submission in reddit.subreddit(subreddit).new(limit=200):
             #Buscar comentarios 
-            submission.comments.replace_more(limit=0)
+            submission.comments.replace_more(limit=None)
             
             for comment in submission.comments.list():
                 #Buscar comandos
@@ -214,27 +218,43 @@ def servicio_al_cliente():
 
         print(f'----\nEnviando estado de cuenta para: {mensaje.author}')
 
-        if "!historial" in mensaje.body:
+        try:
+            if "!historial" in mensaje.body:
 
-            estado_cuenta = historial(str(mensaje.author))
+                estado_cuenta = historial(str(mensaje.author))
 
-            mensaje.reply(f"Estado de Cuenta: {mensaje.author}  |  Saldo: {estado_cuenta[1]} Huachicoins     |  Cantidad de Depositos: {len(estado_cuenta[2])}  |  Cantidad de Retiros: {len(estado_cuenta[3])}")
+                mensaje.reply(f"Estado de Cuenta: {mensaje.author}\n\nSaldo: {estado_cuenta[1]} Huachicoin(s)\n\nCantidad de Depositos: {len(estado_cuenta[2])}\n\nCantidad de Retiros: {len(estado_cuenta[3])}")
 
-            for item in estado_cuenta[0]:
+                chunk = ""
 
-                readable = datetime.datetime.fromtimestamp(float(item[1])).ctime()
+                for i,item in enumerate(estado_cuenta[0],start=1):
 
-                if "Retiro" in item:
-                    mensaje.reply(f"ID:  {item[0]}  |  Timestamp: {readable}  |  Cantidad: {item[2]}  |  Movimiento: {item[3]}  |  Destino: {item[4]}")
+                    if item[3] == "Retiro":
+                        chunk += f"\n\nFecha: {datetime.fromtimestamp(float(item[1])).ctime()}\n\nNota: {item[3]}\n\nCantidad: {item[2]} | Destino: {item[4]}\n\n"
+
+                        chunk += "***"
+
+                    else:
+                        chunk += f"\n\nFecha: {datetime.fromtimestamp(float(item[1])).ctime()}\n\nNota: {item[3]}\n\nCantidad: {item[2]} | Origen: {item[4]}\n\n"
                 
-                else:
-                    mensaje.reply(f"ID:  {item[0]}  |  Timestamp: {readable} |  Cantidad: {item[2]} |  Movimiento: {item[3]}  |  Origen: {item[4]}")
+                        chunk += "***"
+                    
+                    if i % 15 == 0:
 
-        elif "!saldo" in mensaje.body or "!saldazo" in mensaje.body:
+                        mensaje.reply(chunk)
 
-            consulta = saldazo(str(mensaje.author))
+                        chunk = ""
+            
 
-            mensaje.reply(consulta)
+            elif "!saldo" in mensaje.body or "!saldazo" in mensaje.body:
+
+                consulta = saldazo(str(mensaje.author))
+
+                mensaje.reply(consulta)
+            
+        except:
+            #En caso de error, avisarle que no tiene cuenta.
+            mensaje.reply(random.choice(resp_tip_cuenta))
             
         #Preparar para marcar como leido
         unread_messages.append(mensaje)
@@ -251,6 +271,7 @@ if __name__ == "__main__":
     servicio_al_cliente()
 
     print("\nYa respondi a todas las quejas patron!")
+
 
 
 
