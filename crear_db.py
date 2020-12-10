@@ -6,6 +6,7 @@ from tabulate import tabulate
 #Conexion a BD
 conn = sqlite3.connect('boveda.sqlite3')
 
+'''
 tabla_t = """CREATE TABLE IF NOT EXISTS transacciones (
     ID INTEGER PRIMARY KEY AUTOINCREMENT,
     timestamp VARCHAR(255),
@@ -37,5 +38,15 @@ cursor.execute(tabla_comentario)
 cursor.execute(index2)
 
 conn.commit()
+'''
+
+query = """SELECT * FROM transacciones"""
+
+cursor =  conn.cursor()
+
+cursor.execute(query)
+
+for item in cursor.fetchall():
+    print(f'-----\n{item}')
 
 

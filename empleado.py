@@ -264,13 +264,15 @@ def servicio_al_cliente():
 
 if __name__ == "__main__":
     
-    empleado_del_mes()
+    while True:
+    
+        empleado_del_mes()
 
-    print("\nTransacciones al corriente señor!")
+        print("\nTransacciones al corriente señor!")
 
-    servicio_al_cliente()
+        servicio_al_cliente()
 
-    print("\nYa respondi a todas las quejas patron!")
+        print("\nYa respondi a todas las quejas patron!")
 
 
 
