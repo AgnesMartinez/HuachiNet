@@ -33,9 +33,8 @@ def buscar_log(comment_id):
     resultado = cursor.execute(query,(comment_id,)).fetchall()
 
     if resultado != []:
-        for item in resultado:
-            if comment_id in item[1]:
-                return True
+        if comment_id == resultado[0][1]:
+            return True
         
     elif resultado == []:
         return False        
@@ -144,71 +143,53 @@ def empleado_del_mes():
 
     #Buscar subreddits
     for subreddit in config.SUBREDDITS:
-        #Buscar Publicaciones
-        for submission in reddit.subreddit(subreddit).new(limit=200):
-            #Buscar comentarios 
-            submission.comments.replace_more(limit=None)
+       
+        for comment in reddit.subreddit(subreddit).comments(limit=100):
             
-            for comment in submission.comments.list():
+            #Buscar si el comentario ha sido procesado previamante
+            if buscar_log(str(comment.id)) == False:
+                
+                #Agregar comentario al log
+                actualizar_log(str(comment.id))
+
                 #Buscar comandos
                 if "!tip" in comment.body:
-
-                    #Verificar si el comentario ya fue procesado
-                    if buscar_log(str(comment.id)) == True:
-                        pass
                     
-                    else:
-                        #Realizar transaccion
-                        try:
-                            string = str(comment.body)
-                
-                            start = string.index("!tip")
+                    #Realizar transaccion
+                    try:
+                        string = str(comment.body)
+            
+                        start = string.index("!tip")
 
-                            cantidad = int(string[start:].replace("!tip","").strip())
+                        cantidad = int(string[start:].replace("!tip","").strip())
 
-                            transaccion = tip(str(comment.author),str(comment.parent().author),abs(cantidad))
+                        transaccion = tip(str(comment.author),str(comment.parent().author),abs(cantidad))
 
-                            print(f'----\n{transaccion}')
-
-                            #Actualizar log
-                            actualizar_log(str(comment.id))
+                        print(f'----\n{transaccion}')
                             
-                            #Responder al cliente
-                            comment.reply(transaccion)
-
-                        
-                        except:
-                            #Enviar mensaje de error si el empleado no entendio lo que recibio
-                            comment.reply(random.choice(resp_empleado_error))
-                            #Actualizar el log
-                            actualizar_log(str(comment.id))
+                        #Responder al cliente
+                        comment.reply(transaccion)
+   
+                    except:
+                        #Enviar mensaje de error si el empleado no entendio lo que recibio
+                        comment.reply(random.choice(resp_empleado_error))
 
                 elif "!saldo" in comment.body or "!saldazo" in comment.body:
 
-                    #Verificar si el comentario ya fue procesado
-                    if buscar_log(str(comment.id)) == True:
-                        pass
-                    
-                    else:
-                        #Realizar consulta
-                        try:
+                    #Realizar consulta
+                    try:
                         
-                            consulta = saldazo(str(comment.author))
+                        consulta = saldazo(str(comment.author))
 
-                            print(f'----\n{consulta}')
+                        print(f'----\n{consulta}')
 
-                            #Actualizar log unicamente en mensaje exitoso
-                            actualizar_log(str(comment.id))
-                            
-                            #Responder al cliente
-                            comment.reply(consulta)
+                        #Responder al cliente
+                        comment.reply(consulta)
                         
-                        except:
-                            #Enviar mensaje de error si el empleado no entendio lo que recibio
-                            comment.reply(random.choice(resp_empleado_error))
-                            #Actualizar el log
-                            actualizar_log(str(comment.id))
-
+                    except:
+                        #Enviar mensaje de error si el empleado no entendio lo que recibio
+                        comment.reply(random.choice(resp_empleado_error))
+                        
 def servicio_al_cliente():
     """Responder a los papus y a las mamus sobre sus cuentas"""
 
@@ -253,7 +234,7 @@ def servicio_al_cliente():
                 mensaje.reply(consulta)
             
         except:
-            #En caso de error, avisarle que no tiene cuenta.
+
             mensaje.reply(random.choice(resp_tip_cuenta))
             
         #Preparar para marcar como leido
@@ -264,15 +245,13 @@ def servicio_al_cliente():
 
 if __name__ == "__main__":
     
-    while True:
-    
-        empleado_del_mes()
+    empleado_del_mes()
 
-        print("\nTransacciones al corriente señor!")
+    print("\nTransacciones al corriente señor!")
 
-        servicio_al_cliente()
+    servicio_al_cliente()
 
-        print("\nYa respondi a todas las quejas patron!")
+    print("\nYa respondi a todas las quejas patron!")
 
 
 
