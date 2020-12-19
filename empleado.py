@@ -107,6 +107,10 @@ def tip(remitente,destinatario,cantidad) -> str:
 
                     return random.choice(resp_tip_empleado) + f" [{cantidad} Huachicoin(s) Enviado(s)]"
 
+                elif remitente == "Empleado_del_mes":
+
+                    return "autotip"
+
                 else:
                 
                     return random.choice(resp_tip_envio) + f" [{cantidad} Huachicoin(s) Enviado(s)]"
@@ -114,9 +118,9 @@ def tip(remitente,destinatario,cantidad) -> str:
 def edad_cuenta(redditor_id) -> int:
     """calcular la edad en dias de la cuenta"""
 
-    timestamp_usuario =  reddit.redditor(redditor_id)
+    cliente =  reddit.redditor(redditor_id).created_utc
     
-    f_cuenta = datetime.fromtimestamp(timestamp_usuario.created_utc)
+    f_cuenta = datetime.fromtimestamp(cliente)
 
     f_hoy = datetime.utcnow()
 
@@ -137,6 +141,40 @@ def historial(redditor_id) -> list:
     else:
 
         return (Huachis.historial,Huachis.saldo_total,Huachis.depositos,Huachis.retiros)
+
+def rank(redditor_id, topten=False) -> str:
+    """Forbes Mujico - TOP Abinerados"""
+
+    #Acceder a la HuachiNet
+    Huachis = HuachiNet(redditor_id)
+
+    #Primero verificar que el redditor tenga una cuenta
+    if Huachis.Verificar_Usuario(redditor_id) == False:
+        
+        return random.choice(resp_tip_cuenta)
+
+    #Ranking global
+    if topten == True:
+
+        #Respuesta en forma de string
+        respuesta = "# Forbes Mujico - Top Ten Abinerados\n\nLugar | Redditor | Cantidad\n:--|:--:|--:\n"
+        
+        for i,item in enumerate(Huachis.Ranking(),start=1):
+
+            respuesta += f"__{i}__ | {item[0]} | {item[1]} H¢N\n"
+
+            if i == 10:
+                break
+                
+        return respuesta
+
+    elif topten == False:
+        #Ranking por usuario
+        for i,item in enumerate(Huachis.Ranking(),start=1):
+
+            if item[0] == redditor_id:
+
+                return f"Tu posicion en la HuachiNet es la numero: __{i}__"
 
 def empleado_del_mes():
     """El motor de nuestra huachieconomia"""       
@@ -166,9 +204,14 @@ def empleado_del_mes():
                         transaccion = tip(str(comment.author),str(comment.parent().author),abs(cantidad))
 
                         print(f'----\n{transaccion}')
+
+                        #Evitar que el empleado se responda a si mismo.
+                        if transaccion == "autotip":
+                            pass
                             
-                        #Responder al cliente
-                        comment.reply(transaccion)
+                        else:
+                            #Responder al cliente
+                            comment.reply(transaccion)
    
                     except:
                         #Enviar mensaje de error si el empleado no entendio lo que recibio
@@ -189,6 +232,38 @@ def empleado_del_mes():
                     except:
                         #Enviar mensaje de error si el empleado no entendio lo que recibio
                         comment.reply(random.choice(resp_empleado_error))
+
+                elif "!rankme" in comment.body:
+
+                    #Realizar consulta
+                    try:
+
+                        rankme = rank(str(comment.author))
+
+                        print(f'----\n{rankme}')
+
+                        #Responder al cliente
+                        comment.reply(rankme)
+
+                    except:
+                        #Enviar mensaje de error si el empleado no entendio lo que recibio
+                        comment.reply(random.choice(resp_empleado_error))
+
+                elif "!rank" in comment.body:
+
+                    #Realizar consulta
+                    try:
+
+                        rankg = rank(str(comment.author),topten=True)
+
+                        print(f'----\n{rankg}')
+
+                        #Responder al cliente
+                        comment.reply(rankg)
+
+                    except:
+                        #Enviar mensaje de error si el empleado no entendio lo que recibio
+                        comment.reply(random.choice(resp_empleado_error))
                         
 def servicio_al_cliente():
     """Responder a los papus y a las mamus sobre sus cuentas"""
@@ -206,25 +281,25 @@ def servicio_al_cliente():
 
                 mensaje.reply(f"Estado de Cuenta: {mensaje.author}\n\nSaldo: {estado_cuenta[1]} Huachicoin(s)\n\nCantidad de Depositos: {len(estado_cuenta[2])}\n\nCantidad de Retiros: {len(estado_cuenta[3])}")
 
-                chunk = ""
+                chunk = "Fecha | Nota | Cantidad | Destino / Origen\n:--|:--:|--:|:--:\n"
 
                 for i,item in enumerate(estado_cuenta[0],start=1):
 
-                    if item[3] == "Retiro":
-                        chunk += f"\n\nFecha: {datetime.fromtimestamp(float(item[1])).ctime()}\n\nNota: {item[3]}\n\nCantidad: {item[2]} | Destino: {item[4]}\n\n"
-
-                        chunk += "***"
+                    chunk += f"{datetime.fromtimestamp(float(item[1])).ctime()} | {item[3]} | {item[2]} | {item[4]}\n"
+                    
+                    if len(estado_cuenta[0]) < 15:
+                        
+                        x = len(estado_cuenta[0])
 
                     else:
-                        chunk += f"\n\nFecha: {datetime.fromtimestamp(float(item[1])).ctime()}\n\nNota: {item[3]}\n\nCantidad: {item[2]} | Origen: {item[4]}\n\n"
-                
-                        chunk += "***"
-                    
-                    if i % 15 == 0:
+
+                        x = 15
+                        
+                    if i % x == 0:
 
                         mensaje.reply(chunk)
 
-                        chunk = ""
+                        chunk = "Fecha | Nota | Cantidad | Destino / Origen\n:--|:--:|--:|:--:\n"
             
 
             elif "!saldo" in mensaje.body or "!saldazo" in mensaje.body:
@@ -241,7 +316,6 @@ def servicio_al_cliente():
         unread_messages.append(mensaje)
 
     reddit.inbox.mark_read(unread_messages)
-
 
 if __name__ == "__main__":
     

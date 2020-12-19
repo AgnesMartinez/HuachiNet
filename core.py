@@ -1,5 +1,6 @@
 import time
 import sqlite3
+import operator
 
 class HuachiNet():
     """Huachicol as a service
@@ -26,7 +27,6 @@ class HuachiNet():
         self.historial = self.Historial_Cuenta("Global")
         self.depositos = self.Historial_Cuenta("Deposito")
         self.retiros = self.Historial_Cuenta("Retiro")
-
 
     def Bono_Bienvenida(self,usuario):
         """Entregar bineros a los clientes nuevos"""
@@ -135,3 +135,27 @@ class HuachiNet():
         
         except Exception as e:
             print(f'----\n{e}')
+    
+    def Ranking(self):
+        """Forbes Mujico - Usuarios Abinerados"""
+
+        #Obtener lista de usuarios
+        clientes = list()
+        
+        query = """SELECT usuario FROM transacciones WHERE nota='Bono Inicial'"""
+
+        for item in self.cursor.execute(query).fetchall():
+            clientes.append(item[0])
+
+        #Obtener balance por usuario y anexar resultados a un diccionario
+        rank = {}
+
+        query2 = """SELECT SUM(cantidad) FROM transacciones WHERE usuario = ?"""
+
+        for cliente in clientes:
+        
+            cantidad = self.cursor.execute(query2,(cliente,)).fetchall()
+
+            rank[cliente] = cantidad[0][0]
+
+        return sorted(rank.items(), key=operator.itemgetter(1), reverse=True)
