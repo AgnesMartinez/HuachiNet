@@ -36,14 +36,14 @@ for usuario in usuarios:
 
     elif len(transacciones) > 200 and len(transacciones) < 501:
         
-        #Entregar pension basica
+        #Entregar pension intermedia
         Huachis_master.Enviar_Bineros(usuario,60,pension=True)
 
         reddit.redditor(usuario).message("Entrega de pension mujicana intermedia", "Se te han depositado 60 huachicoins a tu cuenta")
 
     elif len(transacciones) > 500:
         
-        Entregar pension basica
+        #Entregar pension avanzada
         Huachis_master.Enviar_Bineros(usuario,70,pension=True)
 
         reddit.redditor(usuario).message("Entrega de pension mujicana avanzada", "Se te han depositado 70 huachicoins a tu cuenta")
