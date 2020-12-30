@@ -27,6 +27,8 @@ class HuachiNet():
         self.historial = self.Historial_Cuenta("Global")
         self.depositos = self.Historial_Cuenta("Deposito")
         self.retiros = self.Historial_Cuenta("Retiro")
+        self.asaltos = self.Historial_Cuenta("Asalto")
+
 
     def Bono_Bienvenida(self,usuario):
         """Entregar bineros a los clientes nuevos"""
@@ -66,7 +68,7 @@ class HuachiNet():
         except Exception as e:
             print(f'----\n{e}')  
 
-    def Enviar_Bineros(self,usuario,cantidad):
+    def Enviar_Bineros(self,usuario,cantidad,asalto=False,pension=False):
         """Registrar transacciones de bineros"""
         
         query = """INSERT INTO transacciones (timestamp,usuario,cantidad,nota,origen_destino) VALUES (?,?,?,?,?)"""
@@ -74,13 +76,45 @@ class HuachiNet():
         timestamp = time.time()
 
         try: 
-            self.cursor.execute(query,(timestamp,usuario,cantidad,"Deposito",self.id))
+            #Ajuste en caso de comando !asalto
+            if asalto == True:
+                self.cursor.execute(query,(timestamp,usuario,5,"Asalto",self.id))
 
-            negativo =  cantidad - (cantidad * 2)
+                self.cursor.execute(query,(timestamp,self.id,-5,"Asalto",usuario))
 
-            self.cursor.execute(query,(timestamp,self.id,negativo,"Retiro",usuario))
+                self.conn.commit()
 
-            self.conn.commit()
+            #Ajuste en caso de entregar pension
+            elif pension == True:
+
+                if cantidad == 50:
+
+                    categoria = "Pension Mujicana Basica"
+
+                elif cantidad == 60:
+
+                    categoria = "Pension Mujicana Intermedia"
+
+                elif cantidad == 70:
+
+                    categoria = "Pension Mujicana Avanzada"
+
+                self.cursor.execute(query,(timestamp,usuario,cantidad,categoria,self.id))
+
+                negativo =  cantidad - (cantidad * 2)
+
+                self.cursor.execute(query,(timestamp,self.id,negativo,categoria,usuario))
+
+                self.conn.commit()
+
+            else:
+                self.cursor.execute(query,(timestamp,usuario,cantidad,"Deposito",self.id))
+
+                negativo =  cantidad - (cantidad * 2)
+
+                self.cursor.execute(query,(timestamp,self.id,negativo,"Retiro",usuario))
+
+                self.conn.commit()
 
         except Exception as e:
             print(f'----\n{e}')
@@ -103,9 +137,9 @@ class HuachiNet():
     def Historial_Cuenta(self,tipo_movimiento):
         """Consultar historial de movimientos del cliente desde el inicio de la cuenta"""
 
-        query = """SELECT id,timestamp,cantidad,nota,origen_destino FROM transacciones WHERE usuario=?"""
+        query = """SELECT id,timestamp,cantidad,nota,origen_destino FROM transacciones WHERE usuario=? ORDER BY id DESC"""
 
-        query2 = """SELECT id,timestamp,cantidad,origen_destino FROM transacciones WHERE usuario=? AND nota=?"""
+        query2 = """SELECT id,timestamp,cantidad,origen_destino FROM transacciones WHERE usuario=? AND nota=? ORDER BY id DESC"""
 
         try:
 
@@ -126,6 +160,14 @@ class HuachiNet():
                 return resultado
 
             elif tipo_movimiento == "Deposito":
+
+                self.cursor.execute(query2,(self.id,tipo_movimiento))
+
+                resultado = self.cursor.fetchall()
+
+                return resultado
+
+            elif tipo_movimiento == "Asalto":
 
                 self.cursor.execute(query2,(self.id,tipo_movimiento))
 
