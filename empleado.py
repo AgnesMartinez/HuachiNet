@@ -2,6 +2,7 @@ from core import HuachiNet
 import praw
 import config
 import sqlite3
+import re
 from datetime import datetime
 import random
 
@@ -26,6 +27,8 @@ resp_tumbar_cholo = open("./frases/frases_tumbar_cholo.txt", "r", encoding="utf-
 resp_tumbar_victima = open("./frases/frases_tumbar_victima.txt", "r", encoding="utf-8").read().splitlines()
 
 resp_seguridad = open("./frases/frases_seguridad.txt", "r", encoding="utf-8").read().splitlines()
+
+resp_autorobo = open("./frases/frases_autorobo.txt", "r", encoding="utf-8").read().splitlines()
 
 monaschinas = open("./shop/monaschinas.txt", "r", encoding="utf-8").read().splitlines()
 
@@ -158,7 +161,7 @@ def historial(redditor_id) -> list:
 
         return (Huachis.historial,Huachis.saldo_total,Huachis.depositos,Huachis.retiros,Huachis.asaltos)
 
-def rank(redditor_id, topten=False) -> str:
+def rank(redditor_id, topten=False,top25=False) -> str:
     """Forbes Mujico - TOP Abinerados"""
 
     #Acceder a la HuachiNet
@@ -183,6 +186,20 @@ def rank(redditor_id, topten=False) -> str:
                 break
                 
         return respuesta
+    
+    if top25 == True:
+
+        #Respuesta en forma de string
+        respuesta = "# Forbes Mujico - Top 25 Abinerados\n\nLugar | Mujican@ | Cantidad\n:--|:--:|--:\n"
+        
+        for i,item in enumerate(Huachis.Ranking(),start=1):
+
+            respuesta += f"__{i}__ | {item[0]} | {item[1]:,} H¢N\n"
+
+            if i == 25:
+                break
+                
+        return respuesta
 
     elif topten == False:
         #Ranking por usuario
@@ -198,7 +215,7 @@ def empleado_del_mes():
     #Buscar subreddits
     for subreddit in config.SUBREDDITS:
        
-        for comment in reddit.subreddit(subreddit).comments(limit=100):
+        for comment in reddit.subreddit(subreddit).comments(limit=200):
             
             #Buscar si el comentario ha sido procesado previamante
             if buscar_log(str(comment.id)) == False:
@@ -207,12 +224,13 @@ def empleado_del_mes():
                 if "!tip" in comment.body.lower():
 
                     #Extraemos la cantidad
-                    
                     string = comment.body.lower()
             
-                    start = string.index("!tip")
+                    pattern = '!tip\ *(\d+)'
 
-                    cantidad = string[start:].replace("!tip","").strip()
+                    result = re.findall(pattern, string)
+
+                    cantidad = result[0]
 
                     #Corroboramos que sea un numero
                     if cantidad.isdigit():
@@ -233,8 +251,7 @@ def empleado_del_mes():
                             #Responder al cliente
                             comment.reply(transaccion)
                         
-                        
-                elif "!saldo" in comment.body.lower() or "!saldazo" in comment.body.lower():
+                elif "!saldazo" in comment.body.lower():
 
                     #Agregar comentario al log
                     actualizar_log(str(comment.id))
@@ -252,7 +269,25 @@ def empleado_del_mes():
                     except:
                         #Enviar mensaje de error si el empleado no entendio lo que recibio
                         comment.reply(random.choice(resp_empleado_error))
+
+                elif "!saldo" in comment.body.lower():
+
+                    #Agregar comentario al log
+                    actualizar_log(str(comment.id))
+
+                    #Realizar consulta
+                    try:
                         
+                        consulta = saldazo(str(comment.author))
+
+                        print(f'----\n{consulta}')
+
+                        #Responder al cliente
+                        comment.reply(consulta)
+                        
+                    except:
+                        #Enviar mensaje de error si el empleado no entendio lo que recibio
+                        comment.reply(random.choice(resp_empleado_error))
                         
 
                 elif "!rankme" in comment.body.lower():
@@ -274,7 +309,25 @@ def empleado_del_mes():
                         #Enviar mensaje de error si el empleado no entendio lo que recibio
                         comment.reply(random.choice(resp_empleado_error))
                         
-                        
+                elif "!rank25" in comment.body.lower():
+
+                    #Agregar comentario al log
+                    actualizar_log(str(comment.id))
+
+                    #Realizar consulta
+                    try:
+
+                        rank25 = rank(str(comment.author),top25=True)
+
+                        print(f'----\n{rank25}')
+
+                        #Responder al cliente
+                        comment.reply(rank25)
+
+                    except:
+                        #Enviar mensaje de error si el empleado no entendio lo que recibio
+                        comment.reply(random.choice(resp_empleado_error))        
+
 
                 elif "!rank" in comment.body.lower():
 
@@ -284,73 +337,61 @@ def empleado_del_mes():
                     #Realizar consulta
                     try:
 
-                        rankg = rank(str(comment.author),topten=True)
+                        rank10 = rank(str(comment.author),topten=True)
 
-                        print(f'----\n{rankg}')
+                        print(f'----\n{rank10}')
 
                         #Responder al cliente
-                        comment.reply(rankg)
+                        comment.reply(rank10)
 
                     except:
                         #Enviar mensaje de error si el empleado no entendio lo que recibio
                         comment.reply(random.choice(resp_empleado_error))
-                        
-                        
-                        
+                              
+                
+                elif "!shop monachina" in comment.body.lower():
 
-                elif "!shop" in comment.body.lower():
-                    
-                    #Realizar transaccion
-                    
-                    string = comment.body.lower()
-            
-                    start = string.index("!shop")
+                    #Agregar comentario al log
+                    actualizar_log(str(comment.id))
 
-                    opcion = string[start:].replace("!shop","").strip()
+                    compra = shop(str(comment.author),str(comment.parent().author),"monachina")
 
-                    print(f'----\n{opcion}')
+                    print(f'----\n{compra}')
 
-                    if opcion == "":
-
-                        #Agregar comentario al log
-                        actualizar_log(str(comment.id))
-
-                        comment.reply("# HuachiStore - Abierto cuando llegamos, cerrado cuando nos vamos\n\nEnvia un regalo usando el comando shop, seguido de una opcion del menu, todo a 5 huachis.\n\nRegalo | Comando\n:--|--:\nMonas Chinas | monachina\nTrapitos | trapo\nFurros | furro\n\nCompleta tu compra de la siguiente manera:\n\n    shop comando\n\n    Ejemplo: shop monachina\n\n    (no olvides el signo de exclamación)\n\nNo respondas a este comentario.")
-
-                    elif opcion == "monachina":
-
-                        #Agregar comentario al log
-                        actualizar_log(str(comment.id))
-
-                        compra = shop(str(comment.author),str(comment.parent().author),"monachina")
-
-                        print(f'----\n{compra}')
-
-                        comment.reply(compra)
+                    comment.reply(compra)
                             
 
-                    elif opcion == "trapo":
+                elif "!shop trapo" in comment.body.lower():
 
-                        #Agregar comentario al log
-                        actualizar_log(str(comment.id))
+                    #Agregar comentario al log
+                    actualizar_log(str(comment.id))
 
-                        compra = shop(str(comment.author),str(comment.parent().author),"trapo")
+                    compra = shop(str(comment.author),str(comment.parent().author),"trapo")
 
-                        print(f'----\n{compra}')
+                    print(f'----\n{compra}')
 
-                        comment.reply(compra)
+                    comment.reply(compra)
 
-                    elif opcion == "furro":
+                elif "!shop furro" in comment.body.lower():
 
-                        #Agregar comentario al log
-                        actualizar_log(str(comment.id))
+                    #Agregar comentario al log
+                    actualizar_log(str(comment.id))
 
-                        compra = shop(str(comment.author),str(comment.parent().author),"furro")
+                    compra = shop(str(comment.author),str(comment.parent().author),"furro")
 
-                        print(f'----\n{compra}')
+                    print(f'----\n{compra}')
 
-                        comment.reply(compra)
+                    comment.reply(compra)
+
+
+                elif "!shop" in comment.body.lower():
                 
+                    #Agregar comentario al log
+                    actualizar_log(str(comment.id))
+
+                    comment.reply("# HuachiStore - Abierto cuando llegamos, cerrado cuando nos vamos\n\nEnvia un regalo usando el comando shop, seguido de una opcion del menu, todo a 5 huachis.\n\nRegalo | Comando\n:--|--:\nMonas Chinas | monachina\nTrapitos | trapo\nFurros | furro\n\nCompleta tu compra de la siguiente manera:\n\n    shop comando\n\n    Ejemplo: shop monachina\n\n    (no olvides el signo de exclamación)\n\nNo respondas a este comentario.")
+                
+
                 elif "!asalto" in comment.body.lower():
 
                     #Agregar comentario al log
@@ -369,62 +410,74 @@ def empleado_del_mes():
                     except:
                         #Enviar mensaje de error si el empleado no entendio lo que recibio
                         comment.reply(random.choice(resp_empleado_error))
+
+
+                elif "!atraco" in comment.body.lower():
+
+                    #Agregar comentario al log
+                    actualizar_log(str(comment.id))
+
+                    #Realizar consulta
+                    try:
+
+                        asalto = atraco(str(comment.author),str(comment.parent().author))
+
+                        print(f'----\n{asalto}')
+
+                        #Responder al cliente
+                        comment.reply(asalto)
+
+                    except:
+                        #Enviar mensaje de error si el empleado no entendio lo que recibio
+                        comment.reply(random.choice(resp_empleado_error))
+
                                                 
 def servicio_al_cliente():
     """Responder a los papus y a las mamus sobre sus cuentas"""
 
-    unread_messages = []
+    for mensaje in reddit.inbox.messages(limit=10):
 
-    for mensaje in reddit.inbox.unread(limit=None):
+        #Buscar si el mensaje ha sido procesado previamante
+        if buscar_log(str(mensaje.id)) == False:
 
-        print(f'----\nEnviando estado de cuenta para: {mensaje.author}')
+            #Agregar mensaje al log
+            actualizar_log(str(mensaje.id))
 
-        try:
-            if "!historial" in mensaje.body:
+            try:
 
-                estado_cuenta = historial(str(mensaje.author))
+                if "!historial" in mensaje.body:
 
-                asalto_victoria = [item for item in estado_cuenta[4] if item[2] == 5]
+                    estado_cuenta = historial(str(mensaje.author))
 
-                asalto_perdida = [item for item in estado_cuenta[4] if item[2] == -5]
+                    asalto_victoria = [item for item in estado_cuenta[4] if item[2] == 5]
 
-                mensaje.reply(f"Estado de Cuenta: {mensaje.author}\n\nSaldo: {estado_cuenta[1]} Huachicoin(s)\n\nCantidad de Depositos: {len(estado_cuenta[2])}\n\nCantidad de Retiros: {len(estado_cuenta[3])}\n\nCantidad de asaltos ganados: {len(asalto_victoria)}\n\nCantidad de asaltos ganados: {len(asalto_perdida)}")
+                    asalto_perdida = [item for item in estado_cuenta[4] if item[2] == -5]
 
-                chunk = "Fecha | Nota | Cantidad | Destino / Origen\n:--|:--:|--:|:--:\n"
+                    mensaje.reply(f"Estado de Cuenta: {mensaje.author}\n\nSaldo: {estado_cuenta[1]} Huachicoin(s)\n\nCantidad de Depositos: {len(estado_cuenta[2])}\n\nCantidad de Retiros: {len(estado_cuenta[3])}\n\nCantidad de asaltos ganados: {len(asalto_victoria)}\n\nCantidad de asaltos perdidos: {len(asalto_perdida)}")
 
-                for i,item in enumerate(estado_cuenta[0],start=1):
+                    chunk = "Fecha | Nota | Cantidad | Destino / Origen\n:--|:--:|--:|:--:\n"
 
-                    chunk += f"{datetime.fromtimestamp(float(item[1])).ctime()} | {item[3]} | {item[2]} | {item[4]}\n"
-                    
-                    if len(estado_cuenta[0]) < 15:
+                    for i,item in enumerate(estado_cuenta[0],start=1):
+
+                        chunk += f"{datetime.fromtimestamp(float(item[1])).ctime()} | {item[3]} | {item[2]} | {item[4]}\n"
                         
-                        x = len(estado_cuenta[0])
+                        if len(estado_cuenta[0]) < 15:
+                            
+                            x = len(estado_cuenta[0])
 
-                    else:
+                        else:
 
-                        x = 15
-                        
-                    if i % x == 0:
+                            x = 15
+                            
+                        if i % x == 0:
 
-                        mensaje.reply(chunk)
+                            mensaje.reply(chunk)
 
-                        chunk = "Fecha | Nota | Cantidad | Destino / Origen\n:--|:--:|--:|:--:\n"
-            
-
-            elif "!saldo" in mensaje.body or "!saldazo" in mensaje.body:
-
-                consulta = saldazo(str(mensaje.author))
-
-                mensaje.reply(consulta)
-            
-        except:
-
-            mensaje.reply(random.choice(resp_tip_cuenta))
-            
-        #Preparar para marcar como leido
-        unread_messages.append(mensaje)
-
-    reddit.inbox.mark_read(unread_messages)
+                            chunk = "Fecha | Nota | Cantidad | Destino / Origen\n:--|:--:|--:|:--:\n"
+                
+            except:
+                #Mensaje no tienes cuenta
+                mensaje.reply(random.choice(resp_tip_cuenta))
 
 def shop(remitente,destinatario,regalo):
     """Tienda de regalos"""
@@ -474,6 +527,10 @@ def shop(remitente,destinatario,regalo):
 def tumbar(cholo,victima):
     """Saca 5 varos morro"""
 
+    if cholo == victima:
+        #Respuesta en caso de autorobo
+        return random.choice(resp_autorobo)
+
     #Proteger al CEO
     if victima == "MarcoCadenas" or victima == "Empleado_del_mes":
         
@@ -481,7 +538,14 @@ def tumbar(cholo,victima):
 
     else:
 
-        redditor_cholo = random.randint(1,100)
+        morralla = random.randint(1,50)
+
+        if cholo == "MarcoCadenas":
+
+            redditor_cholo = 101
+
+        else:
+            redditor_cholo = random.randint(1,100)
 
         redditor_victima = random.randint(1,100)
 
@@ -496,7 +560,7 @@ def tumbar(cholo,victima):
 
             else:
                 #Verificar que se tenga saldo suficiente para la transaccion
-                if Huachis.saldo_total < 5:
+                if Huachis.saldo_total < morralla:
 
                     return "Chale, asaltaste a alguien sin dinero, mal pedo."
             
@@ -509,9 +573,9 @@ def tumbar(cholo,victima):
                         reddit.redditor(cholo).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el post sticky en Mujico para mas informacion de como usar la red.\n\nAqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: \n\n!historial o !saldo / !saldazo")
                 
                     #Enviar Binero
-                    Huachis.Enviar_Bineros(cholo,5,asalto=True)
+                    Huachis.Enviar_Bineros(cholo,morralla,asalto=True)
 
-                    return random.choice(resp_tumbar_cholo) + "\n\n__Ganaste 5 Huachicoins__"
+                    return random.choice(resp_tumbar_cholo) + f"\n\n__{cholo} ganó {morralla} huachis (de la cartera de {victima})__" 
 
         else:
             #Acceder a la HuachiNet
@@ -524,7 +588,7 @@ def tumbar(cholo,victima):
 
             else:
                 #Verificar que se tenga saldo suficiente para la transaccion
-                if Huachis.saldo_total < 5:
+                if Huachis.saldo_total < morralla:
 
                     return "Perdiste, pero no tienes dinero que dar."
             
@@ -534,12 +598,99 @@ def tumbar(cholo,victima):
                         #Abrimos cuenta y le damos dineros de bienvenida
                         Huachis.Bono_Bienvenida(victima)
                 
+                        reddit.redditor(victima).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el post sticky en Mujico para mas informacion de como usar la red.\n\nAqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: \n\n!historial o !saldo / !saldazo")
+                
+                    #Enviar Binero
+                    Huachis.Enviar_Bineros(victima,morralla,asalto=True)
+
+                    return random.choice(resp_tumbar_victima) + f"\n\n__{victima} ganó {morralla} huachis (de la cartera de {cholo})__"
+
+def atraco(cholo,victima):
+    """Asalto en esteroides"""
+
+    if cholo == victima:
+        #Respuesta en caso de autorobo
+        return random.choice(resp_autorobo)
+
+    #Proteger al CEO
+    if victima == "MarcoCadenas" or victima == "Empleado_del_mes":
+        
+        return random.choice(resp_seguridad)
+
+    else:
+
+        if cholo == "MarcoCadenas":
+
+            redditor_cholo = 101
+
+        else:
+
+            redditor_cholo = random.randint(1,100)
+
+        redditor_victima = random.randint(1,100)
+
+        if redditor_cholo > redditor_victima:
+            #Acceder a la HuachiNet
+            Huachis = HuachiNet(victima)
+            
+            #Cantidad a perder
+            cantidad = round(int(Huachis.saldo_total) * random.randint(5,16) / 100)
+
+            #Primero verificar que la victima tenga una cuenta
+            if Huachis.Verificar_Usuario(victima) == False:
+        
+                return "No tiene cuenta, dime, que piensas robarle, ¿Los calzones?"
+
+            else:
+                #Verificar que el saldo sea suficiente
+                if Huachis.saldo_total == 0:
+
+                    return "Chale, asaltaste a alguien sin dinero, mal pedo."
+            
+                else:
+
+                    if Huachis.Verificar_Usuario(cholo) == False:
+                        #Abrimos cuenta y le damos dineros de bienvenida
+                        Huachis.Bono_Bienvenida(cholo)
+                
                         reddit.redditor(cholo).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el post sticky en Mujico para mas informacion de como usar la red.\n\nAqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: \n\n!historial o !saldo / !saldazo")
                 
                     #Enviar Binero
-                    Huachis.Enviar_Bineros(victima,5,asalto=True)
+                    Huachis.Enviar_Bineros(cholo,cantidad,asalto=True)
 
-                    return random.choice(resp_tumbar_victima) + "\n\n__Perdiste 5 Huachicoins__"
+                    return random.choice(resp_tumbar_cholo) + f"\n\n__{cholo} ganó {cantidad} huachis (de la cartera de {victima})__" 
+
+        else:
+            #Acceder a la HuachiNet
+            Huachis = HuachiNet(cholo)
+
+            #Cantidad a perder
+            cantidad = round(int(Huachis.saldo_total) * random.randint(5,16) / 100)
+
+            #Primero verificar que el cholo tenga una cuenta
+            if Huachis.Verificar_Usuario(cholo) == False:
+        
+                return random.choice(resp_tip_cuenta)
+
+            else:
+                #Verificar que se tenga saldo suficiente para la transaccion
+                if Huachis.saldo_total == 0:
+
+                    return "Perdiste, pero no tienes dinero que dar."
+            
+                else:
+
+                    if Huachis.Verificar_Usuario(victima) == False:
+                        #Abrimos cuenta y le damos dineros de bienvenida
+                        Huachis.Bono_Bienvenida(victima)
+                
+                        reddit.redditor(victima).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el post sticky en Mujico para mas informacion de como usar la red.\n\nAqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: \n\n!historial o !saldo / !saldazo")
+                
+                    #Enviar Binero
+                    Huachis.Enviar_Bineros(victima,cantidad,asalto=True)
+
+                    return random.choice(resp_tumbar_victima) + f"\n\n__{victima} ganó {cantidad} huachis (de la cartera de {cholo})__"
+
 
 
 if __name__ == "__main__":

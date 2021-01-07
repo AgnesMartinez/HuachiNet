@@ -78,9 +78,11 @@ class HuachiNet():
         try: 
             #Ajuste en caso de comando !asalto
             if asalto == True:
-                self.cursor.execute(query,(timestamp,usuario,5,"Asalto",self.id))
+                self.cursor.execute(query,(timestamp,usuario,cantidad,"Asalto",self.id))
+                
+                negativo =  cantidad - (cantidad * 2)
 
-                self.cursor.execute(query,(timestamp,self.id,-5,"Asalto",usuario))
+                self.cursor.execute(query,(timestamp,self.id,negativo,"Asalto",usuario))
 
                 self.conn.commit()
 

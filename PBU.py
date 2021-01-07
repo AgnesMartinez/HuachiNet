@@ -7,6 +7,8 @@ Huachis_master = HuachiNet('Bodega')
 
 usuarios = [item[0] for item in Huachis_master.Ranking()]
 
+blacklist = ['Bodega','Shop']
+
 #Configuracion del cliente de reddit
 reddit = praw.Reddit(client_id=config.APP_ID, 
                      client_secret=config.APP_SECRET,
@@ -16,37 +18,40 @@ reddit = praw.Reddit(client_id=config.APP_ID,
 
 #Iterar por cada usuario
 for usuario in usuarios:
-    #Acceder a la cuenta del usuario
-    Huachis_slave = HuachiNet(usuario)
+    
+    if usuario not in blacklist:
 
-    #Cantidad de transacciones
-    transacciones = Huachis_slave.historial
+        #Acceder a la cuenta del usuario
+        Huachis_slave = HuachiNet(usuario)
 
-    #Entregar bineros segun tabulador 
-    #Pension basica (50 a 200 movimientos) = 50 huachicoins semanales
-    #Pension intermedia (201 a 500 movimientos) = 60 huachicoins semanales
-    #Pension avanzada (501 a 1000 movimientos) = 70 huachicoins semanales
+        #Cantidad de transacciones
+        transacciones = Huachis_slave.historial
 
-    if len(transacciones) > 50 and len(transacciones) < 201:
+        #Entregar bineros segun tabulador 
+        #Pension basica (50 a 200 movimientos) = 50 huachicoins semanales
+        #Pension intermedia (201 a 500 movimientos) = 60 huachicoins semanales
+        #Pension avanzada (501 a 1000 movimientos) = 70 huachicoins semanales
 
-        #Entregar pension basica
-        Huachis_master.Enviar_Bineros(usuario,50,pension=True)
+        if len(transacciones) > 50 and len(transacciones) < 201:
 
-        reddit.redditor(usuario).message("Entrega de pension mujicana basica", "Se te han depositado 50 huachicoins a tu cuenta")
+            #Entregar pension basica
+            Huachis_master.Enviar_Bineros(usuario,50,pension=True)
 
-    elif len(transacciones) > 200 and len(transacciones) < 501:
-        
-        #Entregar pension intermedia
-        Huachis_master.Enviar_Bineros(usuario,60,pension=True)
+            reddit.redditor(usuario).message("Entrega de pension mujicana basica", "Se te han depositado 50 huachicoins a tu cuenta")
 
-        reddit.redditor(usuario).message("Entrega de pension mujicana intermedia", "Se te han depositado 60 huachicoins a tu cuenta")
+        elif len(transacciones) > 200 and len(transacciones) < 501:
+            
+            #Entregar pension intermedia
+            Huachis_master.Enviar_Bineros(usuario,60,pension=True)
 
-    elif len(transacciones) > 500:
-        
-        #Entregar pension avanzada
-        Huachis_master.Enviar_Bineros(usuario,70,pension=True)
+            reddit.redditor(usuario).message("Entrega de pension mujicana intermedia", "Se te han depositado 60 huachicoins a tu cuenta")
 
-        reddit.redditor(usuario).message("Entrega de pension mujicana avanzada", "Se te han depositado 70 huachicoins a tu cuenta")
+        elif len(transacciones) > 500:
+            
+            #Entregar pension avanzada
+            Huachis_master.Enviar_Bineros(usuario,70,pension=True)
+
+            reddit.redditor(usuario).message("Entrega de pension mujicana avanzada", "Se te han depositado 70 huachicoins a tu cuenta")
 
 
 
