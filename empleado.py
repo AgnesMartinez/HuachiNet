@@ -457,10 +457,8 @@ def empleado_del_mes():
 
                             print(f'----\n{resultado}')
 
-                            huachito_string = " ".join(resultado[0])
-
                             #Responder al cliente
-                            comment.reply("Aqui tienes tu huachito\n\n" + f">!{huachito_string}!<" + f"\n\n>!{resultado[1]}!<")
+                            comment.reply(resultado)
 
                         except:
                             #Enviar mensaje de error si el empleado no entendio lo que recibio
@@ -755,7 +753,7 @@ def slots(redditor_id):
                 #Enviar mensaje en caso de bomba
                 respuestas_bomba = ["Como en buscaminas, te exploto la bomba, perdiste!","Te toco la bomba werito","BOMBA! mala suerte :'(","Te salio el negrito del arroz, perdistes."]
 
-                return (huachito, random.choice(respuestas_bomba))
+                return f"Aqui tienes tu huachito\n\n>!{' '.join(huachito)}!<\n\n>!{random.choice(respuestas_bomba)}!<"
                 
             else:
                 #Dar dinero en caso de 2 pares iguales
@@ -765,7 +763,7 @@ def slots(redditor_id):
 
                     Huachis_shop.Enviar_Bineros(redditor_id,10,huachito=True)
 
-                    return (huachito,"Ganaste 10 huachis (2 pares iguales)")
+                    return f"Aqui tienes tu huachito\n\n>!{' '.join(huachito)}!<\n\n>!Ganaste 10 huachis (2 pares iguales)!<"
 
                 elif conteo.count(2) == 3:
                     #Acceder a cuenta shop
@@ -773,7 +771,7 @@ def slots(redditor_id):
 
                     Huachis_shop.Enviar_Bineros(redditor_id,100,huachito=True)
 
-                    return (huachito,"Ganaste 100 huachis (3 pares iguales)")
+                    return f"Aqui tienes tu huachito\n\n>!{' '.join(huachito)}!<\n\n>!Ganaste 10 huachis (3 pares iguales)!<"
                 
                 else:
 
@@ -786,7 +784,7 @@ def slots(redditor_id):
 
                             Huachis_shop.Enviar_Bineros(redditor_id,50,huachito=True)
 
-                            return (huachito,"Ganaste 50 huachis (3 iguales)")
+                            return f"Aqui tienes tu huachito\n\n>!{' '.join(huachito)}!<\n\n>!Ganaste 50 huachis (3 iguales)!<"
 
                         elif numero == 4:
 
@@ -795,7 +793,7 @@ def slots(redditor_id):
 
                             Huachis_shop.Enviar_Bineros(redditor_id,300,huachito=True)
 
-                            return (huachito,"Ganaste 300 huachis (4 iguales)")
+                            return f"Aqui tienes tu huachito\n\n>!{' '.join(huachito)}!<\n\n>!Ganaste 300 huachis (4 iguales)!<"
 
                         elif numero == 5:
 
@@ -804,7 +802,7 @@ def slots(redditor_id):
 
                             Huachis_shop.Enviar_Bineros(redditor_id,1000,huachito=True)
 
-                            return (huachito,"Ganaste 1000 huachis (5 iguales)")
+                            return f"Aqui tienes tu huachito\n\n>!{' '.join(huachito)}!<\n\n>!Ganaste 1000 huachis (5 iguales)!<"
 
                         elif numero == 6:
 
@@ -813,12 +811,12 @@ def slots(redditor_id):
 
                             Huachis_shop.Enviar_Bineros(redditor_id,10000,huachito=True)
 
-                            return (huachito,"Ganaste 10000 huachis (Premio Mayor)")
+                            return f"Aqui tienes tu huachito\n\n>!{' '.join(huachito)}!<\n\n>!Ganaste 10,000 huachis (Premio Mayor)!<"
                     
                     
                     respuestas_perdida = ["Sigue participando","Suerte para la proxima","Asi es este negocio de rascar boletitos, llevate un dulce del mostrador"]
 
-                    return (huachito,random.choice(respuestas_perdida))
+                    return f"Aqui tienes tu huachito\n\n>!{' '.join(huachito)}!<\n\n>!{random.choice(respuestas_perdida)}!<"
 
 
 
