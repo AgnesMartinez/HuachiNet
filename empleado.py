@@ -216,222 +216,256 @@ def empleado_del_mes():
     for subreddit in config.SUBREDDITS:
        
         for comment in reddit.subreddit(subreddit).comments(limit=200):
-            
+
             #Buscar si el comentario ha sido procesado previamante
             if buscar_log(str(comment.id)) == False:
-                
+                    
                 #Buscar comandos
                 if "!tip" in comment.body.lower():
 
-                    #Extraemos la cantidad
-                    string = comment.body.lower()
-            
-                    pattern = '!tip\ *(\d+)'
+                    if comment.parent().author != None:
+                        try:
+                            #Extraemos la cantidad
+                            string = comment.body.lower()
+                
+                            pattern = '!tip\ *(\d+)'
 
-                    result = re.findall(pattern, string)
+                            result = re.findall(pattern, string)
 
-                    cantidad = result[0]
+                            cantidad = result[0]
 
-                    #Corroboramos que sea un numero
-                    if cantidad.isdigit():
+                            #Corroboramos que sea un numero
+                            if cantidad.isdigit():
 
+                                #Agregar comentario al log
+                                actualizar_log(str(comment.id))
+
+                                #Realizamos la transaccion
+                                transaccion = tip(str(comment.author),str(comment.parent().author),abs(int(cantidad)))
+
+                                print(f'----\n{transaccion}')
+
+                                #Evitar que el empleado se responda a si mismo.
+                                if transaccion == "autotip":
+                                    pass
+                                
+                                else:
+                                    #Responder al cliente
+                                    comment.reply(transaccion)
+                                    
+                                    
+                        except:
+                            #Enviar mensaje de error si el empleado no entendio lo que recibio
+                            comment.reply(random.choice(resp_empleado_error))
+                                
+                            
+                elif "!saldazo" in comment.body.lower() or "!saldo" in comment.body.lower():
+
+                    if comment.author != None:
                         #Agregar comentario al log
                         actualizar_log(str(comment.id))
 
-                        #Realizamos la transaccion
-                        transaccion = tip(str(comment.author),str(comment.parent().author),abs(int(cantidad)))
-
-                        print(f'----\n{transaccion}')
-
-                        #Evitar que el empleado se responda a si mismo.
-                        if transaccion == "autotip":
-                            pass
+                        #Realizar consulta
+                        try:
                             
-                        else:
+                            consulta = saldazo(str(comment.author))
+
+                            print(f'----\n{consulta}')
+
                             #Responder al cliente
-                            comment.reply(transaccion)
+                            comment.reply(consulta)
+                            
+                        except:
+                            #Enviar mensaje de error si el empleado no entendio lo que recibio
+                            comment.reply(random.choice(resp_empleado_error))
                         
-                elif "!saldazo" in comment.body.lower():
-
-                    #Agregar comentario al log
-                    actualizar_log(str(comment.id))
-
-                    #Realizar consulta
-                    try:
-                        
-                        consulta = saldazo(str(comment.author))
-
-                        print(f'----\n{consulta}')
-
-                        #Responder al cliente
-                        comment.reply(consulta)
-                        
-                    except:
-                        #Enviar mensaje de error si el empleado no entendio lo que recibio
-                        comment.reply(random.choice(resp_empleado_error))
-
-                elif "!saldo" in comment.body.lower():
-
-                    #Agregar comentario al log
-                    actualizar_log(str(comment.id))
-
-                    #Realizar consulta
-                    try:
-                        
-                        consulta = saldazo(str(comment.author))
-
-                        print(f'----\n{consulta}')
-
-                        #Responder al cliente
-                        comment.reply(consulta)
-                        
-                    except:
-                        #Enviar mensaje de error si el empleado no entendio lo que recibio
-                        comment.reply(random.choice(resp_empleado_error))
-                        
+                                                   
 
                 elif "!rankme" in comment.body.lower():
 
-                    #Agregar comentario al log
-                    actualizar_log(str(comment.id))
+                    if comment.author != None:
+                        #Agregar comentario al log
+                        actualizar_log(str(comment.id))
 
-                    #Realizar consulta
-                    try:
+                        #Realizar consulta
+                        try:
 
-                        rankme = rank(str(comment.author))
+                            rankme = rank(str(comment.author))
 
-                        print(f'----\n{rankme}')
+                            print(f'----\n{rankme}')
 
-                        #Responder al cliente
-                        comment.reply(rankme)
+                            #Responder al cliente
+                            comment.reply(rankme)
 
-                    except:
-                        #Enviar mensaje de error si el empleado no entendio lo que recibio
-                        comment.reply(random.choice(resp_empleado_error))
-                        
+                        except:
+                            #Enviar mensaje de error si el empleado no entendio lo que recibio
+                            comment.reply(random.choice(resp_empleado_error))
+                            
+                            
                 elif "!rank25" in comment.body.lower():
 
-                    #Agregar comentario al log
-                    actualizar_log(str(comment.id))
+                    if comment.author != None:
+                        #Agregar comentario al log
+                        actualizar_log(str(comment.id))
 
-                    #Realizar consulta
-                    try:
+                        #Realizar consulta
+                        try:
 
-                        rank25 = rank(str(comment.author),top25=True)
+                            rank25 = rank(str(comment.author),top25=True)
 
-                        print(f'----\n{rank25}')
+                            print(f'----\n{rank25}')
 
-                        #Responder al cliente
-                        comment.reply(rank25)
+                            #Responder al cliente
+                            comment.reply(rank25)
 
-                    except:
-                        #Enviar mensaje de error si el empleado no entendio lo que recibio
-                        comment.reply(random.choice(resp_empleado_error))        
+                        except:
+                            #Enviar mensaje de error si el empleado no entendio lo que recibio
+                            comment.reply(random.choice(resp_empleado_error))
+                               
 
 
                 elif "!rank" in comment.body.lower():
 
-                    #Agregar comentario al log
-                    actualizar_log(str(comment.id))
+                    if comment.author != None:
 
-                    #Realizar consulta
-                    try:
+                        #Agregar comentario al log
+                        actualizar_log(str(comment.id))
 
-                        rank10 = rank(str(comment.author),topten=True)
+                        #Realizar consulta
+                        try:
 
-                        print(f'----\n{rank10}')
+                            rank10 = rank(str(comment.author),topten=True)
 
-                        #Responder al cliente
-                        comment.reply(rank10)
+                            print(f'----\n{rank10}')
 
-                    except:
-                        #Enviar mensaje de error si el empleado no entendio lo que recibio
-                        comment.reply(random.choice(resp_empleado_error))
-                              
-                
+                            #Responder al cliente
+                            comment.reply(rank10)
+
+                        except:
+                            #Enviar mensaje de error si el empleado no entendio lo que recibio
+                            comment.reply(random.choice(resp_empleado_error))
+                        
+                                
+                    
                 elif "!shop monachina" in comment.body.lower():
 
-                    #Agregar comentario al log
-                    actualizar_log(str(comment.id))
+                    if comment.parent().author != None:
 
-                    compra = shop(str(comment.author),str(comment.parent().author),"monachina")
+                        #Agregar comentario al log
+                        actualizar_log(str(comment.id))
 
-                    print(f'----\n{compra}')
+                        compra = shop(str(comment.author),str(comment.parent().author),"monachina")
 
-                    comment.reply(compra)
-                            
+                        print(f'----\n{compra}')
+
+                        comment.reply(compra)
+                                
 
                 elif "!shop trapo" in comment.body.lower():
 
-                    #Agregar comentario al log
-                    actualizar_log(str(comment.id))
+                    if comment.parent().author != None:
 
-                    compra = shop(str(comment.author),str(comment.parent().author),"trapo")
+                        #Agregar comentario al log
+                        actualizar_log(str(comment.id))
 
-                    print(f'----\n{compra}')
+                        compra = shop(str(comment.author),str(comment.parent().author),"trapo")
 
-                    comment.reply(compra)
+                        print(f'----\n{compra}')
+
+                        comment.reply(compra)
 
                 elif "!shop furro" in comment.body.lower():
 
-                    #Agregar comentario al log
-                    actualizar_log(str(comment.id))
+                    if comment.parent().author != None:
 
-                    compra = shop(str(comment.author),str(comment.parent().author),"furro")
+                        #Agregar comentario al log
+                        actualizar_log(str(comment.id))
 
-                    print(f'----\n{compra}')
+                        compra = shop(str(comment.author),str(comment.parent().author),"furro")
 
-                    comment.reply(compra)
+                        print(f'----\n{compra}')
+
+                        comment.reply(compra)
 
 
-                elif "!shop" in comment.body.lower():
-                
-                    #Agregar comentario al log
-                    actualizar_log(str(comment.id))
+                elif "!shop menu" in comment.body.lower():
 
-                    comment.reply("# HuachiStore - Abierto cuando llegamos, cerrado cuando nos vamos\n\nEnvia un regalo usando el comando shop, seguido de una opcion del menu, todo a 5 huachis.\n\nRegalo | Comando\n:--|--:\nMonas Chinas | monachina\nTrapitos | trapo\nFurros | furro\n\nCompleta tu compra de la siguiente manera:\n\n    shop comando\n\n    Ejemplo: shop monachina\n\n    (no olvides el signo de exclamación)\n\nNo respondas a este comentario.")
-                
+                    if comment.parent().author != None:
+                    
+                        #Agregar comentario al log
+                        actualizar_log(str(comment.id))
+
+                        comment.reply("# HuachiStore - Abierto cuando llegamos, cerrado cuando nos vamos\n\nEnvia un regalo usando el comando shop, seguido de una opcion del menu, todo a 5 huachis.\n\nRegalo | Comando\n:--|--:\nMonas Chinas | monachina\nTrapitos | trapo\nFurros | furro\n\nCompleta tu compra de la siguiente manera:\n\n    shop comando\n\n    Ejemplo: shop monachina\n\n    (no olvides el signo de exclamación)\n\nNo respondas a este comentario.")
+                    
 
                 elif "!asalto" in comment.body.lower():
 
-                    #Agregar comentario al log
-                    actualizar_log(str(comment.id))
+                    if comment.parent().author != None:
 
-                    #Realizar consulta
-                    try:
+                        #Agregar comentario al log
+                        actualizar_log(str(comment.id))
 
-                        asalto = tumbar(str(comment.author),str(comment.parent().author))
+                        #Realizar consulta
+                        try:
 
-                        print(f'----\n{asalto}')
+                            asalto = tumbar(str(comment.author),str(comment.parent().author))
 
-                        #Responder al cliente
-                        comment.reply(asalto)
+                            print(f'----\n{asalto}')
 
-                    except:
-                        #Enviar mensaje de error si el empleado no entendio lo que recibio
-                        comment.reply(random.choice(resp_empleado_error))
+                            #Responder al cliente
+                            comment.reply(asalto)
+
+                        except:
+                            #Enviar mensaje de error si el empleado no entendio lo que recibio
+                            comment.reply(random.choice(resp_empleado_error))
+                            
 
 
                 elif "!atraco" in comment.body.lower():
 
-                    #Agregar comentario al log
-                    actualizar_log(str(comment.id))
+                    if comment.parent().author != None:
 
-                    #Realizar consulta
-                    try:
+                        #Agregar comentario al log
+                        actualizar_log(str(comment.id))
 
-                        asalto = atraco(str(comment.author),str(comment.parent().author))
+                        #Realizar consulta
+                        try:
 
-                        print(f'----\n{asalto}')
+                            asalto = atraco(str(comment.author),str(comment.parent().author))
 
-                        #Responder al cliente
-                        comment.reply(asalto)
+                            print(f'----\n{asalto}')
 
-                    except:
-                        #Enviar mensaje de error si el empleado no entendio lo que recibio
-                        comment.reply(random.choice(resp_empleado_error))
+                            #Responder al cliente
+                            comment.reply(asalto)
 
-                                                
+                        except:
+                            #Enviar mensaje de error si el empleado no entendio lo que recibio
+                            comment.reply(random.choice(resp_empleado_error))
+                            
+
+                elif "!huachito" in comment.body.lower():
+
+                    if comment.author != None:
+
+                        #Agregar comentario al log
+                        actualizar_log(str(comment.id))
+
+                        #Realizar consulta
+                        try:
+
+                            resultado = slots(str(comment.author))
+
+                            print(f'----\n{resultado}')
+
+                            huachito_string = " ".join(resultado[0])
+
+                            #Responder al cliente
+                            comment.reply("Aqui tienes tu huachito\n\n" + f">!{huachito_string}!<" + f"\n\n>!{resultado[1]}!<")
+
+                        except:
+                            #Enviar mensaje de error si el empleado no entendio lo que recibio
+                            comment.reply(random.choice(resp_empleado_error))
+                                              
 def servicio_al_cliente():
     """Responder a los papus y a las mamus sobre sus cuentas"""
 
@@ -532,7 +566,7 @@ def tumbar(cholo,victima):
         return random.choice(resp_autorobo)
 
     #Proteger al CEO
-    if victima == "MarcoCadenas" or victima == "Empleado_del_mes":
+    if victima == "MarcoCadenas" or victima == "Empleado_del_mes" or victima == 'Disentibot':
         
         return random.choice(resp_seguridad)
 
@@ -613,7 +647,7 @@ def atraco(cholo,victima):
         return random.choice(resp_autorobo)
 
     #Proteger al CEO
-    if victima == "MarcoCadenas" or victima == "Empleado_del_mes":
+    if victima == "MarcoCadenas" or victima == "Empleado_del_mes" or victima == "Disentibot":
         
         return random.choice(resp_seguridad)
 
@@ -691,6 +725,101 @@ def atraco(cholo,victima):
 
                     return random.choice(resp_tumbar_victima) + f"\n\n__{victima} ganó {cantidad} huachis (de la cartera de {cholo})__"
 
+def slots(redditor_id):
+    """Ahora si es todo un casino"""
+
+    #Acceder a cuenta del redditor
+    Huachis_redditor = HuachiNet(redditor_id)
+    #Verificar que tenga cuenta
+    if Huachis_redditor.Verificar_Usuario(redditor_id) == False:
+        
+        return random.choice(resp_tip_cuenta)
+
+    else:
+        #Verificar que tenga saldo
+        if Huachis_redditor.saldo_total < 10:
+            
+            return random.choice(resp_tip_sinbineros)
+
+        else:
+            #Cobrar el Huachito
+            Huachis_redditor.Enviar_Bineros("Shop",5)
+        
+            emojis = ['👻','👽','🐷','🦖','🐧','🦝','🍮', '💣','👾']
+
+            huachito = [random.choice(emojis) for i in range(6)]
+
+            conteo = [huachito.count(emoji) for emoji in emojis if huachito.count(emoji) != 0]
+
+            if '💣' in huachito:
+                #Enviar mensaje en caso de bomba
+                respuestas_bomba = ["Como en buscaminas, te exploto la bomba, perdiste!","Te toco la bomba werito","BOMBA! mala suerte :'(","Te salio el negrito del arroz, perdistes."]
+
+                return (huachito, random.choice(respuestas_bomba))
+                
+            else:
+                #Dar dinero en caso de 2 pares iguales
+                if conteo.count(2) == 2:
+                    #Acceder a cuenta shop
+                    Huachis_shop = HuachiNet("Shop")
+
+                    Huachis_shop.Enviar_Bineros(redditor_id,10,huachito=True)
+
+                    return (huachito,"Ganaste 10 huachis (2 pares iguales)")
+
+                elif conteo.count(2) == 3:
+                    #Acceder a cuenta shop
+                    Huachis_shop = HuachiNet("Shop")
+
+                    Huachis_shop.Enviar_Bineros(redditor_id,100,huachito=True)
+
+                    return (huachito,"Ganaste 100 huachis (3 pares iguales)")
+                
+                else:
+
+                    for numero in conteo:
+                        #Entregar premios
+
+                        if numero == 3:
+                            #Acceder a cuenta shop
+                            Huachis_shop = HuachiNet("Shop")
+
+                            Huachis_shop.Enviar_Bineros(redditor_id,50,huachito=True)
+
+                            return (huachito,"Ganaste 50 huachis (3 iguales)")
+
+                        elif numero == 4:
+
+                            #Acceder a cuenta shop
+                            Huachis_shop = HuachiNet("Shop")
+
+                            Huachis_shop.Enviar_Bineros(redditor_id,300,huachito=True)
+
+                            return (huachito,"Ganaste 300 huachis (4 iguales)")
+
+                        elif numero == 5:
+
+                            #Acceder a cuenta shop
+                            Huachis_shop = HuachiNet("Shop")
+
+                            Huachis_shop.Enviar_Bineros(redditor_id,1000,huachito=True)
+
+                            return (huachito,"Ganaste 1000 huachis (5 iguales)")
+
+                        elif numero == 6:
+
+                            #Acceder a cuenta shop
+                            Huachis_shop = HuachiNet("Shop")
+
+                            Huachis_shop.Enviar_Bineros(redditor_id,10000,huachito=True)
+
+                            return (huachito,"Ganaste 10000 huachis (Premio Mayor)")
+                    
+                    
+                    respuestas_perdida = ["Sigue participando","Suerte para la proxima","Asi es este negocio de rascar boletitos, llevate un dulce del mostrador"]
+
+                    return (huachito,random.choice(respuestas_perdida))
+
 
 
 if __name__ == "__main__":
@@ -702,6 +831,7 @@ if __name__ == "__main__":
     servicio_al_cliente()
 
     print("\nYa respondi a todas las quejas patron!")
+
 
 
 
