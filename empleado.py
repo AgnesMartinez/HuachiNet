@@ -129,7 +129,7 @@ def tip(remitente,destinatario,cantidad) -> str:
                     #Abrimos cuenta y le damos dineros de bienvenida
                     Huachis.Bono_Bienvenida(destinatario)
                 
-                    reddit.redditor(destinatario).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el post sticky en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial o !saldo / !saldazo")
+                    reddit.redditor(destinatario).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial o !saldo / !saldazo")
             
                 #Iniciamos transaccion
                 Huachis.Enviar_Bineros(destinatario,cantidad)

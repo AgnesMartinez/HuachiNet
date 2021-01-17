@@ -55,6 +55,27 @@
          
          2- !saldo
          
+
+  !rank / !rank25 / rankme
+ ---------------------
+ Solicitar el top ten de usuarios abinerados, solicitar el top 25 de usuarios abinerados y solicitar tu posición en la HuachiNet respectivamente. El empleado del mes responde por DM.
+ 
+         #Ejemplo de uso
+
+         1- Quiénes somos los 10 conformando el 1%? !rank
+
+         2- Empleado del mes, mándame la lista de los 25 más fiís !rank25
+           
+         3- En que posición estoy en la huachinet? !rankme
+
+  !shop menu
+ ---------------------
+ Solicitar el menú de la tienda de regalos (todoa 5 huachis). El empleado del mes responde por DM.
+ 
+         #Ejemplo de uso
+
+         Qué hay nuevo en la tienda? !shop menu
+ 
  !historial
  ---------------------
  Conoce el historial de movimientos de tu cuenta con este comando. Este comando unicamente funciona mediante directo al empleado_del_mes.
@@ -65,8 +86,7 @@
            (Subject) Estado de Cuenta
            
            (mensaje) !historial
- 
- 
+
  Detalles Tecnicos
  ---------------------
  
