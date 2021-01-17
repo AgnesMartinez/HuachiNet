@@ -256,7 +256,19 @@ def empleado_del_mes():
 
             #Buscar si el comentario ha sido procesado previamante
             if buscar_log(str(comment.id)) == False:
-                    
+
+                def shop_item(item):
+                    if comment.parent().author != None:
+
+                        #Agregar comentario al log
+                        actualizar_log(str(comment.id))
+
+                        compra = shop(str(comment.author),str(comment.parent().author), item)
+
+                        print(f'----\n{compra}')
+
+                        return reddit.redditor(str(comment.author)).message("Ticket de Compra",compra)
+
                 #Buscar comandos
                 if "!tip" in comment.body.lower():
 
@@ -322,7 +334,6 @@ def empleado_del_mes():
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
                         
                                                    
-
                 elif "!rankme" in comment.body.lower():
 
                     if comment.author != None:
@@ -369,7 +380,6 @@ def empleado_del_mes():
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
                                
 
-
                 elif "!rank" in comment.body.lower():
 
                     if comment.author != None:
@@ -392,75 +402,31 @@ def empleado_del_mes():
                             error_log(e)
 
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
-                        
-                                
+                                                        
                     
                 elif "!shop monachina" in comment.body.lower():
 
-                    if comment.parent().author != None:
-
-                        #Agregar comentario al log
-                        actualizar_log(str(comment.id))
-
-                        compra = shop(str(comment.author),str(comment.parent().author),"monachina")
-
-                        print(f'----\n{compra}')
-
-                        reddit.redditor(str(comment.author)).message("Ticket de Compra",compra)
+                    shop_item("monachina")
                                 
 
                 elif "!shop trapo" in comment.body.lower():
 
-                    if comment.parent().author != None:
+                    shop_item("trapo")
 
-                        #Agregar comentario al log
-                        actualizar_log(str(comment.id))
-
-                        compra = shop(str(comment.author),str(comment.parent().author),"trapo")
-
-                        print(f'----\n{compra}')
-
-                        reddit.redditor(str(comment.author)).message("Ticket de Compra",compra)
 
                 elif "!shop furro" in comment.body.lower():
 
-                    if comment.parent().author != None:
+                    shop_item("furro")
 
-                        #Agregar comentario al log
-                        actualizar_log(str(comment.id))
-
-                        compra = shop(str(comment.author),str(comment.parent().author),"furro")
-
-                        print(f'----\n{compra}')
-
-                        reddit.redditor(str(comment.author)).message("Ticket de Compra",compra)
 
                 elif "!shop nalgotica" in comment.body.lower():
 
-                    if comment.parent().author != None:
-
-                        #Agregar comentario al log
-                        actualizar_log(str(comment.id))
-
-                        compra = shop(str(comment.author),str(comment.parent().author),"nalgotica")
-
-                        print(f'----\n{compra}')
-
-                        reddit.redditor(str(comment.author)).message("Ticket de Compra",compra)
+                    shop_item("nalgotica")
 
                 
                 elif "!shop huachito" in comment.body.lower():
 
-                    if comment.parent().author != None:
-
-                        #Agregar comentario al log
-                        actualizar_log(str(comment.id))
-
-                        compra = shop(str(comment.author),str(comment.parent().author),"huachito")
-
-                        print(f'----\n{compra}')
-
-                        reddit.redditor(str(comment.author)).message("Ticket de Compra",compra)
+                    shop_item("huachito")
 
 
                 elif "!shop menu" in comment.body.lower():
@@ -496,7 +462,6 @@ def empleado_del_mes():
 
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
                             
-
 
                 elif "!atraco" in comment.body.lower():
 
@@ -646,37 +611,28 @@ def shop(remitente,destinatario,regalo):
             #Iniciamos transaccion
             Huachis.Enviar_Bineros('Shop',5,nota=regalo.capitalize())
             
-            if regalo == 'monachina':
+            def enviar_regalo(opciones, mensaje):
+                item = random.choice(opciones)
 
-                monachina = random.choice(monaschinas)
-
-                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una mona china! Kawaii desu ne! \n\n [Abrir Regalo]({monachina})")
+                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado ", mensaje ,f"\n\n [Abrir Regalo]({item})")
 
                 return random.choice(resp_shop)
+
+            if regalo == 'monachina':
+
+                enviar_regalo(monaschinas, "una mona china! Kawaii desu ne!")
 
             elif regalo == 'trapo':
 
-                trapo = random.choice(trapos)
-
-                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una dama con rama, no tengas miedo papi, si la agarras no da toques. \n\n [Abrir Regalo]({trapo})")
-
-                return random.choice(resp_shop)
+                enviar_regalo(trapos, "una dama con rama, no tengas miedo papi, si la agarras no da toques.")
 
             elif regalo == 'furro':
 
-                furro = random.choice(furros)
-
-                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado un furro, quemalo antes de que se reproduzca! \n\n [Abrir Regalo]({furro})")
-
-                return random.choice(resp_shop)
+                enviar_regalo(furros, "un furro, quemalo antes de que se reproduzca!")
 
             elif regalo == 'nalgotica':
 
-                nalgotica = random.choice(nalgoticas)
-
-                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una nalgotica, 2spoopy4me \n\n [Abrir Regalo]({nalgotica})")
-
-                return random.choice(resp_shop)
+                enviar_regalo(nalgoticas, "una nalgotica, 2spoopy4me")
 
             elif regalo == 'huachito':
 
