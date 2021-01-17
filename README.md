@@ -56,9 +56,9 @@
          2- !saldo
          
 
-  !rank / !rank25 / rankme
+  !rank | !rank25 | rankme
  ---------------------
- Solicitar el top ten de usuarios abinerados, solicitar el top 25 de usuarios abinerados y solicitar tu posición en la HuachiNet respectivamente. El empleado del mes responde por DM.
+ Solicitar el top ten de usuarios abinerados, solicitar el top 25 de usuarios abinerados y solicitar tu posición en la HuachiNet respectivamente. El empleado_del_mes responde por DM.
  
          #Ejemplo de uso
 
@@ -70,7 +70,7 @@
 
   !shop menu
  ---------------------
- Solicitar el menú de la tienda de regalos (todoa 5 huachis). El empleado del mes responde por DM.
+ Solicitar el menú de la tienda de regalos (todoa 5 huachis). El empleado_del_mes responde por DM.
  
          #Ejemplo de uso
 
@@ -86,6 +86,25 @@
            (Subject) Estado de Cuenta
            
            (mensaje) !historial
+
+ !huachito
+ ---------------------
+ El cachito de lotería mujicana en la que puedes ganar jugosos premios con un costo de 5 Huachis. Es posible regalarle un cachito a otro usuario con !shop huachito.
+ 
+         #Ejemplo de uso
+
+         1- !huachito
+
+ !asalto | !atraco
+ ---------------------
+ Sirven para robar bineros de la cartera de otro usuario pero con el riesgo de salir lastimado. El!asalto está limitado a 50 huachis, el atraco pone en juego entre 5% y 16% de tu cartera.
+
+         #Ejemplo de uso
+
+         1- Porque el PRI robó más !asalto
+
+         2- Para quitarle algo de poder al poder !atraco
+
 
  Detalles Tecnicos
  ---------------------
