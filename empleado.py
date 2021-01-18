@@ -614,7 +614,7 @@ def shop(remitente,destinatario,regalo):
             def enviar_regalo(opciones, mensaje):
                 item = random.choice(opciones)
 
-                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado ", mensaje ,f"\n\n [Abrir Regalo]({item})")
+                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado " + mensaje + f"\n\n [Abrir Regalo]({item})")
 
                 return random.choice(resp_shop)
 
