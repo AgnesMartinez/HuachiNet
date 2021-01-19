@@ -1302,7 +1302,7 @@ def pokermujicano(redditor_id):
         #Acceder a la cuenta de la shop
         Huachis_shop = HuachiNet("Shop")
 
-        Huachis_shop.Enviar_Bineros(redditor_id,cantidad,nota="Poker")
+        Huachis_shop.Enviar_Bineros(redditor_id,cantidad * 2,nota="Poker")
         
         return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para {redditor_id}, usando {redditor[0][0]}\n\n_Pot: {cantidad} huachicoins_'
 
@@ -1317,15 +1317,14 @@ def pokermujicano(redditor_id):
             #Acceder a la cuenta de la shop
             Huachis_shop = HuachiNet("Shop")
 
-            Huachis_shop.Enviar_Bineros(redditor_id,cantidad,nota="Poker")
+            Huachis_shop.Enviar_Bineros(redditor_id,cantidad * 2,nota="Poker")
 
             return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para {redditor_id}, usando {redditor[0][0]}\n\n_Pot: {cantidad} huachicoins_'
 
         elif max(casa[1] == max(redditor[1])):
 
             return "Empate tecnico, mi patron no me programo algo para esta situacion, no hay devoluciones es politica de la empresa, lo siento. A si que perdiste"
-
-        
+       
 def combinaciones_poker(mano):
     """Revisar mano y otorgar un puntaje"""
 
@@ -1367,7 +1366,7 @@ def combinaciones_poker(mano):
         if palos_cartas.count(palo) == 5:
             if "A" in valores_cartas and "K" in valores_cartas and "Q" in valores_cartas and "J" in valores_cartas and "10" in valores_cartas:
                 #Puntaje Escalera real de color
-                puntaje = ("Escalera real de color",10)
+                puntaje = ("escalera real de color",10)
 
                 return (puntaje,valores_corregidos)
         
@@ -1390,13 +1389,13 @@ def combinaciones_poker(mano):
                 
                 if escalera_color == 4:
                     #Puntaje Escalera de color
-                    puntaje = ("Escalera de color",9)
+                    puntaje = ("escalera de color",9)
 
                     return (puntaje,valores_corregidos)
                 
                 else:
                     #Puntaje Color
-                    puntaje = ("Color",6)
+                    puntaje = ("color",6)
 
                     return (puntaje,valores_corregidos)
 
@@ -1412,7 +1411,7 @@ def combinaciones_poker(mano):
 
     if fullhouse == 5:
         #Puntaje Fullhouse
-        puntaje = ("Full House",7)
+        puntaje = ("full House",7)
 
         return (puntaje,valores_corregidos)
 
@@ -1422,7 +1421,7 @@ def combinaciones_poker(mano):
     #Escalera alta con A
     if "A" in valores_cartas and "K" in valores_cartas and "Q" in valores_cartas and "J" in valores_cartas and "10" in valores_cartas:
         #Puntaje escalera alta
-        puntaje = ("Escalera Alta",5)
+        puntaje = ("escalera Alta",5)
 
         return (puntaje,valores_corregidos)
 
@@ -1443,7 +1442,7 @@ def combinaciones_poker(mano):
                 
         if escalera == 4:
             #Puntaje escalera
-            puntaje = ("Escalera",5)
+            puntaje = ("escalera",5)
 
             return (puntaje,valores_corregidos)
 
@@ -1453,13 +1452,13 @@ def combinaciones_poker(mano):
     for valor in valores:
         if valores_cartas.count(valor) ==  4:
             #Poker
-            puntaje = ("Poker",8)
+            puntaje = ("poker",8)
 
             return (puntaje,valores_corregidos)
 
         if valores_cartas.count(valor) ==  3:
             #Tercia
-            puntaje = ("Tercia",4)
+            puntaje = ("tercia",4)
 
             return (puntaje,valores_corregidos)
 
@@ -1469,17 +1468,17 @@ def combinaciones_poker(mano):
 
     if pares == 2:
         #Puntaje dos pares
-        puntaje = ("Dos Pares",3)
+        puntaje = ("dos Pares",3)
 
         return (puntaje,valores_corregidos)
     
     elif pares == 1:
         #Puntaje pares
-        puntaje = ("Pares",2)
+        puntaje = ("ar",2)
 
         return (puntaje,valores_corregidos)
     
-    puntaje = ("Carta Alta",1)
+    puntaje = ("carta alta",1)
 
     return (puntaje,valores_corregidos)
 
