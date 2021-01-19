@@ -611,28 +611,37 @@ def shop(remitente,destinatario,regalo):
             #Iniciamos transaccion
             Huachis.Enviar_Bineros('Shop',5,nota=regalo.capitalize())
             
-            def enviar_regalo(opciones, mensaje):
-                item = random.choice(opciones)
+            if regalo == 'monachina':
 
-                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado " + mensaje + f"\n\n [Abrir Regalo]({item})")
+                monachina = random.choice(monaschinas)
+
+                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una mona china! Kawaii desu ne! \n\n [Abrir Regalo]({monachina})")
 
                 return random.choice(resp_shop)
 
-            if regalo == 'monachina':
-
-                enviar_regalo(monaschinas, "una mona china! Kawaii desu ne!")
-
             elif regalo == 'trapo':
 
-                enviar_regalo(trapos, "una dama con rama, no tengas miedo papi, si la agarras no da toques.")
+                trapo = random.choice(trapos)
+
+                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una dama con rama, no tengas miedo papi, si la agarras no da toques. \n\n [Abrir Regalo]({trapo})")
+
+                return random.choice(resp_shop)
 
             elif regalo == 'furro':
 
-                enviar_regalo(furros, "un furro, quemalo antes de que se reproduzca!")
+                furro = random.choice(furros)
+
+                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado un furro, quemalo antes de que se reproduzca! \n\n [Abrir Regalo]({furro})")
+
+                return random.choice(resp_shop)
 
             elif regalo == 'nalgotica':
 
-                enviar_regalo(nalgoticas, "una nalgotica, 2spoopy4me")
+                nalgotica = random.choice(nalgoticas)
+
+                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una nalgotica, 2spoopy4me \n\n [Abrir Regalo]({nalgotica})")
+
+                return random.choice(resp_shop)
 
             elif regalo == 'huachito':
 
