@@ -2,7 +2,7 @@ import math
 import random
 import re
 import sqlite3
-from datetime import datetime
+from datetime import datetime, date, time
 
 import praw
 
@@ -426,20 +426,12 @@ def empleado_del_mes():
 
                     shop_item("nalgotica")
 
+
                 elif "!shop cura" in comment.body.lower() or "!shop corvido" in comment.body.lower():
 
-                    if comment.parent().author != None:
+                    shop_item("cura")
 
-                        #Agregar comentario al log
-                        actualizar_log(str(comment.id))
 
-                        compra = shop(str(comment.author),str(comment.parent().author),"cura")
-
-                        print(f'----\n{compra}')
-
-                        reddit.redditor(str(comment.author)).message("Ticket de Compra",compra)
-
-                
                 elif "!shop huachito" in comment.body.lower():
 
                     shop_item("huachito")
@@ -551,7 +543,8 @@ def empleado_del_mes():
                             error_log(str(e))
                             
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
-                                              
+
+
                 elif "!poker" in comment.body.lower():
 
                     if comment.author != None:
@@ -574,7 +567,32 @@ def empleado_del_mes():
                             error_log(str(e))
                             
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
-                                              
+
+#'''
+                elif "!rifa" in comment.body.lower():
+                    
+                    if comment.author != None:
+
+                        #Agregar comentario al log
+                        actualizar_log(str(comment.id))
+
+                        #Realizar consulta
+                        try:
+
+                            resultado = rifa(str(comment.author))
+
+                            print(f'----\n{resultado}')
+
+                            #Responder al cliente
+                            comment.reply(resultado)
+
+                        except Exception as e:
+                            #Enviar mensaje de error si el empleado no entendio lo que recibio
+                            error_log(str(e))
+                            
+                            reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+#'''
+
 def servicio_al_cliente():
     """Responder a los papus y a las mamus sobre sus cuentas"""
 
@@ -1446,7 +1464,39 @@ def combinaciones_poker(mano):
     puntaje = ("carta alta",1)
 
     return (puntaje,valores_corregidos)
+#'''
+def rifa(redditor_id):
+    #Acceder a cuenta del redditor
+    Huachis_redditor = HuachiNet(redditor_id)
+        
+    #Verificar que tenga cuenta
+    if Huachis_redditor.Verificar_Usuario(redditor_id) == False:
+        
+        return random.choice(resp_tip_cuenta)
 
+    else: 
+        #Verificar que tenga saldo
+        if Huachis_redditor.saldo_total < 5:
+            
+            return random.choice(resp_tip_sinbineros)
+
+        else:
+            rifahoy = datetime(date.today().year, date.today().month, date.today().day, 9)
+            ahora = datetime.now()
+            #Si el tiempo que ha pasado desde el inicio de la rifa es menor a 9 horas
+            if ahora - rifahoy < time(9): 
+                #Cobrar la entrada 25 huachis
+                Huachis_redditor.Enviar_Bineros("Shop",25,nota="rifa")
+                #Guardar boleto
+                with open('./rifas.txt', 'a') as boletos:
+                    boletos.write(str(redditor_id) + '\n')
+                with open('./rifas.txt', 'r').read().splitlines() as boletos:
+                    return 'Tu voleto es el número ' + str(len(boletos))
+            else:
+                return 'No se puede joven, ya no hay sistema'
+
+                 
+#'''
 if __name__ == "__main__":
     
     empleado_del_mes()
