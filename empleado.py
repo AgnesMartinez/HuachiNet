@@ -1,11 +1,13 @@
-from core import HuachiNet
-import praw
-import config
-import sqlite3
-import re
-from datetime import datetime
-import random
 import math
+import random
+import re
+import sqlite3
+from datetime import datetime
+
+import praw
+
+import config
+from core import HuachiNet
 
 conn_log = sqlite3.connect("boveda.sqlite3")
 
@@ -40,6 +42,8 @@ trapos = open("./shop/trapos.txt", "r", encoding="utf-8").read().splitlines()
 furros = open("./shop/furro.txt", "r", encoding="utf-8").read().splitlines()
 
 nalgoticas = open("./shop/nalgoticas.txt", "r", encoding="utf-8").read().splitlines()
+
+curas = open("./shop/curas.txt", "r", encoding="utf-8").read().splitlines()
 
 reddit = praw.Reddit(client_id=config.APP_ID, 
                      client_secret=config.APP_SECRET,
@@ -129,8 +133,7 @@ def tip(remitente,destinatario,cantidad) -> str:
                     #Abrimos cuenta y le damos dineros de bienvenida
                     Huachis.Bono_Bienvenida(destinatario)
                 
-                    reddit.redditor(destinatario).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial o !saldo / !saldazo")
-            
+                    reddit.redditor(redditor_id).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial")
                 #Iniciamos transaccion
                 Huachis.Enviar_Bineros(destinatario,cantidad)
 
@@ -252,7 +255,7 @@ def empleado_del_mes():
     #Buscar subreddits
     for subreddit in config.SUBREDDITS:
        
-        for comment in reddit.subreddit(subreddit).comments(limit=5):
+        for comment in reddit.subreddit(subreddit).comments(limit=100):
 
             #Buscar si el comentario ha sido procesado previamante
             if buscar_log(str(comment.id)) == False:
@@ -294,7 +297,7 @@ def empleado_del_mes():
                                         
                         except Exception as e:
                             #Enviar mensaje de error si el empleado no entendio lo que recibio
-                            error_log(e)
+                            error_log(str(e))
 
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
                                 
@@ -317,7 +320,7 @@ def empleado_del_mes():
                             
                         except Exception as e:
                             #Enviar mensaje de error si el empleado no entendio lo que recibio
-                            error_log(e)
+                            error_log(str(e))
 
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
                         
@@ -341,7 +344,7 @@ def empleado_del_mes():
 
                         except Exception as e:
                             #Enviar mensaje de error si el empleado no entendio lo que recibio
-                            error_log(e)
+                            error_log(str(e))
 
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
                             
@@ -364,7 +367,7 @@ def empleado_del_mes():
 
                         except Exception as e:
                             #Enviar mensaje de error si el empleado no entendio lo que recibio
-                            error_log(e)
+                            error_log(str(e))
 
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
                                
@@ -389,7 +392,7 @@ def empleado_del_mes():
 
                         except Exception as e:
                             #Enviar mensaje de error si el empleado no entendio lo que recibio
-                            error_log(e)
+                            error_log(str(e))
 
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
                         
@@ -448,6 +451,19 @@ def empleado_del_mes():
 
                         reddit.redditor(str(comment.author)).message("Ticket de Compra",compra)
 
+                elif "!shop cura" in comment.body.lower() or "!shop corvido" in comment.body.lower():
+
+                    if comment.parent().author != None:
+
+                        #Agregar comentario al log
+                        actualizar_log(str(comment.id))
+
+                        compra = shop(str(comment.author),str(comment.parent().author),"cura")
+
+                        print(f'----\n{compra}')
+
+                        reddit.redditor(str(comment.author)).message("Ticket de Compra",compra)
+
                 
                 elif "!shop huachito" in comment.body.lower():
 
@@ -470,7 +486,7 @@ def empleado_del_mes():
                         #Agregar comentario al log
                         actualizar_log(str(comment.id))
 
-                        reddit.redditor(str(comment.author)).message("Menu Shop","__HuachiStore - Abierto cuando llegamos, cerrado cuando nos vamos__\n\nEnvia un regalo usando el comando shop, seguido de una opcion del menu, todo a 5 huachis.\n\nRegalo | Comando\n:--|--:\nMonas Chinas | monachina\nTrapitos | trapo\nFurros | furro\nHuachito | huachito\nNalgoticas | nalgotica\n\nCompleta tu compra de la siguiente manera:\n\n    shop comando\n\n    Ejemplo: shop monachina\n\n    (no olvides el signo de exclamación)\n\nUsalo en la seccion de comentarios.")
+                        reddit.redditor(str(comment.author)).message("Menu Shop","__HuachiStore - Abierto cuando llegamos, cerrado cuando nos vamos__\n\nEnvia un regalo usando el comando shop, seguido de una opcion del menu, todo a 5 huachis.\n\nRegalo | Comando\n:--|--:\nMonas Chinas | monachina\nTrapitos | trapo\nFurros | furro\nHuachito | huachito\nNalgoticas | nalgotica\nMDLP | cura / corvido\n\nCompleta tu compra de la siguiente manera:\n\n    shop comando\n\n    Ejemplo: shop monachina\n\n    (no olvides el signo de exclamación)\n\nUsalo en la seccion de comentarios.")
                     
 
                 elif "!asalto" in comment.body.lower():
@@ -492,7 +508,7 @@ def empleado_del_mes():
 
                         except Exception as e:
                             #Enviar mensaje de error si el empleado no entendio lo que recibio
-                            error_log(e)
+                            error_log(str(e))
 
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
                             
@@ -517,7 +533,7 @@ def empleado_del_mes():
 
                         except Exception as e:
                             #Enviar mensaje de error si el empleado no entendio lo que recibio
-                            error_log(e)
+                            error_log(str(e))
 
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
 
@@ -543,7 +559,7 @@ def empleado_del_mes():
 
                         except Exception as e:
                             #Enviar mensaje de error si el empleado no entendio lo que recibio
-                            error_log(e)
+                            error_log(str(e))
 
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
                             
@@ -567,7 +583,30 @@ def empleado_del_mes():
 
                         except Exception as e:
                             #Enviar mensaje de error si el empleado no entendio lo que recibio
-                            error_log(e)
+                            error_log(str(e))
+                            
+                            reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+                                              
+                elif "!poker" in comment.body.lower():
+
+                    if comment.author != None:
+
+                        #Agregar comentario al log
+                        actualizar_log(str(comment.id))
+
+                        #Realizar consulta
+                        try:
+
+                            resultado = pokermujicano(str(comment.author))
+
+                            print(f'----\n{resultado}')
+
+                            #Responder al cliente
+                            comment.reply(resultado)
+
+                        except Exception as e:
+                            #Enviar mensaje de error si el empleado no entendio lo que recibio
+                            error_log(str(e))
                             
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
                                               
@@ -678,6 +717,14 @@ def shop(remitente,destinatario,regalo):
 
                 return random.choice(resp_shop)
 
+            elif regalo == 'cura':
+
+                cura = random.choice(curas)
+
+                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una cura, La cura del Dr. Corvus Beulenpest es la mejor! \n\n [Abrir Regalo]({cura})")
+
+                return random.choice(resp_shop)
+
             elif regalo == 'huachito':
 
                 huachito = slots(destinatario,regalo=True)
@@ -702,7 +749,7 @@ def asalto(cholo,victima):
 
         morralla = random.randint(1,50)
 
-        if cholo == "MarcoCadenas" or cholo == "AutoModerator":
+        if cholo == "MarcoCadenas" or cholo == "AutoModerator" or cholo == "Empleado_del_mes":
 
             redditor_cholo = 101
 
@@ -732,8 +779,7 @@ def asalto(cholo,victima):
                         #Abrimos cuenta y le damos dineros de bienvenida
                         Huachis.Bono_Bienvenida(cholo)
                 
-                        reddit.redditor(cholo).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial o !saldo / !saldazo")
-                
+                        reddit.redditor(redditor_id).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial")
                     #Enviar Binero
                     Huachis.Enviar_Bineros(cholo,morralla,nota="Asalto")
 
@@ -760,7 +806,7 @@ def asalto(cholo,victima):
                         #Abrimos cuenta y le damos dineros de bienvenida
                         Huachis.Bono_Bienvenida(victima)
                 
-                        reddit.redditor(victima).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial o !saldo / !saldazo")
+                        reddit.redditor(victima).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el post sticky en Mujico para mas informacion de como usar la red.\n\nAqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: \n\n!historial o !saldo / !saldazo")
                 
                     #Enviar Binero
                     Huachis.Enviar_Bineros(victima,morralla,nota="Asalto")
@@ -781,7 +827,7 @@ def atraco(cholo,victima):
 
     else:
 
-        if cholo == "AutoModerator" or cholo == "MarcoCadenas":
+        if cholo == "AutoModerator" or cholo == "MarcoCadenas" or cholo == "Empleado_del_mes":
 
             redditor_cholo = 101
 
@@ -829,8 +875,7 @@ def atraco(cholo,victima):
                         #Abrimos cuenta y le damos dineros de bienvenida
                         Huachis.Bono_Bienvenida(cholo)
                 
-                        reddit.redditor(cholo).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial o !saldo / !saldazo")
-                
+                        reddit.redditor(redditor_id).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial")
                     #Enviar Binero
                     Huachis.Enviar_Bineros(cholo,cantidad,nota="Atraco")
 
@@ -864,7 +909,7 @@ def atraco(cholo,victima):
                         #Abrimos cuenta y le damos dineros de bienvenida
                         Huachis.Bono_Bienvenida(victima)
                 
-                        reddit.redditor(victima).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial o !saldo / !saldazo")
+                        reddit.redditor(victima).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el post sticky en Mujico para mas informacion de como usar la red.\n\nAqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: \n\n!historial o !saldo / !saldazo")
                 
                     #Enviar Binero
                     Huachis.Enviar_Bineros(victima,cantidad,nota="Atraco")
@@ -960,8 +1005,7 @@ def slots(redditor_id,regalo=False):
                 #Abrimos cuenta y le damos dineros de bienvenida
                 Huachis_shop.Bono_Bienvenida(redditor_id)
                 
-                reddit.redditor(redditor_id).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial o !saldo / !saldazo")
-                             
+                reddit.redditor(redditor_id).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial")            
             Huachis_shop.Enviar_Bineros(redditor_id,cantidad,nota="Premio Huachito")
 
             if '🥓' in huachito:
@@ -1014,8 +1058,7 @@ def slots(redditor_id,regalo=False):
                 #Abrimos cuenta y le damos dineros de bienvenida
                 Huachis_shop.Bono_Bienvenida(redditor_id)
                 
-                reddit.redditor(redditor_id).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial o !saldo / !saldazo")
-
+                reddit.redditor(redditor_id).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial")
             Huachis_shop.Enviar_Bineros(redditor_id,cantidad,nota="Premio Huachito")
             
             if '🥓' in huachito:
@@ -1068,8 +1111,7 @@ def slots(redditor_id,regalo=False):
                 #Abrimos cuenta y le damos dineros de bienvenida
                 Huachis_shop.Bono_Bienvenida(redditor_id)
                 
-                reddit.redditor(redditor_id).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial o !saldo / !saldazo")
-                
+                reddit.redditor(redditor_id).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial")
             Huachis_shop.Enviar_Bineros(redditor_id,cantidad,nota="Premio Huachito")
 
             if '🥓' in huachito:
@@ -1094,8 +1136,7 @@ def slots(redditor_id,regalo=False):
                 #Abrimos cuenta y le damos dineros de bienvenida
                 Huachis_shop.Bono_Bienvenida(redditor_id)
                 
-                reddit.redditor(redditor_id).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial o !saldo / !saldazo")
-                
+                reddit.redditor(redditor_id).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial")
 
             Huachis_shop.Enviar_Bineros(redditor_id,cantidad,nota="Premio Huachito")
             
@@ -1129,7 +1170,7 @@ def levanton(cholo,victima):
 
     else:
 
-        if cholo == "AutoModerator" or cholo == "MarcoCadenas":
+        if cholo == "AutoModerator" or cholo == "MarcoCadenas" or cholo == "Empleado_del_mes":
 
             redditor_cholo = 101
             
@@ -1168,8 +1209,7 @@ def levanton(cholo,victima):
                         #Abrimos cuenta y le damos dineros de bienvenida
                         Huachis.Bono_Bienvenida(cholo)
                 
-                        reddit.redditor(cholo).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial o !saldo / !saldazo")
-                
+                        reddit.redditor(redditor_id).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial")
                     #Enviar Binero
                     Huachis.Enviar_Bineros(cholo,cantidad,nota="Levanton")
 
@@ -1203,12 +1243,245 @@ def levanton(cholo,victima):
                         #Abrimos cuenta y le damos dineros de bienvenida
                         Huachis.Bono_Bienvenida(victima)
                 
-                        reddit.redditor(victima).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial o !saldo / !saldazo")
-                
+                        reddit.redditor(redditor_id).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial")
                     #Enviar Binero
                     Huachis.Enviar_Bineros(victima,cantidad,nota="Levanton")
 
                     return random.choice(resp_tumbar_victima) + f"\n\n__{victima} ganó {cantidad} huachis (de la cartera de {cholo})__"
+
+def pokermujicano(redditor_id):
+
+    #Acceder a cuenta del redditor
+    Huachis_redditor = HuachiNet(redditor_id)
+        
+    #Verificar que tenga cuenta
+    if Huachis_redditor.Verificar_Usuario(redditor_id) == False:
+        
+        return random.choice(resp_tip_cuenta)
+
+    else: 
+        #Verificar que tenga saldo
+        if Huachis_redditor.saldo_total < 5:
+            
+            return random.choice(resp_tip_sinbineros)
+
+        else:
+            #Cobrar la entrada
+            cantidad = random.randint(20,200)
+            Huachis_redditor.Enviar_Bineros("Shop",cantidad,nota="Poker")
+            
+    
+    valores = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"]
+
+    baraja = [[('♠',valor,"espada") for valor in valores],
+              [('♥',valor,"corazon") for valor in valores],
+              [('♦',valor,"diamante") for valor in valores],
+              [('♣',valor,"trebol") for valor in valores]]
+
+    cartas = [carta for palo in baraja for carta in palo]
+
+    for i in range(100):
+        random.shuffle(cartas)
+
+    manos = random.sample(cartas,k=10)
+
+    casa = combinaciones_poker(manos[0:5])
+
+    redditor = combinaciones_poker(manos[5:10])
+
+    cartas_casa = f'{manos[0][0]} : {manos[0][1]} | {manos[1][0]} : {manos[1][1]} | {manos[2][0]} : {manos[2][1]} | {manos[3][0]} : {manos[3][1]} | {manos[4][0]} : {manos[4][1]}'
+
+    cartas_redditor = f'{manos[5][0]} : {manos[5][1]} | {manos[6][0]} : {manos[6][1]} | {manos[7][0]} : {manos[7][1]} | {manos[8][0]} : {manos[8][1]} | {manos[9][0]} : {manos[9][1]}'
+
+    if casa[0][1] > redditor[0][1]:
+
+        return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para el empleado, usando {casa[0][0]}\n\n_Pot: {cantidad} huachicoins_' 
+
+    elif casa[0][1] < redditor[0][1]:
+
+        #Acceder a la cuenta de la shop
+        Huachis_shop = HuachiNet("Shop")
+
+        Huachis_shop.Enviar_Bineros(redditor_id,cantidad,nota="Poker")
+        
+        return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para {redditor_id}, usando {redditor[0][0]}\n\n_Pot: {cantidad} huachicoins_'
+
+    elif casa[0][1] == redditor[0][1]:
+
+        if max(casa[1]) > max(redditor[1]):
+
+            return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para el empleado, usando {casa[0][0]}\n\n_Pot: {cantidad} huachicoins_' 
+
+        elif max(casa[1] < max(redditor[1])):
+
+            #Acceder a la cuenta de la shop
+            Huachis_shop = HuachiNet("Shop")
+
+            Huachis_shop.Enviar_Bineros(redditor_id,cantidad,nota="Poker")
+
+            return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para {redditor_id}, usando {redditor[0][0]}\n\n_Pot: {cantidad} huachicoins_'
+
+        elif max(casa[1] == max(redditor[1])):
+
+            return "Empate tecnico, mi patron no me programo algo para esta situacion, no hay devoluciones es politica de la empresa, lo siento. A si que perdiste"
+
+        
+def combinaciones_poker(mano):
+    """Revisar mano y otorgar un puntaje"""
+
+    #Valores de las cartas
+    palos = ["diamante","corazon","trebol","espada"]
+
+    valores = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"]
+
+    #Separar cada tupla en 2 elementos y convertir letras en su valor entero
+    palos_cartas = tuple([carta[2] for carta in mano])
+
+    valores_cartas = tuple([carta[1] for carta in mano])
+
+    valores_corregidos = list()
+
+    for valor in valores_cartas:
+
+        if valor.isdigit():
+            valores_corregidos.append(int(valor))
+
+        elif valor == "A" and "2" in valores_cartas and "3" in valores_cartas and "4" in valores_cartas and "5" in valores_cartas:
+            valores_corregidos.append(1)
+        
+        elif valor == "A":
+            valores_corregidos.append(14)
+
+        elif valor == "J":
+            valores_corregidos.append(11)
+
+        elif valor == "Q":
+            valores_corregidos.append(12)
+
+        elif valor == "K":
+            valores_corregidos.append(13)
+
+    #Evaluar mano segun combinaciones en orden descendente, puntaje minimo es 1 (carta alta)
+    #Escalera real de color / escalera de color / color
+    for palo in palos:
+        if palos_cartas.count(palo) == 5:
+            if "A" in valores_cartas and "K" in valores_cartas and "Q" in valores_cartas and "J" in valores_cartas and "10" in valores_cartas:
+                #Puntaje Escalera real de color
+                puntaje = ("Escalera real de color",10)
+
+                return (puntaje,valores_corregidos)
+        
+            else:
+                #Contar numeros consecutivos
+                escalera_color = 0
+
+                cartas = sorted(valores_corregidos,reverse=True)
+
+                for i in range(5):
+
+                    if i == 4:
+                        break
+
+                    else:
+                        
+                        if cartas[i] - cartas[i+1] == 1:
+                        
+                            escalera_color += 1 
+                
+                if escalera_color == 4:
+                    #Puntaje Escalera de color
+                    puntaje = ("Escalera de color",9)
+
+                    return (puntaje,valores_corregidos)
+                
+                else:
+                    #Puntaje Color
+                    puntaje = ("Color",6)
+
+                    return (puntaje,valores_corregidos)
+
+    #Full House 
+    fullhouse = 0
+    for valor in valores:
+
+        if valores_cartas.count(valor) == 3:
+            fullhouse += 3
+        
+        elif valores_cartas.count(valor) == 2:
+            fullhouse += 2
+
+    if fullhouse == 5:
+        #Puntaje Fullhouse
+        puntaje = ("Full House",7)
+
+        return (puntaje,valores_corregidos)
+
+    #Escalera
+    #Contar numeros consecutivos
+    escalera = 0
+    #Escalera alta con A
+    if "A" in valores_cartas and "K" in valores_cartas and "Q" in valores_cartas and "J" in valores_cartas and "10" in valores_cartas:
+        #Puntaje escalera alta
+        puntaje = ("Escalera Alta",5)
+
+        return (puntaje,valores_corregidos)
+
+    else:    
+
+        for i in range(5):
+
+            cartas = sorted(valores_corregidos,reverse=True)
+
+            if i == 4:
+                break
+
+            else:
+
+                if cartas[i] - cartas[i+1] == 1:
+                        
+                    escalera += 1
+                
+        if escalera == 4:
+            #Puntaje escalera
+            puntaje = ("Escalera",5)
+
+            return (puntaje,valores_corregidos)
+
+    #Poker / Tercia / Dos pares / Pares
+    pares = 0
+
+    for valor in valores:
+        if valores_cartas.count(valor) ==  4:
+            #Poker
+            puntaje = ("Poker",8)
+
+            return (puntaje,valores_corregidos)
+
+        if valores_cartas.count(valor) ==  3:
+            #Tercia
+            puntaje = ("Tercia",4)
+
+            return (puntaje,valores_corregidos)
+
+        if valores_cartas.count(valor) ==  2:
+            #Sumar par
+            pares += 1
+
+    if pares == 2:
+        #Puntaje dos pares
+        puntaje = ("Dos Pares",3)
+
+        return (puntaje,valores_corregidos)
+    
+    elif pares == 1:
+        #Puntaje pares
+        puntaje = ("Pares",2)
+
+        return (puntaje,valores_corregidos)
+    
+    puntaje = ("Carta Alta",1)
+
+    return (puntaje,valores_corregidos)
 
 if __name__ == "__main__":
     
