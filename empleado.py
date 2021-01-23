@@ -241,7 +241,19 @@ def empleado_del_mes():
 
             #Buscar si el comentario ha sido procesado previamante
             if buscar_log(str(comment.id)) == False:
-                    
+
+                def shop_item(item):
+                    if comment.parent().author != None:
+
+                        #Agregar comentario al log
+                        actualizar_log(str(comment.id))
+
+                        compra = shop(str(comment.author),str(comment.parent().author), item)
+
+                        print(f'----\n{compra}')
+
+                        return reddit.redditor(str(comment.author)).message("Ticket de Compra",compra)
+
                 #Buscar comandos
                 if "!tip" in comment.body.lower():
 
@@ -307,7 +319,6 @@ def empleado_del_mes():
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
                         
                                                    
-
                 elif "!rankme" in comment.body.lower():
 
                     if comment.author != None:
@@ -354,7 +365,6 @@ def empleado_del_mes():
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
                                
 
-
                 elif "!rank" in comment.body.lower():
 
                     if comment.author != None:
@@ -377,61 +387,26 @@ def empleado_del_mes():
                             error_log(str(e))
 
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
-                        
-                                
+                                                        
                     
                 elif "!shop monachina" in comment.body.lower():
 
-                    if comment.parent().author != None:
-
-                        #Agregar comentario al log
-                        actualizar_log(str(comment.id))
-
-                        compra = shop(str(comment.author),str(comment.parent().author),"monachina")
-
-                        print(f'----\n{compra}')
-
-                        reddit.redditor(str(comment.author)).message("Ticket de Compra",compra)
+                    shop_item("monachina")
                                 
 
                 elif "!shop trapo" in comment.body.lower():
 
-                    if comment.parent().author != None:
+                    shop_item("trapo")
 
-                        #Agregar comentario al log
-                        actualizar_log(str(comment.id))
-
-                        compra = shop(str(comment.author),str(comment.parent().author),"trapo")
-
-                        print(f'----\n{compra}')
-
-                        reddit.redditor(str(comment.author)).message("Ticket de Compra",compra)
 
                 elif "!shop furro" in comment.body.lower():
 
-                    if comment.parent().author != None:
+                    shop_item("furro")
 
-                        #Agregar comentario al log
-                        actualizar_log(str(comment.id))
-
-                        compra = shop(str(comment.author),str(comment.parent().author),"furro")
-
-                        print(f'----\n{compra}')
-
-                        reddit.redditor(str(comment.author)).message("Ticket de Compra",compra)
 
                 elif "!shop nalgotica" in comment.body.lower():
 
-                    if comment.parent().author != None:
-
-                        #Agregar comentario al log
-                        actualizar_log(str(comment.id))
-
-                        compra = shop(str(comment.author),str(comment.parent().author),"nalgotica")
-
-                        print(f'----\n{compra}')
-
-                        reddit.redditor(str(comment.author)).message("Ticket de Compra",compra)
+                    shop_item("nalgotica")
 
                 elif "!shop cura" in comment.body.lower() or "!shop corvido" in comment.body.lower():
 
@@ -449,16 +424,7 @@ def empleado_del_mes():
                 
                 elif "!shop huachito" in comment.body.lower():
 
-                    if comment.parent().author != None:
-
-                        #Agregar comentario al log
-                        actualizar_log(str(comment.id))
-
-                        compra = shop(str(comment.author),str(comment.parent().author),"huachito")
-
-                        print(f'----\n{compra}')
-
-                        reddit.redditor(str(comment.author)).message("Ticket de Compra",compra)
+                    shop_item("huachito")
 
 
                 elif "!shop menu" in comment.body.lower():
@@ -494,7 +460,6 @@ def empleado_del_mes():
 
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
                             
-
 
                 elif "!atraco" in comment.body.lower():
 
