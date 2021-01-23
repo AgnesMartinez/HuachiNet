@@ -48,6 +48,8 @@ nalgoticas = open("./shop/nalgoticas.txt", "r", encoding="utf-8").read().splitli
 
 curas = open("./shop/curas.txt", "r", encoding="utf-8").read().splitlines()
 
+galletas = open("./shop/galletas.txt", "r", encoding="utf-8").read().splitlines()
+
 reddit = praw.Reddit(client_id=config.APP_ID, 
                      client_secret=config.APP_SECRET,
                      user_agent=config.USER_AGENT, 
@@ -408,6 +410,7 @@ def empleado_del_mes():
 
                     shop_item("nalgotica")
 
+
                 elif "!shop cura" in comment.body.lower() or "!shop corvido" in comment.body.lower():
 
                     if comment.parent().author != None:
@@ -420,8 +423,13 @@ def empleado_del_mes():
                         print(f'----\n{compra}')
 
                         reddit.redditor(str(comment.author)).message("Ticket de Compra",compra)
-
                 
+                
+                elif "!shop galleta" in comment.body.lower():
+
+                    shop_item("galleta")
+
+
                 elif "!shop huachito" in comment.body.lower():
 
                     shop_item("huachito")
@@ -533,7 +541,8 @@ def empleado_del_mes():
                             error_log(str(e))
                             
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
-                                              
+
+
                 elif "!poker" in comment.body.lower():
 
                     if comment.author != None:
@@ -556,6 +565,7 @@ def empleado_del_mes():
                             error_log(str(e))
                             
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+
 
                 elif "!huachilate" in comment.body.lower() or "!huachilote" in comment.body.lower():
 
@@ -691,6 +701,14 @@ def shop(remitente,destinatario,regalo):
                 cura = random.choice(curas)
 
                 reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una cura, La cura del Dr. Corvus Beulenpest es la mejor! \n\n [Abrir Regalo]({cura})")
+
+                return random.choice(resp_shop)
+
+            elif regalo == 'galleta':
+
+                galleta = random.choice(galletas)
+
+                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una galleta de la suerte. ¿Cuál será tu fortuna? \n\n [Abrir Regalo]({galleta})")
 
                 return random.choice(resp_shop)
 
