@@ -48,6 +48,8 @@ nalgoticas = open("./shop/nalgoticas.txt", "r", encoding="utf-8").read().splitli
 
 curas = open("./shop/curas.txt", "r", encoding="utf-8").read().splitlines()
 
+chambeadoras = open("./shop/ganosas.txt", "r", encoding="utf-8").read().splitlines()
+
 galletas = open("./shop/galletas.txt", "r", encoding="utf-8").read().splitlines()
 
 reddit = praw.Reddit(client_id=config.APP_ID, 
@@ -413,26 +415,19 @@ def empleado_del_mes():
 
                 elif "!shop cura" in comment.body.lower() or "!shop corvido" in comment.body.lower():
 
-                    if comment.parent().author != None:
-
-                        #Agregar comentario al log
-                        actualizar_log(str(comment.id))
-
-                        compra = shop(str(comment.author),str(comment.parent().author),"cura")
-
-                        print(f'----\n{compra}')
-
-                        reddit.redditor(str(comment.author)).message("Ticket de Compra",compra)
-                
+                    shop_item("cura")
                 
                 elif "!shop galleta" in comment.body.lower():
 
                     shop_item("galleta")
 
-
                 elif "!shop huachito" in comment.body.lower():
 
                     shop_item("huachito")
+
+                elif "!shop chambeadora" in comment.body.lower():
+
+                    shop_item("chambeadora")
 
 
                 elif "!shop menu" in comment.body.lower():
@@ -442,7 +437,7 @@ def empleado_del_mes():
                         #Agregar comentario al log
                         actualizar_log(str(comment.id))
 
-                        reddit.redditor(str(comment.author)).message("Menu Shop","__HuachiStore - Abierto cuando llegamos, cerrado cuando nos vamos__\n\nEnvia un regalo usando el comando shop, seguido de una opcion del menu, todo a 5 huachis.\n\nRegalo | Comando\n:--|--:\nMonas Chinas | monachina\nTrapitos | trapo\nFurros | furro\nHuachito | huachito\nNalgoticas | nalgotica\nMDLP | cura / corvido\n\nCompleta tu compra de la siguiente manera:\n\n    shop comando\n\n    Ejemplo: shop monachina\n\n    (no olvides el signo de exclamación)\n\nUsalo en la seccion de comentarios.")
+                        reddit.redditor(str(comment.author)).message("Menu Shop","__HuachiStore - Abierto cuando llegamos, cerrado cuando nos vamos__\n\nEnvia un regalo usando el comando shop, seguido de una opcion del menu, todo a 5 huachis.\n\nRegalo | Comando\n:--|--:\nMonas Chinas | monachina\nTrapitos | trapo\nFurros | furro\nHuachito | huachito\nNalgoticas | nalgotica\nMDLP | cura / corvido\nGanosas (Revistas para adultos) | chambeadora\n\nCompleta tu compra de la siguiente manera:\n\n    shop comando\n\n    Ejemplo: shop monachina\n\n    (no olvides el signo de exclamación)\n\nUsalo en la seccion de comentarios.")
                     
 
                 elif "!asalto" in comment.body.lower():
@@ -704,13 +699,19 @@ def shop(remitente,destinatario,regalo):
 
                 return random.choice(resp_shop)
 
+            elif regalo == 'chambeadora':
+
+                chambeadora = random.choice(chambeadoras)
+
+                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una chambeadora, Revisas fogosas, pura picardia mexicana con el clasico sexismo de la epoca!\n\n [Abrir Regalo]({chambeadora})")
+
+                return random.choice(resp_shop)
+              
             elif regalo == 'galleta':
 
                 galleta = random.choice(galletas)
 
                 reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una galleta de la suerte. ¿Cuál será tu fortuna? \n\n [Abrir Regalo]({galleta})")
-
-                return random.choice(resp_shop)
 
             elif regalo == 'huachito':
 
@@ -1637,7 +1638,9 @@ def premio_huachilate():
 
     participantes = [usuario[0] for usuario in cursor.execute("""SELECT usuario FROM boletitos WHERE huachiclave = ?""",(huachiclave[1],)).fetchall()]
 
-    ganadores = random.sample(participantes,k = 3)
+    ganadores = set(random.sample(participantes,k = 15))
+
+    ganadores = list(ganadores)
 
     premios = [round((int(huachicuenta.saldo_total) * 50 ) / 100),round((int(huachicuenta.saldo_total) * 30 ) / 100),round((int(huachicuenta.saldo_total) * 20 ) / 100)]
 
