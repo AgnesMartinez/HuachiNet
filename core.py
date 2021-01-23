@@ -1,6 +1,8 @@
 import time
 import sqlite3
 import operator
+import random
+import string
 
 class HuachiNet():
     """Huachicol as a service
@@ -150,12 +152,9 @@ class HuachiNet():
         """Forbes Mujico - Usuarios Abinerados"""
 
         #Obtener lista de usuarios
-        clientes = list()
-        
         query = """SELECT usuario FROM transacciones WHERE nota='Bono Inicial'"""
 
-        for item in self.cursor.execute(query).fetchall():
-            clientes.append(item[0])
+        clientes = [item[0] for item in self.cursor.execute(query).fetchall()]
 
         #Obtener balance por usuario y anexar resultados a un diccionario
         rank = {}
@@ -163,9 +162,38 @@ class HuachiNet():
         query2 = """SELECT SUM(cantidad) FROM transacciones WHERE usuario = ?"""
 
         for cliente in clientes:
-        
-            cantidad = self.cursor.execute(query2,(cliente,)).fetchall()
 
-            rank[cliente] = cantidad[0][0]
+            if cliente != None:
+        
+                cantidad = self.cursor.execute(query2,(cliente,)).fetchall()
+
+                rank[cliente] = cantidad[0][0]
 
         return sorted(rank.items(), key=operator.itemgetter(1), reverse=True)
+
+    def Huachiclave(self):
+        """Regresa la huachiclave vigente o genera una nueva"""
+
+        query = """SELECT timestamp,huachiclave,cantidad,entregado FROM huachilate WHERE entregado = '0' ORDER BY timestamp"""
+
+        query2 = """INSERT INTO huachilate (timestamp,huachiclave,cantidad,entregado) VALUES (?,?,?,?)"""
+
+        resultado = self.cursor.execute(query).fetchall()
+
+        if resultado == []:
+            
+            timestamp = time.time()
+            
+            huachiclave = "".join(random.choices(string.ascii_letters + string.digits,k = 7))
+
+            cantidad = random.randint(10000,50000)
+
+            self.cursor.execute(query2,(timestamp,huachiclave,cantidad,0))
+
+            self.conn.commit()
+
+            return (timestamp,huachiclave,cantidad,0)
+        
+        else:
+            return resultado[-1]
+

@@ -2,14 +2,15 @@ import math
 import random
 import re
 import sqlite3
+import time
 from datetime import datetime
-
 import praw
-
 import config
 from core import HuachiNet
 
-conn_log = sqlite3.connect("boveda.sqlite3")
+conn = sqlite3.connect("boveda.sqlite3")
+
+cursor = conn.cursor()
 
 resp_saldo = open("./frases/frases_saldo.txt", "r", encoding="utf-8").read().splitlines()
 
@@ -34,6 +35,8 @@ resp_seguridad = open("./frases/frases_seguridad.txt", "r", encoding="utf-8").re
 resp_autorobo = open("./frases/frases_autorobo.txt", "r", encoding="utf-8").read().splitlines()
 
 resp_levanton = open("./frases/frases_levanton.txt", "r", encoding="utf-8").read().splitlines()
+
+resp_huachilate = open("./frases/frases_huachilate.txt", "r", encoding="utf-8").read().splitlines()
 
 monaschinas = open("./shop/monaschinas.txt", "r", encoding="utf-8").read().splitlines()
 
@@ -60,8 +63,6 @@ def error_log(error):
 def buscar_log(comment_id):
     """Buscar si el comentario ha sido previamente procesado por el empleado del mes"""
 
-    cursor = conn_log.cursor()
-
     query = """SELECT * FROM comentarios WHERE id_comment=?"""
 
     resultado = cursor.execute(query,(comment_id,)).fetchall()
@@ -76,13 +77,11 @@ def buscar_log(comment_id):
 def actualizar_log(comment_id):
     """Agregar id de comentarios en el log"""
 
-    cursor = conn_log.cursor()
-
     query = """INSERT INTO comentarios (id_comment) VALUES (?)"""
 
     cursor.execute(query,(comment_id,))
 
-    conn_log.commit()
+    conn.commit()
 
 def saldazo(redditor_id) -> str:
     """Abierto todos los dias de 7am a 10pm"""
@@ -176,7 +175,7 @@ def historial(redditor_id) -> list:
 
         return (Huachis.historial,Huachis.saldo_total,Huachis.depositos,Huachis.retiros,Huachis.asaltos,Huachis.atracos,Huachis.huachitos,Huachis.premios_huachito,Huachis.levantones)
 
-def rank(redditor_id, topten=False,top25=False) -> str:
+def rank(redditor_id, opcion) -> str:
     """Forbes Mujico - TOP Abinerados"""
 
     #Acceder a la HuachiNet
@@ -187,43 +186,26 @@ def rank(redditor_id, topten=False,top25=False) -> str:
         
         return random.choice(resp_tip_cuenta)
 
-    #Ranking global
-    if topten == True:
+    ranking = Huachis.Ranking()
 
-        #Respuesta en forma de string
-        respuesta = "# Forbes Mujico - Top Ten Abinerados\n\nLugar | Mujican@ | Cantidad\n:--|:--:|--:\n"
-        
-        for i,item in enumerate(Huachis.Ranking(),start=1):
+    respuesta = "#Forbes Mujico - Top Ten Abinerados\n\nLugar | Mujican@ | Cantidad\n:--|:--:|--:\n"
 
-            respuesta += f"__{i}__ | {item[0]} | {item[1]:,} H¢N\n"
+    for i,item in enumerate(ranking,start=1):
 
-            if i == 10:
-                break
-                
-        return respuesta
-    
-    if top25 == True:
-
-        #Respuesta en forma de string
-        respuesta = "# Forbes Mujico - Top 25 Abinerados\n\nLugar | Mujican@ | Cantidad\n:--|:--:|--:\n"
-        
-        for i,item in enumerate(Huachis.Ranking(),start=1):
-
-            respuesta += f"__{i}__ | {item[0]} | {item[1]:,} H¢N\n"
-
-            if i == 25:
-                break
-                
-        return respuesta
-
-    elif topten == False:
-        #Ranking por usuario
-        for i,item in enumerate(Huachis.Ranking(),start=1):
+        if opcion == 0:
 
             if item[0] == redditor_id:
 
                 return f"Tu posicion en la HuachiNet es la numero: __{i}__"
+        
+        #Respuesta en forma de string
+        respuesta += f"__{i}__ | {item[0]} | {item[1]:,} H¢N\n"
 
+        if i == opcion:
+            break
+                
+    return respuesta
+ 
 def buscar_usuario(string):
     """Buscar usuarios para darles un levanton"""
 
@@ -335,7 +317,7 @@ def empleado_del_mes():
                         #Realizar consulta
                         try:
 
-                            rankme = rank(str(comment.author))
+                            rankme = rank(str(comment.author),0)
 
                             print(f'----\n{rankme}')
 
@@ -358,7 +340,7 @@ def empleado_del_mes():
                         #Realizar consulta
                         try:
 
-                            rank25 = rank(str(comment.author),top25=True)
+                            rank25 = rank(str(comment.author),25)
 
                             print(f'----\n{rank25}')
 
@@ -383,7 +365,7 @@ def empleado_del_mes():
                         #Realizar consulta
                         try:
 
-                            rank10 = rank(str(comment.author),topten=True)
+                            rank10 = rank(str(comment.author),10)
 
                             print(f'----\n{rank10}')
 
@@ -609,6 +591,28 @@ def empleado_del_mes():
                             error_log(str(e))
                             
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+
+                elif "!huachilate" in comment.body.lower() or "!huachilote" in comment.body.lower():
+
+                    if comment.author != None:
+
+                        #Agregar comentario al log
+                        actualizar_log(str(comment.id))
+
+                        try:
+
+                            compra = huachilate(str(comment.author))
+
+                            print(f'----\n{compra}')
+
+                            #Responder al cliente
+                            reddit.redditor(str(comment.author)).message("Compraste tu huachilate!",compra)
+
+                        except Exception as e:
+                            #Enviar mensaje de error si el empleado no entendio lo que recibio
+                            error_log(str(e))
+                            
+                            reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
                                               
 def servicio_al_cliente():
     """Responder a los papus y a las mamus sobre sus cuentas"""
@@ -736,6 +740,9 @@ def shop(remitente,destinatario,regalo):
 def asalto(cholo,victima):
     """Saca bineros morro"""
 
+    if victima == 'Shop' or victima == 'Bodega' or victima == 'Huachicuenta':
+        return "wow :O chico listo"
+
     if cholo == victima:
         #Respuesta en caso de autorobo
 
@@ -820,6 +827,9 @@ def asalto(cholo,victima):
 
 def atraco(cholo,victima):
     """Asalto en esteroides"""
+
+    if victima == 'Shop' or victima == 'Bodega' or victima == 'Huachicuenta':
+        return "wow :O chico listo"
 
     if cholo == victima:
         #Respuesta en caso de autorobo
@@ -1168,6 +1178,9 @@ def levanton(cholo,victima):
 
     if victima == 'None':
         return "Patron, me parece que esa persona no existe."
+
+    if victima == 'Shop' or victima == 'Bodega' or victima == 'Huachicuenta':
+        return "wow :O chico listo"
 
     if cholo == victima:
         #Respuesta en caso de autorobo
@@ -1596,6 +1609,81 @@ def combinaciones_poker(mano):
 
     return (puntaje,valores_corregidos,"None")
 
+def huachilate(redditor_id):
+    """Vengase y agarre su !huachilote"""
+
+    #Acceder a cuenta del redditor
+    Huachis_redditor = HuachiNet(redditor_id)
+        
+    #Verificar que tenga cuenta
+    if Huachis_redditor.Verificar_Usuario(redditor_id) == False:
+        
+        return random.choice(resp_tip_cuenta)
+
+    else: 
+        #Verificar que tenga saldo
+        if Huachis_redditor.saldo_total < 50:
+            
+            return random.choice(resp_tip_sinbineros)
+
+        else:
+            #Cobrar la entrada
+            Huachis_redditor.Enviar_Bineros("Huachicuenta",50,nota="Huachilate")
+
+            huachiclave = Huachis_redditor.Huachiclave()
+
+            valores = (time.time(),redditor_id,huachiclave[1])
+            
+            conn.execute("""INSERT INTO boletitos (timestamp,usuario,huachiclave) VALUES (?,?,?)""",valores)
+
+            conn.commit()
+
+            huachicuenta = HuachiNet("Huachicuenta")
+
+            if int(huachicuenta.saldo_total) >= huachiclave[2]:
+                premio_huachilate()
+
+            return random.choice(resp_huachilate)
+
+def premio_huachilate():
+    """Repartir premios del huachilate"""
+
+    huachicuenta = HuachiNet("Huachicuenta")
+
+    huachiclave = huachicuenta.Huachiclave()
+
+    participantes = [usuario[0] for usuario in cursor.execute("""SELECT usuario FROM boletitos WHERE huachiclave = ?""",(huachiclave[1],)).fetchall()]
+
+    ganadores = random.sample(participantes,k = 3)
+
+    premios = [round((int(huachicuenta.saldo_total) * 50 ) / 100),round((int(huachicuenta.saldo_total) * 30 ) / 100),round((int(huachicuenta.saldo_total) * 20 ) / 100)]
+
+    #Entregar premios
+    #Primer lugar 50%
+    huachicuenta.Enviar_Bineros(ganadores[0],premios[0],nota="Premio Huachilate")
+
+    reddit.redditor(ganadores[0]).message("Felicidades! Primer lugar en Huachilate!",f"Ganaste el huachilate :D\n\nTu premio es de: {premios[0]}")
+
+    #Segundo lugar 30%
+    huachicuenta.Enviar_Bineros(ganadores[1],premios[1],nota="Premio Huachilate")
+
+    reddit.redditor(ganadores[1]).message("Felicidades! Segundo lugar en Huachilate!",f"Ganaste el huachilate :D\n\nTu premio es de: {premios[1]}")
+
+    #Tercer lugar 20%
+    huachicuenta.Enviar_Bineros(ganadores[2],premios[2],nota="Premio Huachilate")
+
+    reddit.redditor(ganadores[2]).message("Felicidades! Tercer lugar en Huachilate!",f"Ganaste el huachilate :D\n\nTu premio es de: {premios[2]}")
+
+    #Publicaren reddit
+
+    selftext = f"Los ganadores de este Huachilate son:\n\nMujican@ | Lugar | Cantidad \n:--|:--:|--:\n{ganadores[0]} | 1ero | {premios[0]}\n{ganadores[1]} | 2do | {premios[1]}\n{ganadores[2]} | 3ero | {premios[2]}\n\nFelicidades a los ganadores del huachilote!"
+
+    reddit.subreddit('Mujico').submit('Ganadores del Huachilote :D', selftext=selftext, flair_id='a0a7193c-579b-11eb-8162-0e6a96a0cacd')
+
+    #Actualizar columna entregado para que se genere nueva huachiclave
+    cursor.execute("""UPDATE huachilate SET entregado = 1 WHERE huachiclave = ?)""",(huachiclave[1],))
+
+    conn.commit()
 
 
 if __name__ == "__main__":
