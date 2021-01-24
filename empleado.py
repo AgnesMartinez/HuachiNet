@@ -1737,29 +1737,30 @@ def dados(redditor_id, apuesta, num = 1):
     x1 = random.randint(1,6)
     x2 = random.randint(1,6)
     x3 = random.randint(1,6)
+
+    dados_lanzados = x1, emojis[x1],'  ',x2, emojis[x2],'  ', x3, emojis[x3]
     
     if (x1 == num and x2 == num and x3 == num):
         ganancia = 3 * apuesta
+        #Acceder a la cuenta de la shop
+        Huachis_shop = HuachiNet("Shop")
+        Huachis_shop.Enviar_Bineros(redditor_id,ganancia,nota="dados")
+        return f'_Dados mujicanos_\n\nDados de {redditor_id}\n\n{dados_lanzados}\n\nganaste {3 * apuesta} huachicoins_'
 
     elif (x1 == num and x2 == num and x3 != num) or (x1 == num and x2 != num and x3 == num) or (x1 != num and x2 == num and x3 == num):
-        ganancia = 2 * apuesta
+        ganancia = 3 * apuesta
+        #Acceder a la cuenta de la shop
+        Huachis_shop = HuachiNet("Shop")
+        Huachis_shop.Enviar_Bineros(redditor_id,ganancia,nota="dados")
+        return f'_Dados mujicanos_\n\nDados de {redditor_id}\n\n{dados_lanzados}\n\nganaste {2 * apuesta} huachicoins_'
 
     elif (x1 == num and x2 != num and x3 != num) or (x1 != num and x2 == num and x3 != num) or (x1 != num and x2 != num and x3 == num):
-        ganancia = 1 * apuesta
-    
-    else:
-        ganancia = 0
-
-    dados_lanzados = x1, emojis[x1],'  ',x2, emojis[x2],'  ', x3, emojis[x3]
-
-    if ganancia >= 1:
-    #Acceder a la cuenta de la shop
+        ganancia = 3 * apuesta
+        #Acceder a la cuenta de la shop
         Huachis_shop = HuachiNet("Shop")
-
         Huachis_shop.Enviar_Bineros(redditor_id,ganancia,nota="dados")
-
-        return f'_Dados mujicanos_\n\nDados de {redditor_id}\n\n{dados_lanzados}\n\nganaste {ganancia} huachicoins_' 
-
+        return f'_Dados mujicanos_\n\nDados de {redditor_id}\n\n{dados_lanzados}\n\nganaste {1 * apuesta} huachicoins_'
+        
     else:
         return f'_Dados mujicanos_\n\nDados de {redditor_id}\n\n{dados_lanzados}\n\nperdiste, victoria para la casa_'
 
