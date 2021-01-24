@@ -417,13 +417,16 @@ def empleado_del_mes():
 
                     shop_item("cura")
                 
+
                 elif "!shop galleta" in comment.body.lower():
 
                     shop_item("galleta")
 
+
                 elif "!shop huachito" in comment.body.lower():
 
                     shop_item("huachito")
+
 
                 elif "!shop chambeadora" in comment.body.lower():
 
@@ -582,6 +585,44 @@ def empleado_del_mes():
                             #Enviar mensaje de error si el empleado no entendio lo que recibio
                             error_log(str(e))
                             
+                            reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+                        
+
+                elif "!dados" in comment.body.lower():
+
+                    if comment.author != None:
+
+                        #Agregar comentario al log
+                        actualizar_log(str(comment.id))
+                        
+                        try:
+                            #Extraemos la cantidad
+                            string = comment.body.lower()
+                
+                            pattern = '!tip\ *(\d+)'
+
+                            result = re.findall(pattern, string)
+
+                            apuesta = result[0]
+
+                            num = result[1]
+
+                            #Corroboramos que sea un numero
+                            if apuesta.isdigit() and num.isdigit():
+                                
+                                #Realizamos la transaccion
+                                resultado = dados(str(comment.author), apuesta, num)
+
+                                print(f'----\n{resultado}')
+                                
+                                #Responder al cliente
+                                comment.reply(resultado)
+                                    
+                                        
+                        except Exception as e:
+                            #Enviar mensaje de error si el empleado no entendio lo que recibio
+                            error_log(str(e))
+
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
                                               
 def servicio_al_cliente():
@@ -1671,6 +1712,56 @@ def premio_huachilate():
 
     conn.commit()
 
+def dados(redditor_id, apuesta, num = 1):
+
+    #Acceder a cuenta del redditor
+    Huachis_redditor = HuachiNet(redditor_id)
+        
+    #Verificar que tenga cuenta
+    if Huachis_redditor.Verificar_Usuario(redditor_id) == False:
+        
+        return random.choice(resp_tip_cuenta)
+
+    else: 
+        #Verificar que tenga saldo
+        if Huachis_redditor.saldo_total < apuesta:
+            
+            return random.choice(resp_tip_sinbineros)
+
+        else:
+            #Cobrar la entrada
+            Huachis_redditor.Enviar_Bineros("Shop",apuesta,nota="Dados")
+
+    emojis = (' ','⚀','⚁','⚂','⚃','⚄','⚅')
+
+    x1 = random.randint(1,6)
+    x2 = random.randint(1,6)
+    x3 = random.randint(1,6)
+    
+    if (x1 == num and x2 == num and x3 == num):
+        ganancia = 3 * apuesta
+
+    elif (x1 == num and x2 == num and x3 != num) or (x1 == num and x2 != num and x3 == num) or (x1 != num and x2 == num and x3 == num):
+        ganancia = 2 * apuesta
+
+    elif (x1 == num and x2 != num and x3 != num) or (x1 != num and x2 == num and x3 != num) or (x1 != num and x2 != num and x3 == num):
+        ganancia = 1 * apuesta
+    
+    else:
+        ganancia = 0
+
+    dados_lanzados = x1, emojis[x1],'  ',x2, emojis[x2],'  ', x3, emojis[x3]
+
+    if ganancia >= 1:
+    #Acceder a la cuenta de la shop
+        Huachis_shop = HuachiNet("Shop")
+
+        Huachis_shop.Enviar_Bineros(redditor_id,ganancia,nota="dados")
+
+        return f'_Dados mujicanos_\n\nDados de {redditor_id}\n\n{dados_lanzados}\n\nganaste {ganancia} huachicoins_' 
+
+    else:
+        return f'_Dados mujicanos_\n\nDados de {redditor_id}\n\n{dados_lanzados}\n\nperdiste, victoria para la casa_'
 
 if __name__ == "__main__":
     
