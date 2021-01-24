@@ -752,7 +752,7 @@ def shop(remitente,destinatario,regalo):
 
                 galleta = random.choice(galletas)
 
-                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una galleta de la suerte. ¿Cuál será tu fortuna? \n\n [Abrir Regalo]({galleta})")
+                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una galleta de la suerte. ¿Cuál será tu fortuna? \n\n >!{galleta}!<")
 
             elif regalo == 'huachito':
 
