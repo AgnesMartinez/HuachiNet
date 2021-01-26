@@ -588,7 +588,7 @@ def empleado_del_mes():
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
                         
 
-                elif "!dados" in comment.body.lower():
+                elif "!rtd" in comment.body.lower():
 
                     if comment.author != None:
 
@@ -599,19 +599,16 @@ def empleado_del_mes():
                             #Extraemos la cantidad
                             string = comment.body.lower()
                 
-                            pattern = '!tip\ *(\d+)'
+                            pattern = '!rtd\ *(\d+)'
 
                             result = re.findall(pattern, string)
 
-                            apuesta = result[0]
+                            numero = int(result[0])
 
-                            num = result[1]
-
-                            #Corroboramos que sea un numero
-                            if apuesta.isdigit() and num.isdigit():
+                            if numero > 0 and numero < 7:
                                 
                                 #Realizamos la transaccion
-                                resultado = dados(str(comment.author), apuesta, num)
+                                resultado = rollthedice(str(comment.author),numero)
 
                                 print(f'----\n{resultado}')
                                 
@@ -619,7 +616,7 @@ def empleado_del_mes():
                                 comment.reply(resultado)
                                     
                                         
-                        except Exception as e:
+                        except ValueError as e:
                             #Enviar mensaje de error si el empleado no entendio lo que recibio
                             error_log(str(e))
 
@@ -1712,7 +1709,8 @@ def premio_huachilate():
 
     conn.commit()
 
-def dados(redditor_id, apuesta, num = 1):
+def rollthedice(redditor_id,numero):
+    """Juego de dados"""
 
     #Acceder a cuenta del redditor
     Huachis_redditor = HuachiNet(redditor_id)
@@ -1724,45 +1722,69 @@ def dados(redditor_id, apuesta, num = 1):
 
     else: 
         #Verificar que tenga saldo
-        if Huachis_redditor.saldo_total < apuesta:
+        if Huachis_redditor.saldo_total < 20:
             
             return random.choice(resp_tip_sinbineros)
 
         else:
             #Cobrar la entrada
-            Huachis_redditor.Enviar_Bineros("Shop",apuesta,nota="Dados")
+            Huachis_redditor.Enviar_Bineros("Shop",20,nota="RollTheDice")
 
-    emojis = (' ','⚀','⚁','⚂','⚃','⚄','⚅')
+    dados = [('1️⃣',1),('2️⃣',2),('3️⃣',3),('4️⃣',4),('5️⃣',5),('6️⃣',6)]
 
-    x1 = random.randint(1,6)
-    x2 = random.randint(1,6)
-    x3 = random.randint(1,6)
+    dados_lanzados = random.choices(dados,k=3)
 
-    dados_lanzados = x1, emojis[x1],'  ',x2, emojis[x2],'  ', x3, emojis[x3]
-    
-    if (x1 == num and x2 == num and x3 == num):
-        ganancia = 3 * apuesta
-        #Acceder a la cuenta de la shop
+    dado_redditor = dados[numero-1]
+
+    conteo = dados_lanzados.count(dado_redditor)
+
+    if dados_lanzados == [('⚅',6),('⚅',6),('⚅',6)]:
+        #2spoopy4me - pierde 50% de su cartera
+        cantidad = int(Huachis_redditor.saldo_total) / 2
+
+        Huachis_redditor.Enviar_Bineros("Shop",cantidad,nota="666")
+
+        dados_emoji = [dado[0] for dado in dados_lanzados]
+
+        return f"*Roll The Dice a la mujicana*\n\nDado de {redditor_id}\n\n#{dado_redditor[0]}\n\nDados lanzados por el empleado:\n\n#{' '.join(dados_emoji)}\n\nEsta partida esta embrujada, perdiste la mitad de tu cartera ({cantidad} huachis)"
+
+
+    elif conteo == 3:
+        #Entregar premio 3 dados iguales
         Huachis_shop = HuachiNet("Shop")
-        Huachis_shop.Enviar_Bineros(redditor_id,ganancia,nota="dados")
-        return f'_Dados mujicanos_\n\nDados de {redditor_id}\n\n{dados_lanzados}\n\nganaste {3 * apuesta} huachicoins_'
 
-    elif (x1 == num and x2 == num and x3 != num) or (x1 == num and x2 != num and x3 == num) or (x1 != num and x2 == num and x3 == num):
-        ganancia = 3 * apuesta
-        #Acceder a la cuenta de la shop
-        Huachis_shop = HuachiNet("Shop")
-        Huachis_shop.Enviar_Bineros(redditor_id,ganancia,nota="dados")
-        return f'_Dados mujicanos_\n\nDados de {redditor_id}\n\n{dados_lanzados}\n\nganaste {2 * apuesta} huachicoins_'
+        Huachis_shop.Enviar_Bineros(redditor_id,200,nota="Premio RTD")
 
-    elif (x1 == num and x2 != num and x3 != num) or (x1 != num and x2 == num and x3 != num) or (x1 != num and x2 != num and x3 == num):
-        ganancia = 3 * apuesta
-        #Acceder a la cuenta de la shop
+        dados_emoji = [dado[0] for dado in dados_lanzados]
+
+        return f"*Roll The Dice a la mujicana*\n\nDado de {redditor_id}\n\n#{dado_redditor[0]}\n\nDados lanzados por el empleado:\n\n#{' '.join(dados_emoji)}\n\nVictoria para {redditor_id} con 3 dados iguales!\n\n_Premio: 200 huachis_"
+
+    elif conteo == 2:
+        #Entregar premio 3 dados iguales
         Huachis_shop = HuachiNet("Shop")
-        Huachis_shop.Enviar_Bineros(redditor_id,ganancia,nota="dados")
-        return f'_Dados mujicanos_\n\nDados de {redditor_id}\n\n{dados_lanzados}\n\nganaste {1 * apuesta} huachicoins_'
-        
-    else:
-        return f'_Dados mujicanos_\n\nDados de {redditor_id}\n\n{dados_lanzados}\n\nperdiste, victoria para la casa_'
+
+        Huachis_shop.Enviar_Bineros(redditor_id,100,nota="Premio RTD")
+
+        dados_emoji = [dado[0] for dado in dados_lanzados]
+
+        return f"*Roll The Dice a la mujicana*\n\nDado de {redditor_id}\n\n#{dado_redditor[0]}\n\nDados lanzados por el empleado:\n\n#{' '.join(dados_emoji)}\n\nVictoria para {redditor_id} con 2 dados iguales!\n\n_Premio: 100 huachis_"
+
+    elif conteo == 1:
+        #Entregar premio 3 dados iguales
+        Huachis_shop = HuachiNet("Shop")
+
+        Huachis_shop.Enviar_Bineros(redditor_id,50,nota="Premio RTD")
+
+        dados_emoji = [dado[0] for dado in dados_lanzados]
+
+        return f"*Roll The Dice a la mujicana*\n\nDado de {redditor_id}\n\n#{dado_redditor[0]}\n\nDados lanzados por el empleado:\n\n#{' '.join(dados_emoji)}\n\nVictoria para {redditor_id} con un dado igual!\n\n_Premio: 50 huachis_"
+
+    dados_emoji = [dado[0] for dado in dados_lanzados]
+
+    resp_dados = ["Suerte para la proxima","No estan cargados, te lo juro","Sigue participando","Hoy no es tu dia","No te awites, niño chillon"]
+
+    return f"*Roll The Dice a la mujicana*\n\nDado de {redditor_id}\n\n#{dado_redditor[0]}\n\nDados lanzados por el empleado:\n\n#{' '.join(dados_emoji)}\n\n_{random.choice(resp_dados)}_"
+
 
 if __name__ == "__main__":
     
