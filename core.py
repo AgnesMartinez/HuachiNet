@@ -192,7 +192,7 @@ class HuachiNet():
 
             self.conn.commit()
 
-            return (timestamp,huachiclave,cantidad,0)
+            return (timestamp,huachiclave,cantidad)
         
         else:
             return resultado[-1]
