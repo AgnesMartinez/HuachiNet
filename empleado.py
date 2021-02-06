@@ -410,14 +410,18 @@ def empleado_del_mes():
                             comandos += 1
 
                             #Opciones del menu
+
                             opciones = ["monachina","trapo","furro","nalgotica","cura","corvido","galleta","huachito","chambeadora","dulce"]
+
                         
                             for opcion in opciones:
 
                                 if "menu" in texto:
                                     
                                     #Enviar menu
+
                                     reddit.redditor(str(comment.author)).message("Menu Shop","__HuachiStore - Abierto cuando llegamos, cerrado cuando nos vamos__\n\nEnvia un regalo usando el comando shop, seguido de una opcion del menu, todo a 5 huachis.\n\nRegalo | Comando\n:--|--:\nMonas Chinas | monachina\nTrapitos | trapo\nFurros | furro\nHuachito | huachito\nNalgoticas | nalgotica\nMDLP | cura / corvido\nGanosas (Revistas para adultos) | chambeadora\nGalleta de la fortuna | galleta\nDulce mujicano | dulce\n\nCompleta tu compra de la siguiente manera:\n\n    shop comando\n\n    Ejemplo: shop monachina\n\n    (no olvides el signo de exclamación)\n\nUsalo en la seccion de comentarios.")
+
                         
 
                                 if opcion in texto:
