@@ -129,7 +129,7 @@ class HuachiNet():
                 parametros = (self.id,)
 
             else:
-                query2 = """SELECT id,timestamp,cantidad,origen_destino FROM transacciones WHERE usuario=? AND nota=? ORDER BY id DESC"""
+                query = """SELECT id,timestamp,cantidad,origen_destino FROM transacciones WHERE usuario=? AND nota=? ORDER BY id DESC"""
                 parametros = (self.id,tipo_movimiento)
 
             self.cursor.execute(query,parametros)
