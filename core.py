@@ -56,23 +56,24 @@ class HuachiNet():
     def Verificar_Usuario(self,usuario):
         """Verificar si existe el cliente en la BD"""
 
-        query = """SELECT * FROM transacciones WHERE usuario=?"""
+        existe = False
+
+        query = """SELECT ID FROM transacciones WHERE usuario=? LIMIT 1"""
 
         try:
             self.cursor.execute(query,(usuario,))
 
-            resultado = self.cursor.fetchall()
+            resultado = self.cursor.fetchone()
 
-            if resultado != []:
-                for item in resultado:
-                    if usuario in item:
-                        return True
-                         
-            else:
-                return False
-        
+            print(resultado)
+
+            if resultado != None:
+                existe = True
+
         except Exception as e:
-            print(f'----\n{e}')  
+            print(f'----\n{e}')
+
+        return existe
 
     def Enviar_Bineros(self,usuario,cantidad,nota="Default"):
         """Registrar transacciones de bineros"""
@@ -113,63 +114,53 @@ class HuachiNet():
         try:
             self.cursor.execute(query,(self.id,))
 
-            resultado = self.cursor.fetchall()
+            resultado = self.cursor.fetchone()
 
             return resultado[0][0]
         
         except Exception as e:
             print(f'----\n{e}')  
     
-    def Historial_Cuenta(self,tipo_movimiento):
+    def Historial_Cuenta(self, tipo_movimiento = "Global"):
         """Consultar historial de movimientos del cliente desde el inicio de la cuenta"""
-
-        query = """SELECT id,timestamp,cantidad,nota,origen_destino FROM transacciones WHERE usuario=? ORDER BY id DESC"""
-
-        query2 = """SELECT id,timestamp,cantidad,origen_destino FROM transacciones WHERE usuario=? AND nota=? ORDER BY id DESC"""
-
         try:
-
             if tipo_movimiento == "Global":
+                query = """SELECT id,timestamp,cantidad,nota,origen_destino FROM transacciones WHERE usuario=? ORDER BY id DESC"""
+                parametros = (self.id,)
 
-                self.cursor.execute(query,(self.id,))
+            else:
+                query2 = """SELECT id,timestamp,cantidad,origen_destino FROM transacciones WHERE usuario=? AND nota=? ORDER BY id DESC"""
+                parametros = (self.id,tipo_movimiento)
 
-                resultado = self.cursor.fetchall()
+            self.cursor.execute(query,parametros)
 
-                return resultado
+            resultado = self.cursor.fetchall()
 
-            elif tipo_movimiento != "Global":
-
-                self.cursor.execute(query2,(self.id,tipo_movimiento))
-
-                resultado = self.cursor.fetchall()
-
-                return resultado
+            return resultado
         
         except Exception as e:
             print(f'----\n{e}')
     
-    def Ranking(self):
-        """Forbes Mujico - Usuarios Abinerados"""
+    def Mujicanos(self):
+        """Lista de usuarios activos"""
 
         #Obtener lista de usuarios
         query = """SELECT usuario FROM transacciones WHERE nota='Bono Inicial'"""
 
-        clientes = [item[0] for item in self.cursor.execute(query).fetchall()]
+        self.cursor.row_factory = lambda cursor, row: row[0]
 
-        #Obtener balance por usuario y anexar resultados a un diccionario
-        rank = {}
+        resultado = self.cursor.execute(query).fetchall()
 
-        query2 = """SELECT SUM(cantidad) FROM transacciones WHERE usuario = ?"""
+        return list(filter(None,resultado))
 
-        for cliente in clientes:
+    def Ranking(self, limite = '25'):
+        """Forbes Mujico - Usuarios Abinerados"""
 
-            if cliente != None:
+        #Obtener lista de usuarios
+        query = """SELECT usuario, SUM(cantidad) as cantidad FROM transacciones WHERE usuario in (SELECT usuario FROM transacciones WHERE nota='Bono Inicial') GROUP BY usuario ORDER BY cantidad DESC LIMIT ? """
         
-                cantidad = self.cursor.execute(query2,(cliente,)).fetchall()
 
-                rank[cliente] = cantidad[0][0]
-
-        return sorted(rank.items(), key=operator.itemgetter(1), reverse=True)
+        return self.cursor.execute(query,(limite,)).fetchall()
 
     def Huachiclave(self):
         """Regresa la huachiclave vigente o genera una nueva"""
@@ -196,4 +187,3 @@ class HuachiNet():
         
         else:
             return resultado[-1]
-
