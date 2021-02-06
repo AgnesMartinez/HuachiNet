@@ -1,4 +1,4 @@
-Ya te iba dar la lana, no tenias porque gritarle.
+﻿Ya te iba dar la lana, no tenias porque gritarle.
 Le tumbaste el dinero del lonche a ese niño, paga lo que me debes moroso.
 En chinga que te solto el varo.
 Creo que se mojo sus pantalones del susto.
@@ -6,7 +6,7 @@ Robar es malo, pero el PRI robo mas.
 A puño limpio perro, le sacaste moneditas.
 Se cago en los calzones, hasta aca me llega el olor.
 Creo que ya robaste demasiado.
-Ya casi nadie asalta desde que existe el atraco, que atascados.
+Ya casi nadie asalta desde que existe el !atraco, que atascados.
 Si robaste, pero robaste poquito.
 Robando desde la cuna, beibe.
 Recuerda desinfectar tu navaja antes de cualquier asalto, nosotros no somos bandidos.
@@ -14,3 +14,4 @@ DILE HOLA A MI AMIGUITO.
 Robando algo para poder comer.
 No es robo, es hurto.
 Cada vez robas menos huachis, todo bien en casa?
+Malo, malo, eres chico malo

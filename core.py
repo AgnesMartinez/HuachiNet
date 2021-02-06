@@ -186,7 +186,7 @@ class HuachiNet():
             
             huachiclave = "".join(random.choices(string.ascii_letters + string.digits,k = 7))
 
-            cantidad = random.randint(10000,100000)
+            cantidad = random.randint(5000,50000)
 
             self.cursor.execute(query2,(timestamp,huachiclave,cantidad,0))
 

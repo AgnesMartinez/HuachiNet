@@ -2,14 +2,15 @@ import math
 import random
 import re
 import sqlite3
+import time
 from datetime import datetime
-
 import praw
-
 import config
 from core import HuachiNet
 
-conn_log = sqlite3.connect("boveda.sqlite3")
+conn = sqlite3.connect("boveda.sqlite3")
+
+cursor = conn.cursor()
 
 resp_saldo = open("./frases/frases_saldo.txt", "r", encoding="utf-8").read().splitlines()
 
@@ -35,6 +36,8 @@ resp_autorobo = open("./frases/frases_autorobo.txt", "r", encoding="utf-8").read
 
 resp_levanton = open("./frases/frases_levanton.txt", "r", encoding="utf-8").read().splitlines()
 
+resp_huachilate = open("./frases/frases_huachilate.txt", "r", encoding="utf-8").read().splitlines()
+
 monaschinas = open("./shop/monaschinas.txt", "r", encoding="utf-8").read().splitlines()
 
 trapos = open("./shop/trapos.txt", "r", encoding="utf-8").read().splitlines()
@@ -44,6 +47,10 @@ furros = open("./shop/furro.txt", "r", encoding="utf-8").read().splitlines()
 nalgoticas = open("./shop/nalgoticas.txt", "r", encoding="utf-8").read().splitlines()
 
 curas = open("./shop/curas.txt", "r", encoding="utf-8").read().splitlines()
+
+chambeadoras = open("./shop/ganosas.txt", "r", encoding="utf-8").read().splitlines()
+
+galletas = open("./shop/galletas.txt", "r", encoding="utf-8").read().splitlines()
 
 reddit = praw.Reddit(client_id=config.APP_ID, 
                      client_secret=config.APP_SECRET,
@@ -60,8 +67,6 @@ def error_log(error):
 def buscar_log(comment_id):
     """Buscar si el comentario ha sido previamente procesado por el empleado del mes"""
 
-    cursor = conn_log.cursor()
-
     query = """SELECT * FROM comentarios WHERE id_comment=?"""
 
     resultado = cursor.execute(query,(comment_id,)).fetchall()
@@ -76,13 +81,11 @@ def buscar_log(comment_id):
 def actualizar_log(comment_id):
     """Agregar id de comentarios en el log"""
 
-    cursor = conn_log.cursor()
-
     query = """INSERT INTO comentarios (id_comment) VALUES (?)"""
 
     cursor.execute(query,(comment_id,))
 
-    conn_log.commit()
+    conn.commit()
 
 def saldazo(redditor_id) -> str:
     """Abierto todos los dias de 7am a 10pm"""
@@ -176,7 +179,7 @@ def historial(redditor_id) -> list:
 
         return (Huachis.historial,Huachis.saldo_total,Huachis.depositos,Huachis.retiros,Huachis.asaltos,Huachis.atracos,Huachis.huachitos,Huachis.premios_huachito,Huachis.levantones)
 
-def rank(redditor_id, topten=False,top25=False) -> str:
+def rank(redditor_id, opcion) -> str:
     """Forbes Mujico - TOP Abinerados"""
 
     #Acceder a la HuachiNet
@@ -187,43 +190,26 @@ def rank(redditor_id, topten=False,top25=False) -> str:
         
         return random.choice(resp_tip_cuenta)
 
-    #Ranking global
-    if topten == True:
+    ranking = Huachis.Ranking()
 
-        #Respuesta en forma de string
-        respuesta = "# Forbes Mujico - Top Ten Abinerados\n\nLugar | Mujican@ | Cantidad\n:--|:--:|--:\n"
-        
-        for i,item in enumerate(Huachis.Ranking(),start=1):
+    respuesta = "#Forbes Mujico - Top Ten Abinerados\n\nLugar | Mujican@ | Cantidad\n:--|:--:|--:\n"
 
-            respuesta += f"__{i}__ | {item[0]} | {item[1]:,} H¢N\n"
+    for i,item in enumerate(ranking,start=1):
 
-            if i == 10:
-                break
-                
-        return respuesta
-    
-    if top25 == True:
-
-        #Respuesta en forma de string
-        respuesta = "# Forbes Mujico - Top 25 Abinerados\n\nLugar | Mujican@ | Cantidad\n:--|:--:|--:\n"
-        
-        for i,item in enumerate(Huachis.Ranking(),start=1):
-
-            respuesta += f"__{i}__ | {item[0]} | {item[1]:,} H¢N\n"
-
-            if i == 25:
-                break
-                
-        return respuesta
-
-    elif topten == False:
-        #Ranking por usuario
-        for i,item in enumerate(Huachis.Ranking(),start=1):
+        if opcion == 0:
 
             if item[0] == redditor_id:
 
                 return f"Tu posicion en la HuachiNet es la numero: __{i}__"
+        
+        #Respuesta en forma de string
+        respuesta += f"__{i}__ | {item[0]} | {item[1]:,} H¢N\n"
 
+        if i == opcion:
+            break
+                
+    return respuesta
+ 
 def buscar_usuario(string):
     """Buscar usuarios para darles un levanton"""
 
@@ -346,7 +332,7 @@ def empleado_del_mes():
                         #Realizar consulta
                         try:
 
-                            rankme = rank(str(comment.author))
+                            rankme = rank(str(comment.author),0)
 
                             print(f'----\n{rankme}')
 
@@ -369,7 +355,7 @@ def empleado_del_mes():
                         #Realizar consulta
                         try:
 
-                            rank25 = rank(str(comment.author),top25=True)
+                            rank25 = rank(str(comment.author),25)
 
                             print(f'----\n{rank25}')
 
@@ -393,7 +379,7 @@ def empleado_del_mes():
                         #Realizar consulta
                         try:
 
-                            rank10 = rank(str(comment.author),topten=True)
+                            rank10 = rank(str(comment.author),10)
 
                             print(f'----\n{rank10}')
 
@@ -426,23 +412,25 @@ def empleado_del_mes():
 
                     shop_item("nalgotica")
 
+
                 elif "!shop cura" in comment.body.lower() or "!shop corvido" in comment.body.lower():
 
-                    if comment.parent().author != None:
-
-                        #Agregar comentario al log
-                        actualizar_log(str(comment.id))
-
-                        compra = shop(str(comment.author),str(comment.parent().author),"cura")
-
-                        print(f'----\n{compra}')
-
-                        reddit.redditor(str(comment.author)).message("Ticket de Compra",compra)
-
+                    shop_item("cura")
                 
+
+                elif "!shop galleta" in comment.body.lower():
+
+                    shop_item("galleta")
+
+
                 elif "!shop huachito" in comment.body.lower():
 
                     shop_item("huachito")
+
+
+                elif "!shop chambeadora" in comment.body.lower():
+
+                    shop_item("chambeadora")
 
 
                 elif "!shop menu" in comment.body.lower():
@@ -452,7 +440,7 @@ def empleado_del_mes():
                         #Agregar comentario al log
                         actualizar_log(str(comment.id))
 
-                        reddit.redditor(str(comment.author)).message("Menu Shop","__HuachiStore - Abierto cuando llegamos, cerrado cuando nos vamos__\n\nEnvia un regalo usando el comando shop, seguido de una opcion del menu, todo a 5 huachis.\n\nRegalo | Comando\n:--|--:\nMonas Chinas | monachina\nTrapitos | trapo\nFurros | furro\nHuachito | huachito\nNalgoticas | nalgotica\nMDLP | cura / corvido\n\nCompleta tu compra de la siguiente manera:\n\n    shop comando\n\n    Ejemplo: shop monachina\n\n    (no olvides el signo de exclamación)\n\nUsalo en la seccion de comentarios.")
+                        reddit.redditor(str(comment.author)).message("Menu Shop","__HuachiStore - Abierto cuando llegamos, cerrado cuando nos vamos__\n\nEnvia un regalo usando el comando shop, seguido de una opcion del menu, todo a 5 huachis.\n\nRegalo | Comando\n:--|--:\nMonas Chinas | monachina\nTrapitos | trapo\nFurros | furro\nHuachito | huachito\nNalgoticas | nalgotica\nMDLP | cura / corvido\nGanosas (Revistas para adultos) | chambeadora\n\nCompleta tu compra de la siguiente manera:\n\n    shop comando\n\n    Ejemplo: shop monachina\n\n    (no olvides el signo de exclamación)\n\nUsalo en la seccion de comentarios.")
                     
 
                 elif "!asalto" in comment.body.lower():
@@ -551,7 +539,8 @@ def empleado_del_mes():
                             error_log(str(e))
                             
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
-                                              
+
+
                 elif "!poker" in comment.body.lower():
 
                     if comment.author != None:
@@ -573,6 +562,64 @@ def empleado_del_mes():
                             #Enviar mensaje de error si el empleado no entendio lo que recibio
                             error_log(str(e))
                             
+                            reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+
+
+                elif "!huachilate" in comment.body.lower() or "!huachilote" in comment.body.lower():
+
+                    if comment.author != None:
+
+                        #Agregar comentario al log
+                        actualizar_log(str(comment.id))
+
+                        try:
+
+                            compra = huachilate(str(comment.author))
+
+                            print(f'----\n{compra}')
+
+                            #Responder al cliente
+                            reddit.redditor(str(comment.author)).message("Compraste tu huachilate!",compra)
+
+                        except Exception as e:
+                            #Enviar mensaje de error si el empleado no entendio lo que recibio
+                            error_log(str(e))
+                            
+                            reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+                        
+
+                elif "!rtd" in comment.body.lower():
+
+                    if comment.author != None:
+
+                        #Agregar comentario al log
+                        actualizar_log(str(comment.id))
+                        
+                        try:
+                            #Extraemos la cantidad
+                            string = comment.body.lower()
+                
+                            pattern = '!rtd\ *(\d+)'
+
+                            result = re.findall(pattern, string)
+
+                            numero = int(result[0])
+
+                            if numero > 0 and numero < 7:
+                                
+                                #Realizamos la transaccion
+                                resultado = rollthedice(str(comment.author),numero)
+
+                                print(f'----\n{resultado}')
+                                
+                                #Responder al cliente
+                                comment.reply(resultado)
+                                    
+                                        
+                        except ValueError as e:
+                            #Enviar mensaje de error si el empleado no entendio lo que recibio
+                            error_log(str(e))
+
                             reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
                                               
 def servicio_al_cliente():
@@ -690,6 +737,20 @@ def shop(remitente,destinatario,regalo):
 
                 return random.choice(resp_shop)
 
+            elif regalo == 'chambeadora':
+
+                chambeadora = random.choice(chambeadoras)
+
+                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una chambeadora, Revisas fogosas, pura picardia mexicana con el clasico sexismo de la epoca!\n\n [Abrir Regalo]({chambeadora})")
+
+                return random.choice(resp_shop)
+              
+            elif regalo == 'galleta':
+
+                galleta = random.choice(galletas)
+
+                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una galleta de la suerte. ¿Cuál será tu fortuna? \n\n >!{galleta}!<")
+
             elif regalo == 'huachito':
 
                 huachito = slots(destinatario,regalo=True)
@@ -701,9 +762,17 @@ def shop(remitente,destinatario,regalo):
 def asalto(cholo,victima):
     """Saca bineros morro"""
 
+    if victima == 'Shop' or victima == 'Bodega' or victima == 'Huachicuenta':
+        return "wow :O chico listo"
+
     if cholo == victima:
         #Respuesta en caso de autorobo
-        return random.choice(resp_autorobo)
+
+        if cholo == "Empleado_del_mes":
+            pass
+
+        else:
+            return random.choice(resp_autorobo)
 
     #Proteger al CEO
     if victima == "MarcoCadenas" or victima == "Empleado_del_mes" or victima == 'Disentibot':
@@ -781,9 +850,17 @@ def asalto(cholo,victima):
 def atraco(cholo,victima):
     """Asalto en esteroides"""
 
+    if victima == 'Shop' or victima == 'Bodega' or victima == 'Huachicuenta':
+        return "wow :O chico listo"
+
     if cholo == victima:
         #Respuesta en caso de autorobo
-        return random.choice(resp_autorobo)
+
+        if cholo == "Empleado_del_mes":
+            pass
+
+        else:
+            return random.choice(resp_autorobo)
 
     #Proteger a los bots
     if victima == "MarcoCadenas" or victima == "Empleado_del_mes" or victima == "Disentibot" or victima == "AutoModerator":
@@ -1124,6 +1201,9 @@ def levanton(cholo,victima):
     if victima == 'None':
         return "Patron, me parece que esa persona no existe."
 
+    if victima == 'Shop' or victima == 'Bodega' or victima == 'Huachicuenta':
+        return "wow :O chico listo"
+
     if cholo == victima:
         #Respuesta en caso de autorobo
         return random.choice(resp_autorobo)
@@ -1226,7 +1306,7 @@ def pokermujicano(redditor_id):
 
     else: 
         #Verificar que tenga saldo
-        if Huachis_redditor.saldo_total < 5:
+        if Huachis_redditor.saldo_total < 200:
             
             return random.choice(resp_tip_sinbineros)
 
@@ -1235,7 +1315,10 @@ def pokermujicano(redditor_id):
             cantidad = random.randint(20,200)
             Huachis_redditor.Enviar_Bineros("Shop",cantidad,nota="Poker")
             
-    
+    pot = cantidad * 2
+
+    palos = ["espada","diamante","corazon","trebol"]
+
     valores = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"]
 
     baraja = [[('♠',valor,"espada") for valor in valores],
@@ -1250,46 +1333,142 @@ def pokermujicano(redditor_id):
 
     manos = random.sample(cartas,k=10)
 
-    casa = combinaciones_poker(manos[0:5])
+    mano_casa = manos[0:5]
 
-    redditor = combinaciones_poker(manos[5:10])
+    mano_redditor = manos[5:10]
 
-    cartas_casa = f'{manos[0][0]} : {manos[0][1]} | {manos[1][0]} : {manos[1][1]} | {manos[2][0]} : {manos[2][1]} | {manos[3][0]} : {manos[3][1]} | {manos[4][0]} : {manos[4][1]}'
+    casa = combinaciones_poker(mano_casa)
 
-    cartas_redditor = f'{manos[5][0]} : {manos[5][1]} | {manos[6][0]} : {manos[6][1]} | {manos[7][0]} : {manos[7][1]} | {manos[8][0]} : {manos[8][1]} | {manos[9][0]} : {manos[9][1]}'
+    redditor = combinaciones_poker(mano_redditor)
 
+    cartas_casa = f'{mano_casa[0][0]} : {mano_casa[0][1]} | {mano_casa[1][0]} : {mano_casa[1][1]} | {mano_casa[2][0]} : {mano_casa[2][1]} | {mano_casa[3][0]} : {mano_casa[3][1]} | {mano_casa[4][0]} : {manos[4][1]}'
+
+    cartas_redditor = f'{mano_redditor[0][0]} : {mano_redditor[0][1]} | {mano_redditor[1][0]} : {mano_redditor[1][1]} | {mano_redditor[2][0]} : {mano_redditor[2][1]} | {mano_redditor[3][0]} : {mano_redditor[3][1]} | {mano_redditor[4][0]} : {mano_redditor[4][1]}'
+
+
+    #Victoria: Empleado_del_mes
     if casa[0][1] > redditor[0][1]:
 
-        return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para el empleado, usando {casa[0][0]}\n\n_Pot: {cantidad} huachicoins_' 
+        return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para el empleado, con {casa[0][0]}\n\n_Pot: {pot} huachicoins_' 
 
+    #Victoria: Redditor
     elif casa[0][1] < redditor[0][1]:
 
         #Acceder a la cuenta de la shop
         Huachis_shop = HuachiNet("Shop")
 
-        Huachis_shop.Enviar_Bineros(redditor_id,cantidad * 2,nota="Poker")
+        Huachis_shop.Enviar_Bineros(redditor_id,pot,nota="Poker")
         
-        return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para {redditor_id}, usando {redditor[0][0]}\n\n_Pot: {cantidad} huachicoins_'
+        return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para {redditor_id}, con {redditor[0][0]}\n\n_Pot: {pot} huachicoins_'
 
+    #Empate tecnico, desempate segun combinacion (4 escenarios)
     elif casa[0][1] == redditor[0][1]:
 
-        if max(casa[1]) > max(redditor[1]):
+        letras = {"K":13,"A":14,"J":11,"Q":12}
 
-            return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para el empleado, usando {casa[0][0]}\n\n_Pot: {cantidad} huachicoins_' 
+        if casa[2] in palos or redditor[2] in palos:
+            #Escenario 1 - Palo que provoco escalera color, color
+            carta_alta_casa = [carta[1] for carta in mano_casa if carta[2] == casa[2]]
+        
+            carta_alta_redditor = [carta[1] for carta in mano_redditor if carta[2] == redditor[2]]
 
-        elif max(casa[1] < max(redditor[1])):
+            if carta_alta_casa[0].isdigit() == False:
 
-            #Acceder a la cuenta de la shop
-            Huachis_shop = HuachiNet("Shop")
+                carta_alta_casa = [valor for letra,valor in letras.items() if letra == carta_alta_casa[0]]
 
-            Huachis_shop.Enviar_Bineros(redditor_id,cantidad * 2,nota="Poker")
+            if carta_alta_redditor[0].isdigit() == False:
 
-            return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para {redditor_id}, usando {redditor[0][0]}\n\n_Pot: {cantidad} huachicoins_'
+                carta_alta_redditor = [valor for letra,valor in letras.items() if letra == carta_alta_redditor[0]]
 
-        elif max(casa[1] == max(redditor[1])):
+            if int(carta_alta_casa[0]) > int(carta_alta_redditor[0]):
 
-            return "Empate tecnico, mi patron no me programo algo para esta situacion, no hay devoluciones es politica de la empresa, lo siento. A si que perdiste"
-       
+                return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para el empleado, usando {casa[0][0]}\n\n_Pot: {pot} huachicoins_' 
+
+            elif int(carta_alta_casa[0]) < int(carta_alta_redditor[0]):
+
+                #Acceder a la cuenta de la shop
+                Huachis_shop = HuachiNet("Shop")
+
+                Huachis_shop.Enviar_Bineros(redditor_id,pot,nota="Poker")
+
+                return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para {redditor_id}, usando {redditor[0][0]}\n\n_Pot: {pot} huachicoins_'
+
+            elif int(carta_alta_casa[0]) == int(carta_alta_redditor[0]):
+
+                return f"_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nEmpate tecnico, mi patron no me programo algo para esta situacion, no hay devoluciones es politica de la empresa, lo siento. A si que perdiste\n\n_Pot: {pot} huachicoins_"
+        
+        #Escenario 2 - ambas manos tienen digito como carta alta
+        elif casa[2].isdigit() and redditor[2].isdigit():
+            
+            if int(casa[2]) > int(redditor[2]):
+
+                return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para el empleado, usando {casa[0][0]}\n\n_Pot: {pot} huachicoins_' 
+
+            elif int(casa[2]) < int(redditor[2]):
+
+                #Acceder a la cuenta de la shop
+                Huachis_shop = HuachiNet("Shop")
+
+                Huachis_shop.Enviar_Bineros(redditor_id,pot,nota="Poker")
+
+                return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para {redditor_id}, usando {redditor[0][0]}\n\n_Pot: {pot} huachicoins_'
+
+            elif int(casa[2]) == int(redditor[2]):
+
+                return f"_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nEmpate tecnico, mi patron no me programo algo para esta situacion, no hay devoluciones es politica de la empresa, lo siento. A si que perdiste\n\n_Pot: {pot} huachicoins_"
+        
+        #Escenario 3 -Ambas manos tiene carta alta
+        elif casa[2] == "None" and redditor[2] == "None": 
+            #El valor de la carta mas alta
+            if max(casa[1]) > max(redditor[1]):
+
+                return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para el empleado, usando {casa[0][0]}\n\n_Pot: {pot} huachicoins_' 
+
+            elif max(casa[1]) < max(redditor[1]):
+
+                #Acceder a la cuenta de la shop
+                Huachis_shop = HuachiNet("Shop")
+
+                Huachis_shop.Enviar_Bineros(redditor_id,pot,nota="Poker")
+
+                return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para {redditor_id}, usando {redditor[0][0]}\n\n_Pot: {pot} huachicoins_'
+
+            elif max(casa[1]) == max(redditor[1]):
+
+                return f"_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nEmpate tecnico, mi patron no me programo algo para esta situacion, no hay devoluciones es politica de la empresa, lo siento. A si que perdiste\n\n_Pot: {pot} huachicoins_"        
+
+        #Escenario 4 - Una mano tiene digito como carta alta, la otra tiene letra
+        else:
+
+            carta_alta_casa = casa[2]
+
+            carta_alta_redditor = redditor[2]
+
+            if carta_alta_casa[0].isdigit() == False and carta_alta_casa != "None":
+
+                carta_alta_casa = [valor for letra,valor in letras.items() if letra == carta_alta_casa[0]]
+
+            if carta_alta_redditor[0].isdigit() == False and carta_alta_redditor != "None":
+
+                carta_alta_redditor = [valor for letra,valor in letras.items() if letra == carta_alta_redditor[0]]
+
+            if int(carta_alta_casa[0]) > int(carta_alta_redditor[0]):
+
+                return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para el empleado, usando {casa[0][0]}\n\n_Pot: {pot} huachicoins_' 
+
+            elif int(carta_alta_casa[0]) < int(carta_alta_redditor[0]):
+
+                #Acceder a la cuenta de la shop
+                Huachis_shop = HuachiNet("Shop")
+
+                Huachis_shop.Enviar_Bineros(redditor_id,pot,nota="Poker")
+
+                return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para {redditor_id}, usando {redditor[0][0]}\n\n_Pot: {pot} huachicoins_'
+
+            elif int(carta_alta_casa[0]) == int(carta_alta_redditor[0]):
+
+                return f"_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nEmpate tecnico, mi patron no me programo algo para esta situacion, no hay devoluciones es politica de la empresa, lo siento. A si que perdiste\n\n_Pot: {pot} huachicoins_"
+                
 def combinaciones_poker(mano):
     """Revisar mano y otorgar un puntaje"""
 
@@ -1333,7 +1512,7 @@ def combinaciones_poker(mano):
                 #Puntaje Escalera real de color
                 puntaje = ("escalera real de color",10)
 
-                return (puntaje,valores_corregidos)
+                return (puntaje,valores_corregidos,"None")
         
             else:
                 #Contar numeros consecutivos
@@ -1356,29 +1535,31 @@ def combinaciones_poker(mano):
                     #Puntaje Escalera de color
                     puntaje = ("escalera de color",9)
 
-                    return (puntaje,valores_corregidos)
+                    return (puntaje,valores_corregidos,palo)
                 
                 else:
                     #Puntaje Color
                     puntaje = ("color",6)
 
-                    return (puntaje,valores_corregidos)
+                    return (puntaje,valores_corregidos,palo)
 
     #Full House 
     fullhouse = 0
+    valor_tercia = ""
     for valor in valores:
 
         if valores_cartas.count(valor) == 3:
             fullhouse += 3
+            valor_tercia = valor
         
         elif valores_cartas.count(valor) == 2:
             fullhouse += 2
 
     if fullhouse == 5:
         #Puntaje Fullhouse
-        puntaje = ("full House",7)
+        puntaje = ("full house",7)
 
-        return (puntaje,valores_corregidos)
+        return (puntaje,valores_corregidos,valor_tercia)
 
     #Escalera
     #Contar numeros consecutivos
@@ -1388,7 +1569,7 @@ def combinaciones_poker(mano):
         #Puntaje escalera alta
         puntaje = ("escalera Alta",5)
 
-        return (puntaje,valores_corregidos)
+        return (puntaje,valores_corregidos,"None")
 
     else:    
 
@@ -1409,44 +1590,47 @@ def combinaciones_poker(mano):
             #Puntaje escalera
             puntaje = ("escalera",5)
 
-            return (puntaje,valores_corregidos)
+            return (puntaje,valores_corregidos,"None")
 
     #Poker / Tercia / Dos pares / Pares
     pares = 0
-
+    valor_varios = ""
     for valor in valores:
         if valores_cartas.count(valor) ==  4:
             #Poker
             puntaje = ("poker",8)
+            valor_varios = valor
 
-            return (puntaje,valores_corregidos)
+            return (puntaje,valores_corregidos,valor_varios)
 
         if valores_cartas.count(valor) ==  3:
             #Tercia
             puntaje = ("tercia",4)
+            valor_varios = valor
 
-            return (puntaje,valores_corregidos)
+            return (puntaje,valores_corregidos, valor_varios)
 
         if valores_cartas.count(valor) ==  2:
             #Sumar par
             pares += 1
+            valor_varios = valor
 
     if pares == 2:
         #Puntaje dos pares
         puntaje = ("dos Pares",3)
 
-        return (puntaje,valores_corregidos)
+        return (puntaje,valores_corregidos, valor_varios)
     
     elif pares == 1:
         #Puntaje pares
-        puntaje = ("ar",2)
-
-        return (puntaje,valores_corregidos)
+        puntaje = ("par",2)
+        
+        return (puntaje,valores_corregidos,valor_varios)
     
     puntaje = ("carta alta",1)
 
-    return (puntaje,valores_corregidos)
-  
+    return (puntaje,valores_corregidos,"None")
+
 def huachilate(redditor_id):
     """Vengase y agarre su !huachilote"""
 
@@ -1481,7 +1665,7 @@ def huachilate(redditor_id):
             if int(huachicuenta.saldo_total) >= huachiclave[2]:
                 premio_huachilate()
 
-            return f"Huachilote vendido a {redditor_id}"
+            return random.choice(resp_huachilate)
 
 def premio_huachilate():
     """Repartir premios del huachilate"""
@@ -1492,7 +1676,9 @@ def premio_huachilate():
 
     participantes = [usuario[0] for usuario in cursor.execute("""SELECT usuario FROM boletitos WHERE huachiclave = ?""",(huachiclave[1],)).fetchall()]
 
-    ganadores = random.sample(participantes,k = 3)
+    ganadores = set(random.sample(participantes,k = 15))
+
+    ganadores = list(ganadores)
 
     premios = [round((int(huachicuenta.saldo_total) * 50 ) / 100),round((int(huachicuenta.saldo_total) * 30 ) / 100),round((int(huachicuenta.saldo_total) * 20 ) / 100)]
 
@@ -1509,12 +1695,96 @@ def premio_huachilate():
 
     #Tercer lugar 20%
     huachicuenta.Enviar_Bineros(ganadores[2],premios[2],nota="Premio Huachilate")
+
     reddit.redditor(ganadores[2]).message("Felicidades! Tercer lugar en Huachilate!",f"Ganaste el huachilate :D\n\nTu premio es de: {premios[2]}")
+
+    #Publicaren reddit
+
+    selftext = f"Los ganadores de este Huachilate son:\n\nMujican@ | Lugar | Cantidad \n:--|:--:|--:\n{ganadores[0]} | 1ero | {premios[0]}\n{ganadores[1]} | 2do | {premios[1]}\n{ganadores[2]} | 3ero | {premios[2]}\n\nFelicidades a los ganadores del huachilote!"
+
+    reddit.subreddit('Mujico').submit('Ganadores del Huachilote :D', selftext=selftext, flair_id='a0a7193c-579b-11eb-8162-0e6a96a0cacd')
 
     #Actualizar columna entregado para que se genere nueva huachiclave
     cursor.execute("""UPDATE huachilate SET entregado = 1 WHERE huachiclave = ?)""",(huachiclave[1],))
 
-    conn.commit()  
+    conn.commit()
+
+def rollthedice(redditor_id,numero):
+    """Juego de dados"""
+
+    #Acceder a cuenta del redditor
+    Huachis_redditor = HuachiNet(redditor_id)
+        
+    #Verificar que tenga cuenta
+    if Huachis_redditor.Verificar_Usuario(redditor_id) == False:
+        
+        return random.choice(resp_tip_cuenta)
+
+    else: 
+        #Verificar que tenga saldo
+        if Huachis_redditor.saldo_total < 20:
+            
+            return random.choice(resp_tip_sinbineros)
+
+        else:
+            #Cobrar la entrada
+            Huachis_redditor.Enviar_Bineros("Shop",20,nota="RollTheDice")
+
+    dados = [('1️⃣',1),('2️⃣',2),('3️⃣',3),('4️⃣',4),('5️⃣',5),('6️⃣',6)]
+
+    dados_lanzados = random.choices(dados,k=3)
+
+    dado_redditor = dados[numero-1]
+
+    conteo = dados_lanzados.count(dado_redditor)
+
+    if dados_lanzados == [('⚅',6),('⚅',6),('⚅',6)]:
+        #2spoopy4me - pierde 50% de su cartera
+        cantidad = int(Huachis_redditor.saldo_total) / 2
+
+        Huachis_redditor.Enviar_Bineros("Shop",cantidad,nota="666")
+
+        dados_emoji = [dado[0] for dado in dados_lanzados]
+
+        return f"*Roll The Dice a la mujicana*\n\nDado de {redditor_id}\n\n#{dado_redditor[0]}\n\nDados lanzados por el empleado:\n\n#{' '.join(dados_emoji)}\n\nEsta partida esta embrujada, perdiste la mitad de tu cartera ({cantidad} huachis)"
+
+
+    elif conteo == 3:
+        #Entregar premio 3 dados iguales
+        Huachis_shop = HuachiNet("Shop")
+
+        Huachis_shop.Enviar_Bineros(redditor_id,200,nota="Premio RTD")
+
+        dados_emoji = [dado[0] for dado in dados_lanzados]
+
+        return f"*Roll The Dice a la mujicana*\n\nDado de {redditor_id}\n\n#{dado_redditor[0]}\n\nDados lanzados por el empleado:\n\n#{' '.join(dados_emoji)}\n\nVictoria para {redditor_id} con 3 dados iguales!\n\n_Premio: 200 huachis_"
+
+    elif conteo == 2:
+        #Entregar premio 3 dados iguales
+        Huachis_shop = HuachiNet("Shop")
+
+        Huachis_shop.Enviar_Bineros(redditor_id,100,nota="Premio RTD")
+
+        dados_emoji = [dado[0] for dado in dados_lanzados]
+
+        return f"*Roll The Dice a la mujicana*\n\nDado de {redditor_id}\n\n#{dado_redditor[0]}\n\nDados lanzados por el empleado:\n\n#{' '.join(dados_emoji)}\n\nVictoria para {redditor_id} con 2 dados iguales!\n\n_Premio: 100 huachis_"
+
+    elif conteo == 1:
+        #Entregar premio 3 dados iguales
+        Huachis_shop = HuachiNet("Shop")
+
+        Huachis_shop.Enviar_Bineros(redditor_id,50,nota="Premio RTD")
+
+        dados_emoji = [dado[0] for dado in dados_lanzados]
+
+        return f"*Roll The Dice a la mujicana*\n\nDado de {redditor_id}\n\n#{dado_redditor[0]}\n\nDados lanzados por el empleado:\n\n#{' '.join(dados_emoji)}\n\nVictoria para {redditor_id} con un dado igual!\n\n_Premio: 50 huachis_"
+
+    dados_emoji = [dado[0] for dado in dados_lanzados]
+
+    resp_dados = ["Suerte para la proxima","No estan cargados, te lo juro","Sigue participando","Hoy no es tu dia","No te awites, niño chillon"]
+
+    return f"*Roll The Dice a la mujicana*\n\nDado de {redditor_id}\n\n#{dado_redditor[0]}\n\nDados lanzados por el empleado:\n\n#{' '.join(dados_emoji)}\n\n_{random.choice(resp_dados)}_"
+
 
 if __name__ == "__main__":
     
@@ -1525,8 +1795,4 @@ if __name__ == "__main__":
     servicio_al_cliente()
 
     print("\nYa respondi a todas las quejas patron!")
-
-
-
-
 
