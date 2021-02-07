@@ -42,6 +42,8 @@ resp_huachilate = open("./frases/frases_huachilate.txt", "r", encoding="utf-8").
 
 monaschinas = open("./shop/monaschinas.txt", "r", encoding="utf-8").read().splitlines()
 
+valentin = open("./shop/valentin.txt", "r", encoding="utf-8").read().splitlines()
+
 trapos = open("./shop/trapos.txt", "r", encoding="utf-8").read().splitlines()
 
 furros = open("./shop/furro.txt", "r", encoding="utf-8").read().splitlines()
@@ -408,7 +410,7 @@ def empleado_del_mes():
                             comandos += 1
 
                             #Opciones del menu
-                            opciones = ["monachina","trapo","furro","nalgotica","cura","corvido","galleta","huachito","chambeadora"]
+                            opciones = ["monachina","trapo","furro","nalgotica","cura","corvido","galleta","huachito","chambeadora","valentin"]
                         
                             for opcion in opciones:
 
@@ -776,6 +778,14 @@ def shop(remitente,destinatario,regalo):
                 huachito = slots(destinatario,regalo=True)
 
                 reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado un huachito, que te diviertas rascando! \n\n {huachito}")
+
+                return random.choice(resp_shop)
+            
+            if regalo == 'valentin':
+
+                valentin = random.choice(valentin)
+
+                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una tarjeta de San Valentín! \n\n [Abrir Regalo]({valentin})")
 
                 return random.choice(resp_shop)
 
