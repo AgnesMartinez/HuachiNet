@@ -4,7 +4,6 @@ from datetime import datetime
 
 #Conexion a BD
 conn = sqlite3.connect('boveda.sqlite3')
-
 tabla_t = """CREATE TABLE IF NOT EXISTS transacciones (
     ID INTEGER PRIMARY KEY AUTOINCREMENT,
     timestamp VARCHAR(255),
@@ -62,5 +61,6 @@ cursor.execute(tabla_boletitos)
 cursor.execute(index4)
 
 conn.commit()
+
 
 

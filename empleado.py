@@ -58,7 +58,11 @@ chambeadoras = open("./shop/ganosas.txt", "r", encoding="utf-8").read().splitlin
 
 galletas = open("./shop/galletas.txt", "r", encoding="utf-8").read().splitlines()
 
+
+dulces = open("./shop/dulces.txt", "r", encoding="utf-8").read().splitlines()
+
 valentines = open("./shop/valentin.txt", "r", encoding="utf-8").read().splitlines()
+
 
 reddit = praw.Reddit(client_id=config.APP_ID, 
                      client_secret=config.APP_SECRET,
@@ -441,14 +445,17 @@ def empleado_del_mes():
                             comandos += 1
 
                             #Opciones del menu
-                            opciones = ["monachina","trapo","furro","nalgotica","cura","corvido","galleta","huachito","chambeadora","valentin"]
+
+                            opciones = ["monachina","trapo","furro","nalgotica","cura","corvido","galleta","huachito","chambeadora","valentin","dulce"]
+
                         
                             for opcion in opciones:
 
                                 if "menu" in texto:
                                     
                                     #Enviar menu
-                                    reddit.redditor(str(comment.author)).message("Menu Shop","__HuachiStore - Abierto cuando llegamos, cerrado cuando nos vamos__\n\nEnvia un regalo usando el comando shop, seguido de una opcion del menu, todo a 5 huachis.\n\nRegalo | subcomando\n:--|--:\nMonas Chinas | monachina\nTrapitos | trapo\nFurros | furro\nHuachito | huachito\nNalgoticas | nalgotica\nMDLP | cura / corvido\nGanosas (Revistas para adultos) | chambeadora\nGalleta de la fortuna | galleta\n\nCompleta tu compra de la siguiente manera:\n\n    shop comando\n\n    Ejemplo: shop monachina\n\n    (no olvides el signo de exclamación)\n\nUsalo en la seccion de comentarios.")
+                                    reddit.redditor(str(comment.author)).message("Menu Shop","__HuachiStore - Abierto cuando llegamos, cerrado cuando nos vamos__\n\nEnvia un regalo usando el comando shop, seguido de una opcion del menu, todo a 5 huachis.\n\nRegalo | subcomando\n:--|--:\nMonas Chinas | monachina\nTrapitos | trapo\nFurros | furro\nHuachito | huachito\nNalgoticas | nalgotica\nMDLP | cura / corvido\nGanosas (Revistas para adultos) | chambeadora\nGalleta de la fortuna | galleta\nDulce mujicano | dulce\n\nCompleta tu compra de la siguiente manera:\n\n    shop comando\n\n    Ejemplo: shop monachina\n\n    (no olvides el signo de exclamación)\n\nUsalo en la seccion de comentarios.")
+
                         
                                     movimientos += 1
 
@@ -895,8 +902,17 @@ def shop(remitente,destinatario,regalo):
             elif regalo == 'galleta':
 
                 galleta = random.choice(galletas)
-
+                
                 reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una galleta de la suerte. ¿Cuál será tu fortuna? \n\n {galleta}")
+
+                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una galleta de la suerte. ¿Cuál será tu fortuna? \n\n >!{galleta}!<")
+
+            elif regalo == 'dulce':
+
+                dulce = random.choice(dulces)
+
+                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado un dulce, cuídate de la diabetes \n\n [Abrir Regalo]({dulce})")
+
 
             elif regalo == 'huachito':
 
