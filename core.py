@@ -141,8 +141,7 @@ class HuachiNet():
         
         except Exception as e:
             print(f'----\n{e}')
-            
-    
+             
     def Mujicanos(self):
         """Lista de usuarios activos"""
 
@@ -238,6 +237,29 @@ class HuachiNet():
 
         self.conn.commit()
 
+    def Enviar_Shares(self,usuario,cantidad,share,precio):
+        """Huachiswap"""
 
+        query = """INSERT INTO shares (timestamp,usuario,cantidad,share,precio,origen_destino) VALUES (?,?,?,?,?,?)"""
+
+        timestamp = time.time()
+
+        try:
+
+            self.cursor.execute(query,(timestamp,usuario,cantidad,share,precio,self.id)) 
+
+            negativo = cantidad - (cantidad * 2)
+
+            self.cursor.execute(query,(timestamp,self.id,negativo,share,precio,usuario))
+
+            self.conn.commit()
+
+        except Exception as e:
+            print(f'----\n{e}')
                 
+    def Consultar_Shares(self):
+        """Consulta tu portafolio"""
 
+        query = """ SELECT share, SUM(cantidad) as cantidad, AVG(precio) as precio FROM shares WHERE usuario = ? AND share in (SELECT share FROM shares WHERE usuario = ?) GROUP BY share ORDER BY cantidad DESC"""
+
+        return self.cursor.execute(query,(self.id,self.id)).fetchall()

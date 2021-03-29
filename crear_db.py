@@ -2,6 +2,12 @@ import sqlite3
 import time
 from datetime import datetime
 
+stonks = ["AAPL","AMZN","TSLA","MRNA","NFLX","NVDA","NIO",
+          "WMT","COST","ROKU","SPOT","NKE","FTCH","UBER",
+          "BABA","TUP","GME","NTDOY","SNE","MSFT","INTC",
+          "HPQ","AMD","BTC-USD","ETH-USD","LTC-USD",
+          "VET-USD","NANO-USD","DOGE-USD"]
+
 #Conexion a BD
 conn = sqlite3.connect('boveda.sqlite3')
 
@@ -31,6 +37,29 @@ tabla_boletitos = """CREATE TABLE IF NOT EXISTS boletitos (
     huachiclave VARCHAR(255)
 )"""
 
+tabla_perks = """CREATE TABLE IF NOT EXISTS perks (
+    ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp VARCHAR(255),
+    usuario VARCHAR(255),
+    perk VARCHAR(255),
+    power INTEGER,
+    trait VARCHAR(255),
+    weapon VARCHAR(255)
+)"""
+
+tabla_shares = """CREATE TABLE IF NOT EXISTS shares (
+    ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp VARCHAR(255),
+    usuario VARCHAR(255),
+    cantidad INTEGER,
+    share VARCHAR(255),
+    precio VARCHAR(255),
+    origen_destino VARCHAR(255))"""
+
+index6 = """CREATE INDEX IF NOT EXISTS ind_usuario ON shares (usuario)"""
+
+index5 = """CREATE INDEX IF NOT EXISTS ind_usuario ON perks (usuario)"""
+
 index4 = """CREATE INDEX IF NOT EXISTS ind_usuario ON boletitos (usuario)"""
 
 index3 = """CREATE INDEX IF NOT EXISTS ind_huachiclave ON huachilate (huachiclave)"""
@@ -47,7 +76,7 @@ cursor.execute(tabla_t)
 
 cursor.execute(index)
 
-cursor.execute(genesis,(time.time(),"Bodega",10000000,"Deposito","Genesis"))
+#cursor.execute(genesis,(time.time(),"Bodega",30000000,"Deposito","Genesis"))
 
 cursor.execute(tabla_comentario)
 
@@ -60,6 +89,20 @@ cursor.execute(index3)
 cursor.execute(tabla_boletitos)
 
 cursor.execute(index4)
+
+cursor.execute(tabla_perks)
+
+cursor.execute(index5)
+
+cursor.execute(tabla_shares)
+
+cursor.execute(index6)
+
+#for stonk in stonks:
+
+#    query = """INSERT into shares (timestamp,usuario,cantidad,share,precio,origen_destino) VALUES (?,?,?,?,?,?)"""
+
+#    cursor.execute(query,(time.time(),"HuachiSwap",10000000,stonk,0,"Genesis"))
 
 conn.commit()
 
