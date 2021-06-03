@@ -490,7 +490,7 @@ def empleado_del_mes():
                                 if "menu" in texto:
                                     
                                     #Enviar menu
-                                    reddit.redditor(str(comment.author)).message(diccionario['menu bonos']))
+                                    reddit.redditor(str(comment.author)).message(diccionario['menu bonos'])
                                     
                                     movimientos += 1
 
@@ -953,7 +953,7 @@ def servicio_al_cliente():
 
                     atraco_perdida = [item for item in estado_cuenta[5] if int(item[2]) < 0] 
 
-                    chunk = diccionario['chunk']
+                    chunk = f"__Saldo: {estado_cuenta[1]} Huachicoin(s)__\n\n**Total de movimientos**\n\nDepositos: {len(estado_cuenta[2])}  /  Retiros: {len(estado_cuenta[3])}\n\nAsaltos ganados: {len(asalto_victoria)}  /  Asaltos perdidos: {len(asalto_perdida)}\n\nAtracos ganados: {len(atraco_victoria)}  /  Atracos perdidos: {len(atraco_perdida)}\n\nHuachitos Comprados: {len(estado_cuenta[6])}  /  Huachitos Ganados: {len(estado_cuenta[7])}\n\nConfiguracion robos: �{estado_cuenta[9]} (energia disponible: {estado_cuenta[10]})  /  �{estado_cuenta[11]}  /  ⚔️{estado_cuenta[12]}\n\nFecha | Nota | Cantidad | Destino / Origen\n:--|:--:|--:|:--:\n"
 
                     for i,item in enumerate(estado_cuenta[0],start=1):
 

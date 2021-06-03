@@ -15,8 +15,6 @@ diccionario = {
 
   'bonos weapons' : {"platano" : "Platano", "florecita" : "Florecita de vive sin drogas", "noroña" : "Rata con thinner", "fusca" : "Fusca", "ecayece" : "Ecayecelocico"},
 
-  'bonos opciones' : ["susana","jelatina","seguro","detente","chocomilk","caguama","vitaminas","mod","platano","florecita","noroña","fusca","ecayece","verde","roja","azul","dorada"],
-
-  'chunk' : f"__Saldo: {estado_cuenta[1]} Huachicoin(s)__\n\n**Total de movimientos**\n\nDepositos: {len(estado_cuenta[2])}  /  Retiros: {len(estado_cuenta[3])}\n\nAsaltos ganados: {len(asalto_victoria)}  /  Asaltos perdidos: {len(asalto_perdida)}\n\nAtracos ganados: {len(atraco_victoria)}  /  Atracos perdidos: {len(atraco_perdida)}\n\nHuachitos Comprados: {len(estado_cuenta[6])}  /  Huachitos Ganados: {len(estado_cuenta[7])}\n\nConfiguracion robos: �{estado_cuenta[9]} (energia disponible: {estado_cuenta[10]})  /  �{estado_cuenta[11]}  /  ⚔️{estado_cuenta[12]}\n\nFecha | Nota | Cantidad | Destino / Origen\n:--|:--:|--:|:--:\n",
+  'bonos opciones' : ["susana","jelatina","seguro","detente","chocomilk","caguama","vitaminas","mod","platano","florecita","noroña","fusca","ecayece","verde","roja","azul","dorada"]
 
 }
