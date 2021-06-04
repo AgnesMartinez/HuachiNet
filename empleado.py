@@ -124,8 +124,7 @@ def saldazo(redditor_id) -> str:
         
         return random.choice(resp_tip_cuenta)
 
-    else:
-        return random.choice(resp_saldo) + f"\n\n{Huachis.saldo_total:,} Huachis + {Huachis.power} unidades de energia 🌀"
+    return random.choice(resp_saldo) + f"\n\n{Huachis.saldo_total:,} Huachis + {Huachis.power} unidades de energia 🌀"
 
 def tip(remitente,destinatario,cantidad) -> str:
     """Dar propina por publicaciones y comentarios"""
@@ -141,46 +140,43 @@ def tip(remitente,destinatario,cantidad) -> str:
         
         return random.choice(resp_tip_cuenta)
 
+    #Verificar que se tenga saldo suficiente para la transaccion
+    if Huachis.saldo_total < cantidad:
+
+        return random.choice(resp_tip_sinbineros)
+
+    #calcula la edad del destinatario para evitar spam de cuentas recien creadas
+    if destinatario == "Empleado_del_mes":
+        
+        cuenta_dias = 30
+    
     else:
-        #Verificar que se tenga saldo suficiente para la transaccion
-        if Huachis.saldo_total < cantidad:
+        cuenta_dias = edad_cuenta(destinatario)
 
-            return random.choice(resp_tip_sinbineros)
+    if cuenta_dias < 28:
 
-        else:
-            #calcula la edad del destinatario para evitar spam de cuentas recien creadas
-            if destinatario == "Empleado_del_mes":
-                
-                cuenta_dias = 30
-            
-            else:
-                cuenta_dias = edad_cuenta(destinatario)
+        return "El usuario al que quieres enviar no tiene la madurez suficiente para entrar al sistema, es un pinche mocoso miado, dejalo ahi."
 
-            if cuenta_dias < 28:
+    #Verificar si el destinatario existe en la HuachiNet
+    if Huachis.Verificar_Usuario(destinatario) == False:
+        #Abrimos cuenta y le damos dineros de bienvenida
+        Huachis.Bono_Bienvenida(destinatario)
+    
+        reddit.redditor(destinatario).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial")
+    #Iniciamos transaccion
+    Huachis.Enviar_Bineros(destinatario,cantidad)
 
-                return "El usuario al que quieres enviar no tiene la madurez suficiente para entrar al sistema, es un pinche mocoso miado, dejalo ahi."
+    if destinatario == "Empleado_del_mes":
 
-            else:
-                #Verificar si el destinatario existe en la HuachiNet
-                if Huachis.Verificar_Usuario(destinatario) == False:
-                    #Abrimos cuenta y le damos dineros de bienvenida
-                    Huachis.Bono_Bienvenida(destinatario)
-                
-                    reddit.redditor(destinatario).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial")
-                #Iniciamos transaccion
-                Huachis.Enviar_Bineros(destinatario,cantidad)
+        return random.choice(resp_tip_empleado) + f" [{cantidad} Huachicoin(s) Enviado(s)]"
 
-                if destinatario == "Empleado_del_mes":
+    elif remitente == "Empleado_del_mes":
 
-                    return random.choice(resp_tip_empleado) + f" [{cantidad} Huachicoin(s) Enviado(s)]"
+        return "autotip"
 
-                elif remitente == "Empleado_del_mes":
-
-                    return "autotip"
-
-                else:
-                
-                    return random.choice(resp_tip_envio) + f" [{cantidad} Huachicoin(s) Enviado(s)]"
+    else:
+    
+        return random.choice(resp_tip_envio) + f" [{cantidad} Huachicoin(s) Enviado(s)]"
 
 def edad_cuenta(redditor_id) -> int:
     """calcular la edad en dias de la cuenta"""
@@ -208,9 +204,8 @@ def historial(redditor_id) -> list:
         
         return random.choice(resp_tip_cuenta)
 
-    else:
 
-        return (Huachis.historial,Huachis.saldo_total,Huachis.depositos,Huachis.retiros,Huachis.asaltos,Huachis.atracos,Huachis.huachitos,Huachis.premios_huachito,Huachis.levantones,Huachis.perk,Huachis.power,Huachis.trait,Huachis.weapon)
+    return (Huachis.historial,Huachis.saldo_total,Huachis.depositos,Huachis.retiros,Huachis.asaltos,Huachis.atracos,Huachis.huachitos,Huachis.premios_huachito,Huachis.levantones,Huachis.perk,Huachis.power,Huachis.trait,Huachis.weapon)
 
 def rank(redditor_id, opcion) -> str:
     """Forbes Mujico - TOP Abinerados"""
@@ -997,94 +992,92 @@ def shop(remitente,destinatario,regalo):
         
         return random.choice(resp_tip_cuenta)
 
-    else:
 
-        cantidad = 10
+    cantidad = 10
 
-        if regalo == "huachito":
-            
-            cantidad = 20
+    if regalo == "huachito":
         
+        cantidad = 20
+    
 
-        #Verificar que se tenga saldo suficiente para la transaccion
-        if Huachis.saldo_total < cantidad:
+    #Verificar que se tenga saldo suficiente para la transaccion
+    if Huachis.saldo_total < cantidad:
 
-            return random.choice(resp_tip_sinbineros)
+        return random.choice(resp_tip_sinbineros)
 
-        else:
 
-            #Iniciamos transaccion
-            Huachis.Enviar_Bineros('Shop',cantidad,nota=regalo.capitalize())
-            
-            if regalo == 'monachina':
+    #Iniciamos transaccion
+    Huachis.Enviar_Bineros('Shop',cantidad,nota=regalo.capitalize())
+    
+    if regalo == 'monachina':
 
-                monachina = random.choice(monaschinas)
+        monachina = random.choice(monaschinas)
 
-                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una mona china! Kawaii desu ne! \n\n [Abrir Regalo]({monachina})")
+        reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una mona china! Kawaii desu ne! \n\n [Abrir Regalo]({monachina})")
 
-                return random.choice(resp_shop)
+        return random.choice(resp_shop)
 
-            elif regalo == 'trapo':
+    elif regalo == 'trapo':
 
-                trapo = random.choice(trapos)
+        trapo = random.choice(trapos)
 
-                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una dama con rama, no tengas miedo papi, si la agarras no da toques. \n\n [Abrir Regalo]({trapo})")
+        reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una dama con rama, no tengas miedo papi, si la agarras no da toques. \n\n [Abrir Regalo]({trapo})")
 
-                return random.choice(resp_shop)
+        return random.choice(resp_shop)
 
-            elif regalo == 'furro':
+    elif regalo == 'furro':
 
-                furro = random.choice(furros)
+        furro = random.choice(furros)
 
-                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado un furro, quemalo antes de que se reproduzca! \n\n [Abrir Regalo]({furro})")
+        reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado un furro, quemalo antes de que se reproduzca! \n\n [Abrir Regalo]({furro})")
 
-                return random.choice(resp_shop)
+        return random.choice(resp_shop)
 
-            elif regalo == 'nalgotica':
+    elif regalo == 'nalgotica':
 
-                nalgotica = random.choice(nalgoticas)
+        nalgotica = random.choice(nalgoticas)
 
-                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una nalgotica, 2spoopy4me \n\n [Abrir Regalo]({nalgotica})")
+        reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una nalgotica, 2spoopy4me \n\n [Abrir Regalo]({nalgotica})")
 
-                return random.choice(resp_shop)
+        return random.choice(resp_shop)
 
-            elif regalo == 'cura':
+    elif regalo == 'cura':
 
-                cura = random.choice(curas)
+        cura = random.choice(curas)
 
-                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una cura, La cura del Dr. Corvus Beulenpest es la mejor! \n\n [Abrir Regalo]({cura})")
+        reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una cura, La cura del Dr. Corvus Beulenpest es la mejor! \n\n [Abrir Regalo]({cura})")
 
-                return random.choice(resp_shop)
+        return random.choice(resp_shop)
 
-            elif regalo == 'chambeadora':
+    elif regalo == 'chambeadora':
 
-                chambeadora = random.choice(chambeadoras)
+        chambeadora = random.choice(chambeadoras)
 
-                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una chambeadora, Revisas fogosas, pura picardia mexicana con el clasico sexismo de la epoca!\n\n [Abrir Regalo]({chambeadora})")
+        reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una chambeadora, Revisas fogosas, pura picardia mexicana con el clasico sexismo de la epoca!\n\n [Abrir Regalo]({chambeadora})")
 
-                return random.choice(resp_shop)
-              
-            elif regalo == 'galleta':
+        return random.choice(resp_shop)
+        
+    elif regalo == 'galleta':
 
-                galleta = random.choice(galletas)
+        galleta = random.choice(galletas)
 
-                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una galleta de la suerte. ¿Cuál será tu fortuna? \n\n {galleta}")
+        reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una galleta de la suerte. ¿Cuál será tu fortuna? \n\n {galleta}")
 
-            elif regalo == 'huachito':
+    elif regalo == 'huachito':
 
-                huachito = slots(destinatario,regalo=True)
+        huachito = slots(destinatario,regalo=True)
 
-                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado un huachito, que te diviertas rascando! \n\n {huachito}")
+        reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado un huachito, que te diviertas rascando! \n\n {huachito}")
 
-                return random.choice(resp_shop)
+        return random.choice(resp_shop)
 
-            elif regalo == 'valentin':
+    elif regalo == 'valentin':
 
-                valentin = random.choice(valentines)
+        valentin = random.choice(valentines)
 
-                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una tarjeta de San Valentín! \n\n [Abrir Regalo]({valentin})")
+        reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una tarjeta de San Valentín! \n\n [Abrir Regalo]({valentin})")
 
-                return random.choice(resp_shop)
+        return random.choice(resp_shop)
 
 def asalto(cholo,victima,tipo):
     """Saca bineros morro"""
@@ -1111,133 +1104,128 @@ def asalto(cholo,victima,tipo):
         
         return random.choice(resp_seguridad)
 
-    else:
 
-        #Acceder a cuentas
-        huachis_cholo = HuachiNet(cholo)
+    #Acceder a cuentas
+    huachis_cholo = HuachiNet(cholo)
 
-        perks_cholo = [perk for perk in huachis_cholo.Consultar_Perks() if isinstance(perk,int) == False]
+    perks_cholo = [perk for perk in huachis_cholo.Consultar_Perks() if isinstance(perk,int) == False]
 
-        huachis_victima = HuachiNet(victima)
+    huachis_victima = HuachiNet(victima)
 
-        #Primero verificar que la victima tenga una cuenta
-        if huachis_victima.Verificar_Usuario(victima) == False:
-        
-            return "No tiene cuenta, dime, que piensas robarle, ¿Los calzones?"
+    #Primero verificar que la victima tenga una cuenta
+    if huachis_victima.Verificar_Usuario(victima) == False:
+    
+        return "No tiene cuenta, dime, que piensas robarle, ¿Los calzones?"
 
-        perks_victima = [perk for perk in huachis_victima.Consultar_Perks() if isinstance(perk,int) == False ]
+    perks_victima = [perk for perk in huachis_victima.Consultar_Perks() if isinstance(perk,int) == False ]
 
-        #Mensajes personalizados para huachibonos de proteccion        
-        if huachis_cholo.trait == "Marika" or huachis_victima.trait == "Marika":
+    #Mensajes personalizados para huachibonos de proteccion        
+    if huachis_cholo.trait == "Marika" or huachis_victima.trait == "Marika":
 
-            return "Que es ese olor, __sniff sniff__ huele a que alguien compro el huachibono de 'mArIKa'. Salio mod y no quiere que lo roben, pero tampoco puede robar."
+        return "Que es ese olor, __sniff sniff__ huele a que alguien compro el huachibono de 'mArIKa'. Salio mod y no quiere que lo roben, pero tampoco puede robar."
 
-        if huachis_victima.trait == "Vacuna":
+    if huachis_victima.trait == "Vacuna":
 
-            return "Esta persona ha sido inyectada con Patria! la vacuna mujicana, los efectos secundarios la volvieron inmune a los robos, dejame decirte que ya valiste madre F"
+        return "Esta persona ha sido inyectada con Patria! la vacuna mujicana, los efectos secundarios la volvieron inmune a los robos, dejame decirte que ya valiste madre F"
 
-        if huachis_victima.perk == "Seguro para la 3era edad":
+    if huachis_victima.perk == "Seguro para la 3era edad":
 
-            if edad_cuenta(victima) > edad_cuenta(cholo):
-
-                #Verificar que tenga energia
-                if huachis_victima.power > 4:
-
-                    huachis_victima.Consumir_Energia(5)
-
-                    return "Esta cuenta tiene seguro activo contra maricanuebos, esperate a que se le acabe la vigencia para poderlo robar"
-
-        if huachis_victima.perk == "Barrera Susana Distancia":
+        if edad_cuenta(victima) > edad_cuenta(cholo):
 
             #Verificar que tenga energia
             if huachis_victima.power > 4:
 
                 huachis_victima.Consumir_Energia(5)
 
-                return "Esta cuenta tiene la proteccion de susana distancia! Espera a que se le termine el efecto."
+                return "Esta cuenta tiene seguro activo contra maricanuebos, esperate a que se le acabe la vigencia para poderlo robar"
 
-        #calcular monto a jugar
+    if huachis_victima.perk == "Barrera Susana Distancia":
 
-        if tipo == "asalto":
+        #Verificar que tenga energia
+        if huachis_victima.power > 4:
 
-            cantidad_inicial = random.randint(50,500) 
+            huachis_victima.Consumir_Energia(5)
 
-        if tipo == "atraco":
+            return "Esta cuenta tiene la proteccion de susana distancia! Espera a que se le termine el efecto."
 
-            cantidad_inicial = round((int(huachis_victima.saldo_total) * random.randint(5,16)) / 100)
+    #calcular monto a jugar
 
-        if tipo == "levanton":
+    if tipo == "asalto":
 
-            cantidad_inicial = round((int(huachis_victima.saldo_total) * 16) / 100)
+        cantidad_inicial = random.randint(50,500) 
 
+    if tipo == "atraco":
 
-        cantidad_final = cantidad_inicial
+        cantidad_inicial = round((int(huachis_victima.saldo_total) * random.randint(5,16)) / 100)
 
-        #Ajustar odds segun huachibonos
+    if tipo == "levanton":
 
-        redditor_cholo = huachibonos(cholo)
-
-        redditor_victima = huachibonos(victima)
-
-
-        if redditor_cholo[0] > redditor_victima[0]:
-
-            #Calcular monto final
-            cantidad_final += round((cantidad_inicial * redditor_cholo[1]) / 100) 
-                
-            cantidad_final += round((cantidad_inicial * redditor_victima[2]) / 100)
+        cantidad_inicial = round((int(huachis_victima.saldo_total) * 16) / 100)
 
 
-            #Verificar que se tenga saldo suficiente para la transaccion
-            if huachis_victima.saldo_total < cantidad_final:
+    cantidad_final = cantidad_inicial
 
-                return "Chale, asaltaste a alguien sin dinero suficiente, mal pedo."
+    #Ajustar odds segun huachibonos
+
+    redditor_cholo = huachibonos(cholo)
+
+    redditor_victima = huachibonos(victima)
+
+
+    if redditor_cholo[0] > redditor_victima[0]:
+
+        #Calcular monto final
+        cantidad_final += round((cantidad_inicial * redditor_cholo[1]) / 100) 
             
-            else:
+        cantidad_final += round((cantidad_inicial * redditor_victima[2]) / 100)
 
-                if huachis_victima.Verificar_Usuario(cholo) == False:
-                    #Abrimos cuenta y le damos dineros de bienvenida
-                    huachis_victima.Bono_Bienvenida(cholo)
-                
-                    reddit.redditor(cholo).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial")
-                
-                #Enviar Binero
-                huachis_victima.Enviar_Bineros(cholo,cantidad_final,nota=tipo.capitalize())
 
-                return random.choice(resp_tumbar_cholo) + f"\n\n__{cholo} ganó {cantidad_final} huachis (de la cartera de {victima})__\n\nBuild | 🌀 | 🎭 | ⚔️\n:--|:--:|:--:|:--:\n{cholo} | {perks_cholo[0]} | {perks_cholo[1]} | {perks_cholo[2]}\n{victima} | {perks_victima[0]} | {perks_victima[1]} | {perks_victima[2]}" 
+        #Verificar que se tenga saldo suficiente para la transaccion
+        if huachis_victima.saldo_total < cantidad_final:
 
-        else:
-
-            #Primero verificar que el remitente tenga una cuenta
-            if huachis_cholo.Verificar_Usuario(cholo) == False:
+            return "Chale, asaltaste a alguien sin dinero suficiente, mal pedo."
         
-                return random.choice(resp_tip_cuenta)
 
-            else:
+        if huachis_victima.Verificar_Usuario(cholo) == False:
+            #Abrimos cuenta y le damos dineros de bienvenida
+            huachis_victima.Bono_Bienvenida(cholo)
+        
+            reddit.redditor(cholo).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial")
+        
+        #Enviar Binero
+        huachis_victima.Enviar_Bineros(cholo,cantidad_final,nota=tipo.capitalize())
 
-                #Calcular el monto final
+        return random.choice(resp_tumbar_cholo) + f"\n\n__{cholo} ganó {cantidad_final} huachis (de la cartera de {victima})__\n\nBuild | 🌀 | 🎭 | ⚔️\n:--|:--:|:--:|:--:\n{cholo} | {perks_cholo[0]} | {perks_cholo[1]} | {perks_cholo[2]}\n{victima} | {perks_victima[0]} | {perks_victima[1]} | {perks_victima[2]}" 
 
-                cantidad_final += round((cantidad_inicial * redditor_victima[1]) / 100) 
-                
-                cantidad_final += round((cantidad_inicial * redditor_cholo[2]) / 100)
 
-                #Verificar que se tenga saldo suficiente para la transaccion
-                if huachis_cholo.saldo_total < cantidad_final:
+    #Primero verificar que el remitente tenga una cuenta
+    if huachis_cholo.Verificar_Usuario(cholo) == False:
 
-                    return "Perdiste, pero no tienes dinero que dar."
-            
-                else:
+        return random.choice(resp_tip_cuenta)
 
-                    if huachis_cholo.Verificar_Usuario(victima) == False:
-                        #Abrimos cuenta y le damos dineros de bienvenida
-                        huachis_cholo.Bono_Bienvenida(victima)
-                
-                        reddit.redditor(victima).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el post sticky en Mujico para mas informacion de como usar la red.\n\nAqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: \n\n!historial o !saldo / !saldazo")
-                
-                    #Enviar Binero
-                    huachis_cholo.Enviar_Bineros(victima,cantidad_final,nota=tipo.capitalize())
+    
+    #Calcular el monto final
 
-                    return random.choice(resp_tumbar_victima) + f"\n\n__{victima} ganó {cantidad_final} huachis (de la cartera de {cholo})__\n\nBuild | 🌀 | 🎭 | ⚔️\n:--|:--:|:--:|:--:\n{cholo} | {perks_cholo[0]} | {perks_cholo[1]} | {perks_cholo[2]}\n{victima} | {perks_victima[0]} | {perks_victima[1]} | {perks_victima[2]}"
+    cantidad_final += round((cantidad_inicial * redditor_victima[1]) / 100) 
+    
+    cantidad_final += round((cantidad_inicial * redditor_cholo[2]) / 100)
+
+    #Verificar que se tenga saldo suficiente para la transaccion
+    if huachis_cholo.saldo_total < cantidad_final:
+
+        return "Perdiste, pero no tienes dinero que dar."
+
+
+    if huachis_cholo.Verificar_Usuario(victima) == False:
+        #Abrimos cuenta y le damos dineros de bienvenida
+        huachis_cholo.Bono_Bienvenida(victima)
+
+        reddit.redditor(victima).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el post sticky en Mujico para mas informacion de como usar la red.\n\nAqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: \n\n!historial o !saldo / !saldazo")
+
+    #Enviar Binero
+    huachis_cholo.Enviar_Bineros(victima,cantidad_final,nota=tipo.capitalize())
+
+    return random.choice(resp_tumbar_victima) + f"\n\n__{victima} ganó {cantidad_final} huachis (de la cartera de {cholo})__\n\nBuild | 🌀 | 🎭 | ⚔️\n:--|:--:|:--:|:--:\n{cholo} | {perks_cholo[0]} | {perks_cholo[1]} | {perks_cholo[2]}\n{victima} | {perks_victima[0]} | {perks_victima[1]} | {perks_victima[2]}"
 
 def slots(redditor_id,regalo=False):
     """Ahora si es todo un casino"""
@@ -1258,16 +1246,14 @@ def slots(redditor_id,regalo=False):
         if Huachis_redditor.Verificar_Usuario(redditor_id) == False:
         
             return random.choice(resp_tip_cuenta)
+ 
+        #Verificar que tenga saldo
+        if Huachis_redditor.saldo_total < 20:
+        
+            return random.choice(resp_tip_sinbineros)
 
-        else: 
-            #Verificar que tenga saldo
-            if Huachis_redditor.saldo_total < 20:
-            
-                return random.choice(resp_tip_sinbineros)
-
-            else:
-                #Cobrar el Huachito
-                Huachis_redditor.Enviar_Bineros("Shop",20,nota="Huachito")
+        #Cobrar el Huachito
+        Huachis_redditor.Enviar_Bineros("Shop",20,nota="Huachito")
 
     emojis = ['👻','🐷','🐧','🦝','🍮', '💣','👾','👽','🦖','🥓','🤖']
 
@@ -1387,10 +1373,9 @@ def pokermujicano(redditor_id):
             
             return random.choice(resp_tip_sinbineros)
 
-        else:
-            #Cobrar la entrada
-            cantidad = random.randint(20,200)
-            Huachis_redditor.Enviar_Bineros("Shop",cantidad,nota="Poker")
+        #Cobrar la entrada
+        cantidad = random.randint(20,200)
+        Huachis_redditor.Enviar_Bineros("Shop",cantidad,nota="Poker")
             
     pot = cantidad * 2
 
@@ -1591,34 +1576,32 @@ def combinaciones_poker(mano):
 
                 return (puntaje,valores_corregidos,"None")
         
-            else:
-                #Contar numeros consecutivos
-                escalera_color = 0
+            #Contar numeros consecutivos
+            escalera_color = 0
 
-                cartas = sorted(valores_corregidos,reverse=True)
+            cartas = sorted(valores_corregidos,reverse=True)
 
-                for i in range(5):
+            for i in range(5):
 
-                    if i == 4:
-                        break
+                if i == 4:
+                    break
 
-                    else:
-                        
-                        if cartas[i] - cartas[i+1] == 1:
-                        
-                            escalera_color += 1 
-                
-                if escalera_color == 4:
-                    #Puntaje Escalera de color
-                    puntaje = ("escalera de color",9)
-
-                    return (puntaje,valores_corregidos,palo)
-                
                 else:
-                    #Puntaje Color
-                    puntaje = ("color",6)
+                    
+                    if cartas[i] - cartas[i+1] == 1:
+                    
+                        escalera_color += 1 
+            
+            if escalera_color == 4:
+                #Puntaje Escalera de color
+                puntaje = ("escalera de color",9)
 
-                    return (puntaje,valores_corregidos,palo)
+                return (puntaje,valores_corregidos,palo)
+            
+            #Puntaje Color
+            puntaje = ("color",6)
+
+            return (puntaje,valores_corregidos,palo)
 
     #Full House 
     fullhouse = 0
@@ -1722,30 +1705,28 @@ def huachilate(redditor_id):
         
         return random.choice(resp_tip_cuenta)
 
-    else: 
-        #Verificar que tenga saldo
-        if Huachis_redditor.saldo_total < 50:
-            
-            return random.choice(resp_tip_sinbineros)
+    #Verificar que tenga saldo
+    if Huachis_redditor.saldo_total < 50:
+        
+        return random.choice(resp_tip_sinbineros)
 
-        else:
-            #Cobrar la entrada
-            Huachis_redditor.Enviar_Bineros("Huachicuenta",50,nota="Huachilate")
+    #Cobrar la entrada
+    Huachis_redditor.Enviar_Bineros("Huachicuenta",50,nota="Huachilate")
 
-            huachiclave = Huachis_redditor.Huachiclave()
+    huachiclave = Huachis_redditor.Huachiclave()
 
-            valores = (time.time(),redditor_id,huachiclave[1])
-            
-            conn.execute("""INSERT INTO boletitos (timestamp,usuario,huachiclave) VALUES (?,?,?)""",valores)
+    valores = (time.time(),redditor_id,huachiclave[1])
+    
+    conn.execute("""INSERT INTO boletitos (timestamp,usuario,huachiclave) VALUES (?,?,?)""",valores)
 
-            conn.commit()
+    conn.commit()
 
-            huachicuenta = HuachiNet("Huachicuenta")
+    huachicuenta = HuachiNet("Huachicuenta")
 
-            if huachicuenta.saldo_total >= huachiclave[2]:
-                premio_huachilate()
+    if huachicuenta.saldo_total >= huachiclave[2]:
+        premio_huachilate()
 
-            return random.choice(resp_huachilate)
+    return random.choice(resp_huachilate)
 
 def premio_huachilate():
     """Repartir premios del huachilate"""
@@ -1815,15 +1796,13 @@ def rollthedice(redditor_id,numero):
         
         return random.choice(resp_tip_cuenta)
 
-    else: 
-        #Verificar que tenga saldo
-        if Huachis_redditor.saldo_total < 20:
-            
-            return random.choice(resp_tip_sinbineros)
+    #Verificar que tenga saldo
+    if Huachis_redditor.saldo_total < 20:
+        
+        return random.choice(resp_tip_sinbineros)
 
-        else:
-            #Cobrar la entrada
-            Huachis_redditor.Enviar_Bineros("Shop",20,nota="RollTheDice")
+    #Cobrar la entrada
+    Huachis_redditor.Enviar_Bineros("Shop",20,nota="RollTheDice")
 
     dados = [('1️⃣',1),('2️⃣',2),('3️⃣',3),('4️⃣',4),('5️⃣',5),('6️⃣',6)]
 
@@ -1994,20 +1973,18 @@ def actualizar_huachibonos(redditor_id,clase,item):
         
         return random.choice(resp_tip_cuenta)
 
-    else:
 
-        #Verificar que se tenga saldo suficiente para la transaccion
-        if Huachis.saldo_total < cantidad:
+    #Verificar que se tenga saldo suficiente para la transaccion
+    if Huachis.saldo_total < cantidad:
 
-            return random.choice(resp_tip_sinbineros)
+        return random.choice(resp_tip_sinbineros)
 
-        else:
 
-            Huachis.Enviar_Bineros("Shop",cantidad,nota=item)
+    Huachis.Enviar_Bineros("Shop",cantidad,nota=item)
 
-            Huachis.Update_Perks(clase,item)
+    Huachis.Update_Perks(clase,item)
 
-            return random.choice(resp_huachibono)
+    return random.choice(resp_huachibono)
 
 def huachiswap(remitente,destinatario,ticker,cantidad):
     """DEX para intercambiar tokens, sin comisiones!"""
@@ -2035,13 +2012,12 @@ def huachiswap(remitente,destinatario,ticker,cantidad):
                 
                 return f"Hijole wer@, no tienes suficientes {ticker} para completar la transaccion\n\nTienes {total:,} {ticker} en tu portafolio."
 
-            else:
 
-                stonk = check_stonk(ticker)
+            stonk = check_stonk(ticker)
 
-                Huachis.Enviar_Shares(destinatario,cantidad,ticker,stonk[1])
+            Huachis.Enviar_Shares(destinatario,cantidad,ticker,stonk[1])
 
-                return random.choice(resp_huachiswap)
+            return random.choice(resp_huachiswap)
 
     return "Ah caray! de esas no tiene! ¿Seguro que no se las robaron?"
 
@@ -2071,20 +2047,18 @@ def buy(redditor_id,ticker,cantidad):
 
             return random.choice(resp_tip_sinbineros)
     
-        else:
 
-            Huachis_redditor.Enviar_Bineros("HuachiSwap",costo_total,nota=f"{ticker}")
+        Huachis_redditor.Enviar_Bineros("HuachiSwap",costo_total,nota=f"{ticker}")
 
-            #Acceder a cuenta del broker
-            Huachis_broker = HuachiNet("HuachiSwap")
+        #Acceder a cuenta del broker
+        Huachis_broker = HuachiNet("HuachiSwap")
 
-            Huachis_broker.Enviar_Shares(redditor_id,cantidad,ticker,stonk[1].replace(",",""))
+        Huachis_broker.Enviar_Shares(redditor_id,cantidad,ticker,stonk[1].replace(",",""))
 
-            return f"Compraste {cantidad:,} ({ticker}) a ${stonk[1]} por token\n\nMonto total de {costo_total * 3:,} usd ({costo_total:,} huachis UwU) retirados de tu cuenta\n\nPortafolio actualizado! Gracias por usar HuachiSwap ^_^" 
+        return f"Compraste {cantidad:,} ({ticker}) a ${stonk[1]} por token\n\nMonto total de {costo_total * 3:,} usd ({costo_total:,} huachis UwU) retirados de tu cuenta\n\nPortafolio actualizado! Gracias por usar HuachiSwap ^_^" 
 
-    else:
 
-        return "Esa stonk no la tenemos en existencia, verifica que sea la correcta o que este listada en HuachiSwap 'UwU'"
+    return "Esa stonk no la tenemos en existencia, verifica que sea la correcta o que este listada en HuachiSwap 'UwU'"
 
 def sell(redditor_id,ticker,cantidad):
     """DUMP IT"""
@@ -2112,25 +2086,24 @@ def sell(redditor_id,ticker,cantidad):
 
                 return f"Hijole wer@, no tienes suficientes {ticker} para completar la transaccion\n\nTienes {share[1]:,} ({ticker}) en tu portafolio."
 
-            else:
                 
-                #Obtener informacion de la stonk
-                stonk = check_stonk(ticker)
+            #Obtener informacion de la stonk
+            stonk = check_stonk(ticker)
 
-                #Vender shares!
-                Huachis_redditor.Enviar_Shares("HuachiSwap",cantidad,ticker,stonk[1].replace(",",""))
+            #Vender shares!
+            Huachis_redditor.Enviar_Shares("HuachiSwap",cantidad,ticker,stonk[1].replace(",",""))
 
-                #Acceder a cuenta de broker
+            #Acceder a cuenta de broker
 
-                Huachis_broker = HuachiNet("HuachiSwap")
+            Huachis_broker = HuachiNet("HuachiSwap")
 
-                #Calcular dinero a enviar
+            #Calcular dinero a enviar
 
-                costo_total = round((cantidad * Decimal(stonk[1].replace(",",""))) / 3)
+            costo_total = round((cantidad * Decimal(stonk[1].replace(",",""))) / 3)
 
-                Huachis_broker.Enviar_Bineros(redditor_id,costo_total,nota=f"{ticker}")
+            Huachis_broker.Enviar_Bineros(redditor_id,costo_total,nota=f"{ticker}")
 
-                return f"Vendiste {cantidad:,} ({ticker}) a ${stonk[1]} por token\n\nMonto total de {costo_total * 3:,} usd ({costo_total:,} huachis UwU) abonados a tu cuenta\n\nPortafolio actualizado! Gracias por usar HuachiSwap ^_^" 
+            return f"Vendiste {cantidad:,} ({ticker}) a ${stonk[1]} por token\n\nMonto total de {costo_total * 3:,} usd ({costo_total:,} huachis UwU) abonados a tu cuenta\n\nPortafolio actualizado! Gracias por usar HuachiSwap ^_^" 
 
     return "Ah caray! de esas no tiene! ¿Seguro que no se las robaron?"
 
