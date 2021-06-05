@@ -14,6 +14,7 @@ import operator
 import requests
 from bs4 import BeautifulSoup
 from decimal import *
+from misc import diccionario
 
 conn = sqlite3.connect("boveda.sqlite3")
 
@@ -67,10 +68,7 @@ galletas = open("./shop/galletas.txt", "r", encoding="utf-8").read().splitlines(
 
 valentines = open("./shop/valentin.txt", "r", encoding="utf-8").read().splitlines()
 
-stonks = ["AAPL","AMZN","TSLA","MRNA","NFLX","NVDA","NIO",
-          "WMT","COST","TUP","GME","NTDOY","SNE",
-          "MSFT","INTC","AMD","BTC-USD","ETH-USD","LTC-USD",
-          "VET-USD","NANO-USD","DOGE-USD"]
+stonks = diccionario['stonks']
 
 reddit = praw.Reddit(client_id=config.APP_ID, 
                      client_secret=config.APP_SECRET,
@@ -166,7 +164,7 @@ def tip(remitente,destinatario,cantidad) -> str:
                     #Abrimos cuenta y le damos dineros de bienvenida
                     Huachis.Bono_Bienvenida(destinatario)
                 
-                    reddit.redditor(destinatario).message("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial")
+                    reddit.redditor(destinatario).message(diccionario['bienvenida'])
                 #Iniciamos transaccion
                 Huachis.Enviar_Bineros(destinatario,cantidad)
 
@@ -453,14 +451,14 @@ def empleado_del_mes():
                             comandos += 3
 
                             #Opciones del menu
-                            opciones = ["monachina","trapo","furro","nalgotica","cura","corvido","galleta","huachito","chambeadora","valentin"]
+                            opciones = diccionario['opciones shop']
                         
                             for opcion in opciones:
 
                                 if "menu" in texto:
                                     
                                     #Enviar menu
-                                    reddit.redditor(str(comment.author)).message("Menu Shop","__HuachiStore - Abierto cuando llegamos, cerrado cuando nos vamos__\n\nEnvia un regalo usando el comando shop, seguido de una opcion del menu, todo a 5 huachis.\n\nRegalo | subcomando\n:--|--:\nMonas Chinas | monachina\nTrapitos | trapo\nFurros | furro\nHuachito | huachito\nNalgoticas | nalgotica\nMDLP | cura / corvido\nGanosas (Revistas para adultos) | chambeadora\nGalleta de la fortuna | galleta\n\nCompleta tu compra de la siguiente manera:\n\n    shop comando\n\n    Ejemplo: shop monachina\n\n    (no olvides el signo de exclamación)\n\nUsalo en la seccion de comentarios.")
+                                    reddit.redditor(str(comment.author)).message(diccionario['menu shop'])
                         
                                     movimientos += 1
 
@@ -478,13 +476,13 @@ def empleado_del_mes():
                             comandos += 3
 
                             #huachibonos
-                            perks = {"susana" : "Barrera Susana Distancia", "jelatina" : "Jelatina de BANANA", "seguro" : "Seguro para la 3era edad", "detente" : "Estampita Detente", "roja" : "Mariguana roja" , "azul" : "Mariguana azul", "dorada" : "Mariguana dorada" }
+                            perks = diccionario['bonos perks']
 
-                            traits = {"chocomilk" : "Chocomilk", "caguama" : "Carta Blanca", "vitaminas" : "Emulsion Scotch", "mod" : "Marika","verde":"Mariguana verde"}
+                            traits = diccionario['bonos traits']
 
-                            weapons = {"platano" : "Platano", "florecita" : "Florecita de vive sin drogas", "noroña" : "Rata con thinner", "fusca" : "Fusca", "ecayece" : "Ecayecelocico"}
-                          
-                            opciones = ["susana","jelatina","seguro","detente","chocomilk","caguama","vitaminas","mod","platano","florecita","noroña","fusca","ecayece","verde","roja","azul","dorada"]
+                            weapons = diccionario['bonos weapons']
+
+                            opciones = diccionario['opciones']
 
 
                             try:
@@ -492,8 +490,8 @@ def empleado_del_mes():
                                 if "menu" in texto:
                                     
                                     #Enviar menu
-                                    reddit.redditor(str(comment.author)).message("Menu Huachibonos","__Huachibonos - Esta clase de bonos, no los tiene ni obama__\n\nRecuerda que los huachibonos 🌀 consumen energia! Para recargar tu huachibono 🌀 necesitas comprar uno nuevo. La energia no es acumulable.\n\nCosto por huachibono: 🌀 = 1000  🎭 = 500  ⚔️ = 250\n\nHuachibono | subcomando\n:--|--:\nBarrera Susana Distancia 🌀 | susana\nJelatina de BANANA 🌀 | jelatina\nSeguro para la 3era edad 🌀 | seguro\nEstampita Detente 🌀 | detente\nMariguana roja 🌀 | roja\nMariguana azul 🌀 | azul\nMariguana dorada 🌀 | dorada\nChocomilk 🎭 | chocomilk\nCarta Blanca 🎭 | caguama\nEmulsion Scotch 🎭 | vitaminas\nMariguana verde 🎭 | verde\nPlatano ⚔️ | platano\nFlorecita de vive sin drogas ⚔️ | florecita\nRata con thinner ⚔️ | noroña\nFusca ⚔️ | fusca\nEcayecelosico ⚔️ | ecayece\n\nCompleta tu compra de la siguiente manera:\n\n    huachibono subcomando\n\n    Ejemplo: huachibono caguama\n\n    (no olvides el signo de exclamación)\n\nUsalo en la seccion de comentarios.")
-
+                                    reddit.redditor(str(comment.author)).message(diccionario['menu bonos'])
+                                    
                                     movimientos += 1
 
                                 for opcion in opciones:
@@ -955,7 +953,7 @@ def servicio_al_cliente():
 
                     atraco_perdida = [item for item in estado_cuenta[5] if int(item[2]) < 0] 
 
-                    chunk = f"__Saldo: {estado_cuenta[1]} Huachicoin(s)__\n\n**Total de movimientos**\n\nDepositos: {len(estado_cuenta[2])}  /  Retiros: {len(estado_cuenta[3])}\n\nAsaltos ganados: {len(asalto_victoria)}  /  Asaltos perdidos: {len(asalto_perdida)}\n\nAtracos ganados: {len(atraco_victoria)}  /  Atracos perdidos: {len(atraco_perdida)}\n\nHuachitos Comprados: {len(estado_cuenta[6])}  /  Huachitos Ganados: {len(estado_cuenta[7])}\n\nConfiguracion robos: 🌀{estado_cuenta[9]} (energia disponible: {estado_cuenta[10]})  /  🎭{estado_cuenta[11]}  /  ⚔️{estado_cuenta[12]}\n\nFecha | Nota | Cantidad | Destino / Origen\n:--|:--:|--:|:--:\n"
+                    chunk = f"__Saldo: {estado_cuenta[1]} Huachicoin(s)__\n\n**Total de movimientos**\n\nDepositos: {len(estado_cuenta[2])}  /  Retiros: {len(estado_cuenta[3])}\n\nAsaltos ganados: {len(asalto_victoria)}  /  Asaltos perdidos: {len(asalto_perdida)}\n\nAtracos ganados: {len(atraco_victoria)}  /  Atracos perdidos: {len(atraco_perdida)}\n\nHuachitos Comprados: {len(estado_cuenta[6])}  /  Huachitos Ganados: {len(estado_cuenta[7])}\n\nConfiguracion robos: �{estado_cuenta[9]} (energia disponible: {estado_cuenta[10]})  /  �{estado_cuenta[11]}  /  ⚔️{estado_cuenta[12]}\n\nFecha | Nota | Cantidad | Destino / Origen\n:--|:--:|--:|:--:\n"
 
                     for i,item in enumerate(estado_cuenta[0],start=1):
 
