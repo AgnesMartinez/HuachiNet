@@ -172,9 +172,7 @@ def tip(remitente,destinatario,cantidad) -> str:
 
         return "autotip"
 
-    else:
-    
-        return random.choice(resp_tip_envio) + f" [{cantidad} Huachicoin(s) Enviado(s)]"
+    return random.choice(resp_tip_envio) + f" [{cantidad} Huachicoin(s) Enviado(s)]"
 
 def edad_cuenta(redditor_id) -> int:
     """calcular la edad en dias de la cuenta"""
@@ -1498,35 +1496,34 @@ def pokermujicano(redditor_id):
                 return f"_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nEmpate tecnico, mi patron no me programo algo para esta situacion, no hay devoluciones es politica de la empresa, lo siento. A si que perdiste\n\n_Pot: {pot} huachicoins_"        
 
         #Escenario 4 - Una mano tiene digito como carta alta, la otra tiene letra
-        else:
 
             carta_alta_casa = casa[2]
-
+            
             carta_alta_redditor = redditor[2]
-
+            
             if carta_alta_casa[0].isdigit() == False and carta_alta_casa != "None":
-
+            
                 carta_alta_casa = [valor for letra,valor in letras.items() if letra == carta_alta_casa[0]]
-
+            
             if carta_alta_redditor[0].isdigit() == False and carta_alta_redditor != "None":
-
+            
                 carta_alta_redditor = [valor for letra,valor in letras.items() if letra == carta_alta_redditor[0]]
-
+            
             if int(carta_alta_casa[0]) > int(carta_alta_redditor[0]):
-
+            
                 return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para el empleado, usando {casa[0][0]}\n\n_Pot: {pot} huachicoins_' 
-
+            
             elif int(carta_alta_casa[0]) < int(carta_alta_redditor[0]):
-
+            
                 #Acceder a la cuenta de la shop
                 Huachis_shop = HuachiNet("Shop")
-
+            
                 Huachis_shop.Enviar_Bineros(redditor_id,pot,nota="Poker")
-
+            
                 return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para {redditor_id}, usando {redditor[0][0]}\n\n_Pot: {pot} huachicoins_'
-
+            
             elif int(carta_alta_casa[0]) == int(carta_alta_redditor[0]):
-
+            
                 return f"_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nEmpate tecnico, mi patron no me programo algo para esta situacion, no hay devoluciones es politica de la empresa, lo siento. A si que perdiste\n\n_Pot: {pot} huachicoins_"
                 
 def combinaciones_poker(mano):
@@ -1629,26 +1626,25 @@ def combinaciones_poker(mano):
 
         return (puntaje,valores_corregidos,"None")
 
-    else:    
 
-        for i in range(5):
-
-            cartas = sorted(valores_corregidos,reverse=True)
-
-            if i == 4:
-                break
-
-            else:
-
-                if cartas[i] - cartas[i+1] == 1:
-                        
-                    escalera += 1
-                
-        if escalera == 4:
-            #Puntaje escalera
-            puntaje = ("escalera",5)
-
-            return (puntaje,valores_corregidos,"None")
+    for i in range(5):
+    
+        cartas = sorted(valores_corregidos,reverse=True)
+    
+        if i == 4:
+            break
+    
+        else:
+    
+            if cartas[i] - cartas[i+1] == 1:
+                    
+                escalera += 1
+            
+    if escalera == 4:
+        #Puntaje escalera
+        puntaje = ("escalera",5)
+    
+        return (puntaje,valores_corregidos,"None")
 
     #Poker / Tercia / Dos pares / Pares
     pares = 0
