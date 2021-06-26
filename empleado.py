@@ -48,7 +48,7 @@ def empleado_del_mes():
 
                             try:
                                 #Extraemos la cantidad
-                                cantidad = re.findall('!tip\ *(\d+)', texto)[0]
+                                cantidad = (re.findall('!tip\ *(\d+)', texto))[0]
 
                                 #Corroboramos que sea un numero
                                 if cantidad.isdigit():
