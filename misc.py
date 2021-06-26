@@ -1,8 +1,7 @@
+
 diccionario = {
   'stonks' : ("AAPL","AMZN","TSLA","MRNA","NFLX","NVDA","NIO","WMT","COST","TUP","GME","NTDOY","SNE","MSFT","INTC","AMD","BTC-USD","ETH-USD","LTC-USD","VET-USD","NANO-USD","DOGE-USD"),
 
-  'bienvenida' : ("Bienvenid@ a la HuachiNet!", "Recuerda que todo esto es por mera diversion, amor al arte digital. Revisa el [post sticky](https://www.reddit.com/r/Mujico/comments/ky9ehw/comandos_de_la_huachinet/) en Mujico para mas informacion de como usar la red, aqui mismo puedes consultar tu saldo e historial de tu cuenta, solo escribe: !historial"),
-  
   'opciones shop' : ("monachina","trapo","furro","nalgotica","cura","corvido","galleta","huachito","chambeadora","valentin"),
   
   'menu shop' : ("Menu Shop","__HuachiStore - Abierto cuando llegamos, cerrado cuando nos vamos__\n\nEnvia un regalo usando el comando shop, seguido de una opcion del menu, todo a 5 huachis.\n\nRegalo | subcomando\n:--|--:\nMonas Chinas | monachina\nTrapitos | trapo\nFurros | furro\nHuachito | huachito\nNalgoticas | nalgotica\nMDLP | cura / corvido\nGanosas (Revistas para adultos) | chambeadora\nGalleta de la fortuna | galleta\n\nCompleta tu compra de la siguiente manera:\n\n    shop comando\n\n    Ejemplo: shop monachina\n\n    (no olvides el signo de exclamación)\n\nUsalo en la seccion de comentarios."),
@@ -18,3 +17,50 @@ diccionario = {
   'bonos opciones' : ["susana","jelatina","seguro","detente","chocomilk","caguama","vitaminas","mod","platano","florecita","noroña","fusca","ecayece","verde","roja","azul","dorada"]
 
 }
+
+resp_saldo = open("./frases/frases_saldo.txt", "r", encoding="utf-8").read().splitlines()
+
+resp_tip_envio = open("./frases/frases_envio.txt", "r", encoding="utf-8").read().splitlines()
+
+resp_empleado_error = open("./frases/frases_error.txt", "r", encoding="utf-8").read().splitlines()
+
+resp_tip_cuenta = open("./frases/frases_cuenta.txt", "r", encoding="utf-8").read().splitlines()
+
+resp_tip_sinbineros = open("./frases/frases_sinbineros.txt", "r", encoding="utf-8").read().splitlines()
+
+resp_tip_empleado = open("./frases/frases_empleado.txt", "r", encoding="utf-8").read().splitlines()
+
+resp_shop = open("./frases/frases_shop.txt", "r", encoding="utf-8").read().splitlines()
+
+resp_tumbar_cholo = open("./frases/frases_tumbar_cholo.txt", "r", encoding="utf-8").read().splitlines()
+
+resp_tumbar_victima = open("./frases/frases_tumbar_victima.txt", "r", encoding="utf-8").read().splitlines()
+
+resp_seguridad = open("./frases/frases_seguridad.txt", "r", encoding="utf-8").read().splitlines()
+
+resp_autorobo = open("./frases/frases_autorobo.txt", "r", encoding="utf-8").read().splitlines()
+
+resp_levanton = open("./frases/frases_levanton.txt", "r", encoding="utf-8").read().splitlines()
+
+resp_huachilate = open("./frases/frases_huachilate.txt", "r", encoding="utf-8").read().splitlines()
+
+resp_huachibono = open("./frases/frases_huachibono.txt", "r", encoding="utf-8").read().splitlines()
+
+resp_huachiswap = open("./frases/frases_huachiswap.txt","r",encoding="utf-8").read().splitlines()
+
+monaschinas = open("./shop/monaschinas.txt", "r", encoding="utf-8").read().splitlines()
+
+trapos = open("./shop/trapos.txt", "r", encoding="utf-8").read().splitlines()
+
+furros = open("./shop/furro.txt", "r", encoding="utf-8").read().splitlines()
+
+nalgoticas = open("./shop/nalgoticas.txt", "r", encoding="utf-8").read().splitlines()
+
+curas = open("./shop/curas.txt", "r", encoding="utf-8").read().splitlines()
+
+chambeadoras = open("./shop/ganosas.txt", "r", encoding="utf-8").read().splitlines()
+
+galletas = open("./shop/galletas.txt", "r", encoding="utf-8").read().splitlines()
+
+valentines = open("./shop/valentin.txt", "r", encoding="utf-8").read().splitlines()
+

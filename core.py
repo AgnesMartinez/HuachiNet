@@ -24,37 +24,32 @@ class HuachiNet():
     def __init__(self,usuario):
         #Conexion a BD
         self.conn = sqlite3.connect("boveda.sqlite3")
+
         self.cursor = self.conn.cursor()
+
         self.id = usuario
+
         self.perk, self.power, self.trait, self.weapon = self.Consultar_Perks()
+
         self.saldo_total = self.Consultar_Saldo()
+
         self.historial = self.Historial_Cuenta()
+
         self.depositos = self.Historial_Cuenta(tipo_movimiento="Deposito")
+
         self.retiros = self.Historial_Cuenta(tipo_movimiento="Retiro")
+
         self.asaltos = self.Historial_Cuenta(tipo_movimiento="Asalto")
+
         self.huachitos = self.Historial_Cuenta(tipo_movimiento="Huachito")
+
         self.premios_huachito = self.Historial_Cuenta(tipo_movimiento="Premio Huachito")
+
         self.atracos = self.Historial_Cuenta(tipo_movimiento="Atraco")
+
         self.levantones = self.Historial_Cuenta(tipo_movimiento="Levanton")
 
 
-    def Bono_Bienvenida(self,usuario):
-        """Entregar bineros a los clientes nuevos"""
-
-        query = """INSERT INTO transacciones (timestamp,usuario,cantidad,nota,origen_destino) VALUES (?,?,?,?,?)"""
-
-        timestamp = time.time()
-
-        try: 
-            self.cursor.execute(query,(timestamp,usuario,1000,"Bono Inicial","Bodega"))
-
-            self.cursor.execute(query,(timestamp,"Bodega",-1000,"Retiro",usuario))
-
-            self.conn.commit()
-
-        except Exception as e:
-            print(f'----\n{e}')
-    
     def Verificar_Usuario(self,usuario):
         """Verificar si existe el cliente en la BD"""
 
@@ -62,19 +57,28 @@ class HuachiNet():
 
         query = """SELECT ID FROM transacciones WHERE usuario=? LIMIT 1"""
 
-        try:
-            self.cursor
+        resultado = self.cursor.execute(query,(usuario,)).fetchone()
 
-            resultado = self.cursor.execute(query,(usuario,)).fetchone()
+        if resultado != None:
 
-            if resultado != None:
-
-                existe = True
-
-        except Exception as e:
-            print(f'----\n{e}')
+            existe = True
 
         return existe
+
+    def Bono_Bienvenida(self,usuario):
+        """Entregar bineros a los clientes nuevos"""
+
+        if self.Verificar_Usuario(usuario) == False:
+
+            query = """INSERT INTO transacciones (timestamp,usuario,cantidad,nota,origen_destino) VALUES (?,?,?,?,?)"""
+
+            timestamp = time.time()
+        
+            self.cursor.execute(query,(timestamp,usuario,1000,"Bono Inicial","Bodega"))
+
+            self.cursor.execute(query,(timestamp,"Bodega",-1000,"Retiro",usuario))
+
+            self.conn.commit()
 
     def Enviar_Bineros(self,usuario,cantidad,nota="Default"):
         """Registrar transacciones de bineros"""
@@ -83,64 +87,58 @@ class HuachiNet():
 
         timestamp = time.time()
 
-        try:
-            if nota == "Default":
+        self.Bono_Bienvenida(usuario)
+        
+        if nota == "Default":
 
-                self.cursor.execute(query,(timestamp,usuario,cantidad,"Deposito",self.id))
+            self.cursor.execute(query,(timestamp,usuario,cantidad,"Deposito",self.id))
 
-                negativo =  cantidad - (cantidad * 2)
+            negativo =  cantidad - (cantidad * 2)
 
-                self.cursor.execute(query,(timestamp,self.id,negativo,"Retiro",usuario))
+            self.cursor.execute(query,(timestamp,self.id,negativo,"Retiro",usuario))
 
-                self.conn.commit()
+            self.conn.commit()
 
-            elif nota != "Default":
+        elif nota != "Default":
 
-                self.cursor.execute(query,(timestamp,usuario,cantidad,nota,self.id))
+            self.cursor.execute(query,(timestamp,usuario,cantidad,nota,self.id))
 
-                negativo =  cantidad - (cantidad * 2)
+            negativo =  cantidad - (cantidad * 2)
 
-                self.cursor.execute(query,(timestamp,self.id,negativo,nota,usuario))
+            self.cursor.execute(query,(timestamp,self.id,negativo,nota,usuario))
 
-                self.conn.commit()
+            self.conn.commit()
 
-        except Exception as e:
-            print(f'----\n{e}')
 
     def Consultar_Saldo(self):
         """Consulta el saldo total del cliente"""
 
         query = """SELECT SUM(cantidad) FROM transacciones WHERE usuario=?"""
 
-        try:
-            self.cursor.execute(query,(self.id,))
+        self.cursor.execute(query,(self.id,))
 
-            resultado = self.cursor.fetchone()
+        resultado = self.cursor.fetchone()
 
-            return resultado[0]
+        return resultado[0]
         
-        except Exception as e:
-            print(f'----\n{e}')  
-    
+
     def Historial_Cuenta(self, tipo_movimiento = "Global"):
         """Consultar historial de movimientos del cliente desde el inicio de la cuenta"""
-        try:
-            if tipo_movimiento == "Global":
-                query = """SELECT id,timestamp,cantidad,nota,origen_destino FROM transacciones WHERE usuario=? ORDER BY id DESC"""
-                parametros = (self.id,)
-
-            else:
-                query = """SELECT id,timestamp,cantidad,origen_destino FROM transacciones WHERE usuario=? AND nota=? ORDER BY id DESC"""
-                parametros = (self.id,tipo_movimiento)
-
-            self.cursor.execute(query,parametros)
-
-            resultado = self.cursor.fetchall()
-
-            return resultado
         
-        except Exception as e:
-            print(f'----\n{e}')
+        if tipo_movimiento == "Global":
+
+            query = """SELECT id,timestamp,cantidad,nota,origen_destino FROM transacciones WHERE usuario=? ORDER BY id DESC"""
+            
+            parametros = (self.id,)
+
+        else:
+                
+            query = """SELECT id,timestamp,cantidad,origen_destino FROM transacciones WHERE usuario=? AND nota=? ORDER BY id DESC"""
+                
+            parametros = (self.id,tipo_movimiento)
+
+        return self.cursor.execute(query,parametros).fetchall()
+        
              
     def Mujicanos(self):
         """Lista de usuarios activos"""
@@ -244,19 +242,14 @@ class HuachiNet():
 
         timestamp = time.time()
 
-        try:
+        self.cursor.execute(query,(timestamp,usuario,cantidad,share,precio,self.id)) 
 
-            self.cursor.execute(query,(timestamp,usuario,cantidad,share,precio,self.id)) 
+        negativo = cantidad - (cantidad * 2)
 
-            negativo = cantidad - (cantidad * 2)
+        self.cursor.execute(query,(timestamp,self.id,negativo,share,precio,usuario))
 
-            self.cursor.execute(query,(timestamp,self.id,negativo,share,precio,usuario))
+        self.conn.commit()
 
-            self.conn.commit()
-
-        except Exception as e:
-            print(f'----\n{e}')
-                
     def Consultar_Shares(self):
         """Consulta tu portafolio"""
 
