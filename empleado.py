@@ -3,11 +3,11 @@ from habilidades import *
 
 
 def empleado_del_mes():
-    """El motor de nuestra huachieconomia"""      
+    """El motor de nuestra huachieconomia"""
 
     #Buscar subreddits
     for subreddit in config.SUBREDDITS:
-       
+
         for comment in reddit.subreddit(subreddit).comments(limit=50):
 
             #Buscar si el comentario ha sido procesado previamante
@@ -23,7 +23,7 @@ def empleado_del_mes():
                     return reddit.redditor(str(comment.author)).message("Ticket de Compra - Shop",compra)
 
                 def shop_huachibono(clase,item):
-                    
+
                     bono = actualizar_huachibonos(str(comment.author),clase,item)
 
                     return reddit.redditor(str(comment.author)).message("Ticket de Compra - Huachibono",bono)
@@ -33,13 +33,14 @@ def empleado_del_mes():
                 comandos = 0
 
                 for item in texto.split():
-                    
+
                     #No mas de 3 comandos por mono
                     if comandos > 2:
-                        
+
                         break
 
-                    if (comment.parent().author != None and comment.parent().author != "None") or (comment.author != None and comment.author != "None"):
+                    if ((comment.parent().author != None and comment.parent().author != "None")
+                            or (comment.author != None and comment.author != "None")):
                         comandos += 1
 
 
@@ -54,41 +55,45 @@ def empleado_del_mes():
                                 if cantidad.isdigit():
 
                                     #Realizamos la transaccion
-                                    transaccion = tip(str(comment.author),str(comment.parent().author),math.ceil(abs(float(cantidad))))
+                                    transaccion = tip(str(comment.author),str(comment.parent().author),
+                                            math.ceil(abs(float(cantidad))))
 
                                     #Evitar que el empleado se responda a si mismo.
                                     if transaccion == "autotip":
-                                        
+
                                         pass
-                                    
+
                                     else:
 
                                         #Responder al cliente
-                                        reddit.redditor(str(comment.author)).message("Transaccion Exitosa",transaccion)
-                                            
+                                        reddit.redditor(str(comment.author)).message(
+                                                "Transaccion Exitosa",transaccion)
+
                             except:
                                 #Enviar mensaje de error si el empleado no entendio lo que recibio
                                 error_log("Tip -" + traceback.format_exc())
 
-                                reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+                                reddit.redditor(str(comment.author)).message(
+                                        "Mensaje Error",random.choice(resp_empleado_error))
 
 
                         elif "!saldazo" in item or "!saldo" in item:
 
                             #Realizar consulta
                             try:
-                                
+
                                 consulta = saldazo(str(comment.author))
 
                                 #Responder al cliente
                                 reddit.redditor(str(comment.author)).message("Saldazo",consulta)
 
-                                
+
                             except:
                                 #Enviar mensaje de error si el empleado no entendio lo que recibio
                                 error_log("Saldazo -" + traceback.format_exc())
 
-                                reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+                                reddit.redditor(str(comment.author)).message(
+                                        "Mensaje Error",random.choice(resp_empleado_error))
 
 
                         elif "!rankme" in item:
@@ -106,11 +111,12 @@ def empleado_del_mes():
                                 #Enviar mensaje de error si el empleado no entendio lo que recibio
                                 error_log("rankme -" + traceback.format_exc())
 
-                                reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+                                reddit.redditor(str(comment.author)).message(
+                                        "Mensaje Error",random.choice(resp_empleado_error))
 
 
                         elif "!rank25" in item:
-                          
+
                             #Realizar consulta
                             try:
                                 #Responder al cliente
@@ -122,7 +128,8 @@ def empleado_del_mes():
                                 #Enviar mensaje de error si el empleado no entendio lo que recibio
                                 error_log("rank25 -" + traceback.format_exc())
 
-                                reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+                                reddit.redditor(str(comment.author)).message(
+                                        "Mensaje Error",random.choice(resp_empleado_error))
 
 
                         elif "!rank" in item:
@@ -138,7 +145,8 @@ def empleado_del_mes():
                                 #Enviar mensaje de error si el empleado no entendio lo que recibio
                                 error_log("rank10" + traceback.format_exc())
 
-                                reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+                                reddit.redditor(str(comment.author)).message(
+                                        "Mensaje Error",random.choice(resp_empleado_error))
 
 
                         elif "!shop" in item:
@@ -151,16 +159,16 @@ def empleado_del_mes():
                                 opciones = diccionario['opciones shop']
 
                                 if "menu" in texto:
-                                        
+
                                     #Enviar menu
                                     reddit.redditor(str(comment.author)).message(diccionario['menu shop'])
 
                                     continue
-                            
+
                                 for opcion in opciones:
 
                                     if opcion in texto:
-                                        
+
                                         #Enviar regalo
                                         shop_item(opcion)
 
@@ -184,14 +192,14 @@ def empleado_del_mes():
                                 try:
 
                                     if "menu" in texto:
-                                        
+
                                         #Enviar menu
                                         reddit.redditor(str(comment.author)).message(diccionario['menu bonos'])
 
                                     for opcion in opciones:
-                                
+
                                         if opcion in texto:
-                                        
+
                                             if opcion in perks:
 
                                                 #comprar huachibono
@@ -212,7 +220,8 @@ def empleado_del_mes():
                                     #Enviar mensaje de error si el empleado no entendio lo que recibio
                                     error_log("huachibono" + traceback.format_exc())
 
-                                    reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+                                    reddit.redditor(str(comment.author)).message(
+                                            "Mensaje Error",random.choice(resp_empleado_error))
 
 
                         elif "!asalto" in item:
@@ -229,24 +238,26 @@ def empleado_del_mes():
                                 #Enviar mensaje de error si el empleado no entendio lo que recibio
                                 error_log("Asalto -" + traceback.format_exc())
 
-                                reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+                                reddit.redditor(str(comment.author)).message(
+                                        "Mensaje Error",random.choice(resp_empleado_error))
 
 
                         elif "!atraco" in item:
-                           
-                                #Realizar consulta
-                                try:
 
-                                    resultado = asalto(str(comment.author),str(comment.parent().author),"atraco")
+                            #Realizar consulta
+                            try:
 
-                                    #Responder al cliente
-                                    comment.reply(resultado)
+                                resultado = asalto(str(comment.author),str(comment.parent().author),"atraco")
 
-                                except:
-                                    #Enviar mensaje de error si el empleado no entendio lo que recibio
-                                    error_log("Atraco -" + traceback.format_exc())
+                                #Responder al cliente
+                                comment.reply(resultado)
 
-                                    reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+                            except:
+                                #Enviar mensaje de error si el empleado no entendio lo que recibio
+                                error_log("Atraco -" + traceback.format_exc())
+
+                                reddit.redditor(str(comment.author)).message(
+                                    "Mensaje Error",random.choice(resp_empleado_error))
 
 
                         elif "!levanton" in item:
@@ -269,7 +280,8 @@ def empleado_del_mes():
                                     #Enviar mensaje de error si el empleado no entendio lo que recibio
                                     #error_log("Levanton -" + traceback.format_exc())
 
-                                    reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+                                    reddit.redditor(str(comment.author)).message(
+                                            "Mensaje Error",random.choice(resp_empleado_error))
 
 
                         elif "!huachito" in item:
@@ -298,7 +310,7 @@ def empleado_del_mes():
                                     if cantidad < 31:
 
                                         for i in range(cantidad):
-                                            
+
                                             resultado = slots(str(comment.author))
 
                                             respuesta +=  f"\n\n{resultado}\n\n***"
@@ -306,35 +318,38 @@ def empleado_del_mes():
                                         if cantidad < 6:
                                             #Responder al cliente en comentarios
                                             comment.reply(respuesta)
-                                        
+
                                         else:
                                             #Responder al cliente por DM
-                                            reddit.redditor(str(comment.author)).message(f"Compraste {cantidad} huachitos!",respuesta)
+                                            reddit.redditor(str(comment.author)).message(
+                                                    f"Compraste {cantidad} huachitos!",respuesta)
 
-                                            
+
                                 except:
                                     #Enviar mensaje de error si el empleado no entendio lo que recibio
                                     error_log("Huachito -" + traceback.format_exc())
-                                    
-                                    reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+
+                                    reddit.redditor(str(comment.author)).message(
+                                            "Mensaje Error",random.choice(resp_empleado_error))
 
 
                         elif "!poker" in item:
-                       
-                                #Realizar consulta
-                                try:
 
-                                    resultado = pokermujicano(str(comment.author))
+                            #Realizar consulta
+                            try:
 
-                                    #Responder al cliente
-                                    comment.reply(resultado)
+                                resultado = pokermujicano(str(comment.author))
+
+                                #Responder al cliente
+                                comment.reply(resultado)
 
 
-                                except:
-                                    #Enviar mensaje de error si el empleado no entendio lo que recibio
-                                    error_log("Poker -" + traceback.format_exc())
-                                    
-                                    reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+                            except:
+                                #Enviar mensaje de error si el empleado no entendio lo que recibio
+                                error_log("Poker -" + traceback.format_exc())
+
+                                reddit.redditor(str(comment.author)).message(
+                                        "Mensaje Error",random.choice(resp_empleado_error))
 
 
 
@@ -371,14 +386,16 @@ def empleado_del_mes():
                                             compra = huachilate(str(comment.author))
 
                                         #Responder al cliente
-                                        reddit.redditor(str(comment.author)).message(f"Compraste {cantidad} huachilate(s)!",compra)
+                                        reddit.redditor(str(comment.author)).message(
+                                                f"Compraste {cantidad} huachilate(s)!",compra)
 
 
                                 except:
                                     #Enviar mensaje de error si el empleado no entendio lo que recibio
                                     error_log("Huachilate -" + traceback.format_exc())
-                                    
-                                    reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+
+                                    reddit.redditor(str(comment.author)).message(
+                                            "Mensaje Error",random.choice(resp_empleado_error))
 
 
                         elif "!rtd" in item:
@@ -386,7 +403,7 @@ def empleado_del_mes():
                             try:
                                 #Extraemos la cantidad
                                 string = comment.body.lower()
-                    
+
                                 pattern = '!rtd\ *(\d+)'
 
                                 result = re.findall(pattern, string)
@@ -394,18 +411,19 @@ def empleado_del_mes():
                                 numero = abs(int(result[0]))
 
                                 if numero > 0 and numero < 7:
-                                    
+
                                     #Realizamos la transaccion
                                     resultado = rollthedice(str(comment.author),numero)
-                                    
+
                                     #Responder al cliente
-                                    comment.reply(resultado)          
-                                            
+                                    comment.reply(resultado)
+
                             except:
                                 #Enviar mensaje de error si el empleado no entendio lo que recibio
                                 error_log("RTD -" + traceback.format_exc())
 
-                                reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+                                reddit.redditor(str(comment.author)).message(
+                                        "Mensaje Error",random.choice(resp_empleado_error))
 
 
                         elif "!stonks" in item:
@@ -415,19 +433,21 @@ def empleado_del_mes():
                                 comandos += 2
 
                                 try:
-                                
+
                                     #Realizamos la consulta
                                     resultado = consultar_stonks()
-                                        
+
                                     #Responder al cliente
-                                    reddit.redditor(str(comment.author)).message("HuachiSwap Liquidity Pool",resultado)
-            
-                                                
+                                    reddit.redditor(str(comment.author)).message(
+                                            "HuachiSwap Liquidity Pool",resultado)
+
+
                                 except:
                                     #Enviar mensaje de error si el empleado no entendio lo que recibio
                                     error_log("stonks -" + traceback.format_exc())
 
-                                    reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+                                    reddit.redditor(str(comment.author)).message(
+                                            "Mensaje Error",random.choice(resp_empleado_error))
 
 
                         elif "!portafolio" in item:
@@ -437,21 +457,23 @@ def empleado_del_mes():
                                 comandos += 2
 
                                 try:
-                                
+
                                     #Realizamos la consulta
                                     resultado = portafolio(str(comment.author))
-                                        
+
                                     #Responder al cliente
-                                    reddit.redditor(str(comment.author)).message("HuachiSwap - Portafolio",resultado)
-                
-                                                
+                                    reddit.redditor(str(comment.author)).message(
+                                            "HuachiSwap - Portafolio",resultado)
+
+
                                 except:
                                     #Enviar mensaje de error si el empleado no entendio lo que recibio
                                     error_log("Portafolio -" + traceback.format_exc())
 
-                                    reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+                                    reddit.redditor(str(comment.author)).message(
+                                            "Mensaje Error",random.choice(resp_empleado_error))
 
-                        
+
                         elif "!comprar" in item or "!long" in item:
 
                             if comment.author != None and comment.author != "None":
@@ -462,7 +484,7 @@ def empleado_del_mes():
                                     #Comprar X cantidad de tokens.
 
                                     comentario = texto.split()
-                        
+
                                     for i,item in enumerate(comentario,start=0):
 
                                         if "!comprar" in item or "!long" in item:
@@ -474,16 +496,18 @@ def empleado_del_mes():
                                             compra = buy(str(comment.author),ticker.upper(),cantidad)
 
                                             #Responder al cliente
-                                            reddit.redditor(str(comment.author)).message("HuachiSwap - Resumen de operacion",compra)
+                                            reddit.redditor(str(comment.author)).message(
+                                                    "HuachiSwap - Resumen de operacion",compra)
 
                                             break
-                                
+
                                 except:
 
                                     #Enviar mensaje de error si el empleado no entendio lo que recibio
                                     error_log("Long -" + traceback.format_exc())
-                                    
-                                    reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+
+                                    reddit.redditor(str(comment.author)).message(
+                                            "Mensaje Error",random.choice(resp_empleado_error))
 
 
                         elif "!vender" in item or "!short" in item:
@@ -508,15 +532,17 @@ def empleado_del_mes():
                                             venta = sell(str(comment.author),ticker.upper(),cantidad)
 
                                             #Responder al cliente
-                                            reddit.redditor(str(comment.author)).message("HuachiSwap - Resumen de operacion",venta)
+                                            reddit.redditor(str(comment.author)).message(
+                                                    "HuachiSwap - Resumen de operacion",venta)
 
                                             break
                                 except:
 
                                     #Enviar mensaje de error si el empleado no entendio lo que recibio
                                     error_log("Short -" + traceback.format_exc())
-                                    
-                                    reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+
+                                    reddit.redditor(str(comment.author)).message(
+                                            "Mensaje Error",random.choice(resp_empleado_error))
 
 
                         elif "!huachiswap" in item:
@@ -526,7 +552,7 @@ def empleado_del_mes():
                                 comandos += 2
 
                             try:
-                                
+
                                 #Enviar X cantidad de tokens.
 
                                 comentario = texto.split()
@@ -538,20 +564,23 @@ def empleado_del_mes():
                                         ticker = comentario[i+1]
 
                                         cantidad = math.ceil(abs(float(comentario[i+2])))
-                              
-                                        #Realizamos la consulta
-                                        resultado = huachiswap(str(comment.author),str(comment.parent().author),ticker.upper(),cantidad)
-                                    
-                                        #Responder al cliente
-                                        reddit.redditor(str(comment.author)).message("HuachiSwap - Transaccion Exitosa",resultado)
 
-                                        break             
-                                            
+                                        #Realizamos la consulta
+                                        resultado = huachiswap(str(comment.author),
+                                                str(comment.parent().author),ticker.upper(),cantidad)
+
+                                        #Responder al cliente
+                                        reddit.redditor(str(comment.author)).message(
+                                                "HuachiSwap - Transaccion Exitosa",resultado)
+
+                                        break
+
                             except:
                                 #Enviar mensaje de error si el empleado no entendio lo que recibio
                                 error_log("HuachiSwap -" + traceback.format_exc())
 
-                                reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+                                reddit.redditor(str(comment.author)).message(
+                                        "Mensaje Error",random.choice(resp_empleado_error))
 
 
 def servicio_al_cliente():
@@ -582,28 +611,29 @@ def servicio_al_cliente():
 
                     atraco_victoria = [item for item in huachis.atracos if int(item[2]) > 0]
 
-                    atraco_perdida = [item for item in huachis.atracos if int(item[2]) < 0] 
+                    atraco_perdida = [item for item in huachis.atracos if int(item[2]) < 0]
 
                     chunk = f"__Saldo: {huachis.saldo_total} Huachicoin(s)__\n\n**Total de movimientos**\n\nDepositos: {len(huachis.depositos)}  |  Retiros: {len(huachis.retiros)}\n\nAsaltos | ganados: {len(asalto_victoria)} | perdidos: {len(asalto_perdida)}\n\nAtracos | ganados: {len(atraco_victoria)} | perdidos: {len(atraco_perdida)}\n\nHuachitos | Comprados: {len(huachis.huachitos)} | Ganados: {len(huachis.premios_huachito)}\n\nBuild: �{huachis.perk} (energia disponible: {huachis.power})  |  �{huachis.trait}  |  ⚔️{huachis.weapon}\n\nFecha | Nota | Cantidad | Destino / Origen\n:--|:--:|--:|:--:\n"
 
                     for i,item in enumerate(huachis.historial,start=1):
 
                         chunk += f"{datetime.fromtimestamp(float(item[1])).ctime()} | {item[3]} | {item[2]} | {item[4]}\n"
-                        
+
                         if len(huachis.historial) < 20:
-                            
+
                             x = len(huachis.historial)
 
                         else:
 
                             x = 20
-                            
+
                         if i % x == 0:
 
-                            reddit.redditor(str(mensaje.author)).message(f"Estado de Cuenta: {mensaje.author}",chunk)
+                            reddit.redditor(str(mensaje.author)).message(
+                                    f"Estado de Cuenta: {mensaje.author}",chunk)
 
                             break
-                
+
             except Exception as e:
                 #Mensaje no tienes cuenta
                 error_log(e)
@@ -612,7 +642,7 @@ def servicio_al_cliente():
 
 
 if __name__ == "__main__":
-    
+
     while True:
 
         start_time = time.time()
@@ -623,6 +653,6 @@ if __name__ == "__main__":
 
         print("\nTermine mi trabajo patron!")
 
-        print(f"--- {time.time() - start_time} seconds ---")  
+        print(f"--- {time.time() - start_time} seconds ---")
 
         time.sleep(30)
