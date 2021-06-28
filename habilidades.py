@@ -557,106 +557,102 @@ def pokermujicano(redditor_id):
         return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para {redditor_id}, con {redditor[0][0]}\n\n_Pot: {pot} huachicoins_'
 
     #Empate tecnico, desempate segun combinacion (4 escenarios)
-    elif casa[0][1] == redditor[0][1]:
+    letras = {"K":13,"A":14,"J":11,"Q":12}
 
-        letras = {"K":13,"A":14,"J":11,"Q":12}
+    if casa[2] in palos or redditor[2] in palos:
+        #Escenario 1 - Palo que provoco escalera color, color
+        carta_alta_casa = [carta[1] for carta in mano_casa if carta[2] == casa[2]]
 
-        if casa[2] in palos or redditor[2] in palos:
-            #Escenario 1 - Palo que provoco escalera color, color
-            carta_alta_casa = [carta[1] for carta in mano_casa if carta[2] == casa[2]]
+        carta_alta_redditor = [carta[1] for carta in mano_redditor if carta[2] == redditor[2]]
 
-            carta_alta_redditor = [carta[1] for carta in mano_redditor if carta[2] == redditor[2]]
+        carta_alta_casa = [valor for letra,valor in letras.items() if letra ==
+            carta_alta_casa[0] and carta_alta_casa[0].isdigit() == False]
 
-            carta_alta_casa = [valor for letra,valor in letras.items() if letra ==
-                carta_alta_casa[0] and carta_alta_casa[0].isdigit() == False]
+        carta_alta_redditor = [valor for letra,valor in letras.items() if letra ==
+            carta_alta_redditor[0]] and carta_alta_redditor[0].isdigit() == False
 
-            carta_alta_redditor = [valor for letra,valor in letras.items() if letra ==
-                carta_alta_redditor[0]] and carta_alta_redditor[0].isdigit() == False
+        if int(carta_alta_casa[0]) > int(carta_alta_redditor[0]):
 
-            if int(carta_alta_casa[0]) > int(carta_alta_redditor[0]):
+            return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para el empleado, usando {casa[0][0]}\n\n_Pot: {pot} huachicoins_'
 
-                return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para el empleado, usando {casa[0][0]}\n\n_Pot: {pot} huachicoins_'
+        elif int(carta_alta_casa[0]) < int(carta_alta_redditor[0]):
 
-            elif int(carta_alta_casa[0]) < int(carta_alta_redditor[0]):
+            #Acceder a la cuenta de la shop
+            Huachis_shop = HuachiNet("Shop")
 
-                #Acceder a la cuenta de la shop
-                Huachis_shop = HuachiNet("Shop")
+            Huachis_shop.Enviar_Bineros(redditor_id,pot,nota="Poker")
 
-                Huachis_shop.Enviar_Bineros(redditor_id,pot,nota="Poker")
+            return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para {redditor_id}, usando {redditor[0][0]}\n\n_Pot: {pot} huachicoins_'
 
-                return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para {redditor_id}, usando {redditor[0][0]}\n\n_Pot: {pot} huachicoins_'
+        return f"_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nEmpate tecnico, mi patron no me programo algo para esta situacion, no hay devoluciones es politica de la empresa, lo siento. A si que perdiste\n\n_Pot: {pot} huachicoins_"
+
+    #Escenario 2 - ambas manos tienen digito como carta alta
+    elif casa[2].isdigit() and redditor[2].isdigit():
+
+        if int(casa[2]) > int(redditor[2]):
+
+            return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para el empleado, usando {casa[0][0]}\n\n_Pot: {pot} huachicoins_'
+
+        elif int(casa[2]) < int(redditor[2]):
+
+            #Acceder a la cuenta de la shop
+            Huachis_shop = HuachiNet("Shop")
+
+            Huachis_shop.Enviar_Bineros(redditor_id,pot,nota="Poker")
+
+            return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para {redditor_id}, usando {redditor[0][0]}\n\n_Pot: {pot} huachicoins_'
+
+        return f"_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nEmpate tecnico, mi patron no me programo algo para esta situacion, no hay devoluciones es politica de la empresa, lo siento. A si que perdiste\n\n_Pot: {pot} huachicoins_"
+
+    #Escenario 3 -Ambas manos tiene carta alta
+    elif casa[2] == "None" and redditor[2] == "None":
+        #El valor de la carta mas alta
+        if max(casa[1]) > max(redditor[1]):
+
+            return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para el empleado, usando {casa[0][0]}\n\n_Pot: {pot} huachicoins_'
+
+        elif max(casa[1]) < max(redditor[1]):
+
+            #Acceder a la cuenta de la shop
+            Huachis_shop = HuachiNet("Shop")
+
+            Huachis_shop.Enviar_Bineros(redditor_id,pot,nota="Poker")
+
+            return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para {redditor_id}, usando {redditor[0][0]}\n\n_Pot: {pot} huachicoins_'
+
+        elif max(casa[1]) == max(redditor[1]):
 
             return f"_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nEmpate tecnico, mi patron no me programo algo para esta situacion, no hay devoluciones es politica de la empresa, lo siento. A si que perdiste\n\n_Pot: {pot} huachicoins_"
 
-        #Escenario 2 - ambas manos tienen digito como carta alta
-        elif casa[2].isdigit() and redditor[2].isdigit():
+    #Escenario 4 - Una mano tiene digito como carta alta, la otra tiene letra
+    else:
 
-            if int(casa[2]) > int(redditor[2]):
+        carta_alta_casa = casa[2]
 
-                return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para el empleado, usando {casa[0][0]}\n\n_Pot: {pot} huachicoins_'
+        carta_alta_redditor = redditor[2]
 
-            elif int(casa[2]) < int(redditor[2]):
+        carta_alta_casa = [valor for letra,valor in letras.items() if letra == carta_alta_casa[0]
+            and carta_alta_casa[0].isdigit() == False and carta_alta_casa != "None"]
 
-                #Acceder a la cuenta de la shop
-                Huachis_shop = HuachiNet("Shop")
+        carta_alta_redditor = [valor for letra,valor in letras.items() if letra == carta_alta_redditor[0]
+            and carta_alta_redditor[0].isdigit() == False and carta_alta_redditor != "None"]
 
-                Huachis_shop.Enviar_Bineros(redditor_id,pot,nota="Poker")
+        if int(carta_alta_casa[0]) > int(carta_alta_redditor[0]):
 
-                return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para {redditor_id}, usando {redditor[0][0]}\n\n_Pot: {pot} huachicoins_'
+            return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para el empleado, usando {casa[0][0]}\n\n_Pot: {pot} huachicoins_'
 
-            elif int(casa[2]) == int(redditor[2]):
+        elif int(carta_alta_casa[0]) < int(carta_alta_redditor[0]):
 
-                return f"_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nEmpate tecnico, mi patron no me programo algo para esta situacion, no hay devoluciones es politica de la empresa, lo siento. A si que perdiste\n\n_Pot: {pot} huachicoins_"
+            #Acceder a la cuenta de la shop
+            Huachis_shop = HuachiNet("Shop")
 
-        #Escenario 3 -Ambas manos tiene carta alta
-        elif casa[2] == "None" and redditor[2] == "None":
-            #El valor de la carta mas alta
-            if max(casa[1]) > max(redditor[1]):
+            Huachis_shop.Enviar_Bineros(redditor_id,pot,nota="Poker")
 
-                return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para el empleado, usando {casa[0][0]}\n\n_Pot: {pot} huachicoins_'
+            return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para {redditor_id}, usando {redditor[0][0]}\n\n_Pot: {pot} huachicoins_'
 
-            elif max(casa[1]) < max(redditor[1]):
+        elif int(carta_alta_casa[0]) == int(carta_alta_redditor[0]):
 
-                #Acceder a la cuenta de la shop
-                Huachis_shop = HuachiNet("Shop")
-
-                Huachis_shop.Enviar_Bineros(redditor_id,pot,nota="Poker")
-
-                return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para {redditor_id}, usando {redditor[0][0]}\n\n_Pot: {pot} huachicoins_'
-
-            elif max(casa[1]) == max(redditor[1]):
-
-                return f"_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nEmpate tecnico, mi patron no me programo algo para esta situacion, no hay devoluciones es politica de la empresa, lo siento. A si que perdiste\n\n_Pot: {pot} huachicoins_"
-
-        #Escenario 4 - Una mano tiene digito como carta alta, la otra tiene letra
-        else:
-
-            carta_alta_casa = casa[2]
-
-            carta_alta_redditor = redditor[2]
-
-            carta_alta_casa = [valor for letra,valor in letras.items() if letra == carta_alta_casa[0]
-                and carta_alta_casa[0].isdigit() == False and carta_alta_casa != "None"]
-
-            carta_alta_redditor = [valor for letra,valor in letras.items() if letra == carta_alta_redditor[0]
-                and carta_alta_redditor[0].isdigit() == False and carta_alta_redditor != "None"]
-
-            if int(carta_alta_casa[0]) > int(carta_alta_redditor[0]):
-
-                return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para el empleado, usando {casa[0][0]}\n\n_Pot: {pot} huachicoins_'
-
-            elif int(carta_alta_casa[0]) < int(carta_alta_redditor[0]):
-
-                #Acceder a la cuenta de la shop
-                Huachis_shop = HuachiNet("Shop")
-
-                Huachis_shop.Enviar_Bineros(redditor_id,pot,nota="Poker")
-
-                return f'_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nVictoria para {redditor_id}, usando {redditor[0][0]}\n\n_Pot: {pot} huachicoins_'
-
-            elif int(carta_alta_casa[0]) == int(carta_alta_redditor[0]):
-
-                return f"_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nEmpate tecnico, mi patron no me programo algo para esta situacion, no hay devoluciones es politica de la empresa, lo siento. A si que perdiste\n\n_Pot: {pot} huachicoins_"
+            return f"_Poker Estilo Mujico_\n\nMano del empleado:\n\n{cartas_casa}\n\nMano de {redditor_id}\n\n{cartas_redditor}\n\nEmpate tecnico, mi patron no me programo algo para esta situacion, no hay devoluciones es politica de la empresa, lo siento. A si que perdiste\n\n_Pot: {pot} huachicoins_"
 
 def combinaciones_poker(mano):
     """Revisar mano y otorgar un puntaje"""
@@ -1002,7 +998,6 @@ def huachibonos(redditor_id):
     Huachis = HuachiNet(redditor_id)
 
     #Odds Base
-
     puntaje_inicial = 1000 if redditor_id in vib else random.randint(1,100)
 
     #Odds ajustados
