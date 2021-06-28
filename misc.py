@@ -78,6 +78,8 @@ galletas = open("./shop/galletas.txt", "r", encoding="utf-8").read().splitlines(
 
 valentines = open("./shop/valentin.txt", "r", encoding="utf-8").read().splitlines()
 
+viejos = open("./shop/viejos_sabrozos.txt", "r", encoding="utf-8").read().splitlines()
+
 emojis = ['👻','🐷','🐧','🦝','🍮', '💣','👾','👽','🦖','🥓','🤖']
 
 premios_huachito = {}

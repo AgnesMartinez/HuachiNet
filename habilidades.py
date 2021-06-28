@@ -487,6 +487,15 @@ def shop(remitente,destinatario,regalo):
 
         return random.choice(resp_shop)
 
+    elif regalo == 'viejo' or 'sabrozo' or 'sabrozo':
+
+        viejo = random.choice(viejos)
+
+        reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} un viejo sabrozo, no te acerques mucho que te pica un ojo \n\n [Abrir Regalo]({viejo})")
+
+        return random.choice(resp_shop)
+
+
 def pokermujicano(redditor_id):
 
     if redditor_id in prohibido:
