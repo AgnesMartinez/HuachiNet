@@ -29,9 +29,9 @@ reddit = praw.Reddit(client_id=config.APP_ID,
 
 prohibido = ["Shop","HuachiSwap","Bodega","Huachicuenta"]
 
-vib = ["MarcoCadenas","Empleado_del_mes","Disentibot","AutoModerator"]
+vib = ["MarcoCadenas","Empleado_del_mes","Disentibot","AutoModerator","UnidadVictimasEsp"]
 
-stonks = diccionario['stonks']
+stonks = shops['stonks']
 
 def error_log(error):
     """Actualizar el error log"""
@@ -205,7 +205,7 @@ def buscar_usuario(string):
             return usuario
 
 def asalto(cholo,victima,tipo):
-    """Saca bineros morro"""
+    """Saca bineros morro v4"""
 
     if victima == 'None' or victima == None:
 
@@ -235,116 +235,117 @@ def asalto(cholo,victima,tipo):
         #Acceder a cuentas
         huachis_cholo = HuachiNet(cholo)
 
-        perks_cholo = [perk for perk in huachis_cholo.Consultar_Perks() if isinstance(perk,int) == False]
+        cholo_stats = tweak_stats(cholo)
 
         huachis_victima = HuachiNet(victima)
+
+        victima_stats = tweak_stats(victima)
 
         #Primero verificar que la victima tenga una cuenta
         if huachis_victima.Verificar_Usuario(victima) == False:
         
-            return "No tiene cuenta, dime, que piensas robarle, ¿Los calzones?"
+            return "No tiene cuenta. Dime, que piensas robarle, ¿Los calzones?"
 
-        perks_victima = [perk for perk in huachis_victima.Consultar_Perks() if isinstance(perk,int) == False ]
+        if cholo in vib:
 
-        #Mensajes personalizados para huachibonos de proteccion        
-        if huachis_cholo.trait == "Marika" or huachis_victima.trait == "Marika":
+            num_cholo = 10000 + ( cholo_stats[0] + cholo_stats[2] ) - cholo_stats[1]
 
-            return "Que es ese olor, __sniff sniff__ huele a que alguien compro el huachibono de 'mArIKa'. Salio mod y no quiere que lo roben, pero tampoco puede robar."
+        else:
+            
+            num_cholo = random.randint(0,100) + ( cholo_stats[0] + cholo_stats[2] ) - victima_stats[1]
 
-        if huachis_victima.trait == "Vacuna":
+        num_victima = random.randint(0,100) + ( victima_stats[0] + victima_stats[2] ) - cholo_stats[1]
 
-            return "Esta persona ha sido inyectada con Patria! la vacuna mujicana, los efectos secundarios la volvieron inmune a los robos, dejame decirte que ya valiste madre F"
+        if num_cholo > num_victima:
 
-        if huachis_victima.perk == "Seguro para la 3era edad":
+            if tipo == "asalto":
 
-            if edad_cuenta(victima) > edad_cuenta(cholo):
+                cantidad_inicial = random.randint(50,500) 
 
-                #Verificar que tenga energia
-                if huachis_victima.power > 4:
+            if tipo == "atraco":
 
-                    huachis_victima.Consumir_Energia(5)
+                cantidad_inicial = round((int(huachis_victima.saldo_total) * random.randint(5,16)) / 100)
 
-                    return "Esta cuenta tiene seguro activo contra maricanuebos, esperate a que se le acabe la vigencia para poderlo robar"
+            if tipo == "levanton":
 
-        if huachis_victima.perk == "Barrera Susana Distancia":
+                cantidad_inicial = round((int(huachis_victima.saldo_total) * 16) / 100)
 
-            #Verificar que tenga energia
-            if huachis_victima.power > 4:
+            ajuste = huachis_cholo.stats[3] - huachis_victima.stats[3] 
 
-                huachis_victima.Consumir_Energia(5)
+            cantidad_final = round( cantidad_inicial + ( (cantidad_inicial * ajuste ) / 100 ) )
 
-                return "Esta cuenta tiene la proteccion de susana distancia! Espera a que se le termine el efecto."
+            if huachis_victima.saldo_total == 0:
 
-        #calcular monto a jugar
+                return f"Le metiste una putiza totalmente gratis, no tiene dinero.\n\nGuild | Mujicano | 🌀 | 🎭 | ⚔️\n:--|:--|:--:|:--:|:--:\n{huachis_cholo.guild} | {cholo} | {huachis_cholo.perk} | {huachis_cholo.trait} | {huachis_cholo.weapon}\n{huachis_victima.guild} | {victima} | {huachis_victima.perk} | {huachis_victima.trait} | {huachis_victima.weapon}"
+            
 
-        if tipo == "asalto":
+            if cantidad_final <= 0:
 
-            cantidad_inicial = random.randint(50,500) 
+                return f"Ganaste, pero el build del otro usuario absorbio tus ganancias. F\n\nGuild | Mujicano | 🌀 | 🎭 | ⚔️\n:--|:--|:--:|:--:|:--:\n{huachis_cholo.guild} | {cholo} | {huachis_cholo.perk} | {huachis_cholo.trait} | {huachis_cholo.weapon}\n{huachis_victima.guild} | {victima} | {huachis_victima.perk} | {huachis_victima.trait} | {huachis_victima.weapon}"
+            
+            elif cantidad_final > huachis_victima.saldo_total:
 
-        if tipo == "atraco":
+                #Enviar Binero
+                huachis_victima.Enviar_Bineros(cholo,huachis_victima.saldo_total,nota=tipo.capitalize())
 
-            cantidad_inicial = round((int(huachis_victima.saldo_total) * random.randint(5,16)) / 100)
-
-        if tipo == "levanton":
-
-            cantidad_inicial = round((int(huachis_victima.saldo_total) * 16) / 100)
-
-
-        cantidad_final = cantidad_inicial
-
-        #Ajustar odds segun huachibonos
-
-        redditor_cholo = huachibonos(cholo)
-
-        redditor_victima = huachibonos(victima)
-
-
-        if redditor_cholo[0] > redditor_victima[0]:
-
-            #Calcular monto final
-            cantidad_final += round((cantidad_inicial * redditor_cholo[1]) / 100) 
-                
-            cantidad_final += round((cantidad_inicial * redditor_victima[2]) / 100)
-
-
-            #Verificar que se tenga saldo suficiente para la transaccion
-            if huachis_victima.saldo_total < cantidad_final:
-
-                return "Chale, asaltaste a alguien sin dinero suficiente, mal pedo."
+                return random.choice(resp_tumbar_cholo) + f"__{cholo} ganó toda la cartera de {victima} ({huachis_victima.saldo_total:,} huachis)__\n\nGuild | Mujicano | 🌀 | 🎭 | ⚔️\n:--|:--|:--:|:--:|:--:\n{huachis_cholo.guild} | {cholo} | {huachis_cholo.perk} | {huachis_cholo.trait} | {huachis_cholo.weapon}\n{huachis_victima.guild} | {victima} | {huachis_victima.perk} | {huachis_victima.trait} | {huachis_victima.weapon}"
             
             else:
 
                 #Enviar Binero
                 huachis_victima.Enviar_Bineros(cholo,cantidad_final,nota=tipo.capitalize())
 
-                return random.choice(resp_tumbar_cholo) + f"\n\n__{cholo} ganó {cantidad_final} huachis (de la cartera de {victima})__\n\nBuild | 🌀 | 🎭 | ⚔️\n:--|:--:|:--:|:--:\n{cholo} | {perks_cholo[0]} | {perks_cholo[1]} | {perks_cholo[2]}\n{victima} | {perks_victima[0]} | {perks_victima[1]} | {perks_victima[2]}" 
+                return random.choice(resp_tumbar_cholo) + f"\n\n__{cholo} ganó {cantidad_final:,} huachis (de la cartera de {victima})__\n\nGuild | Mujicano | 🌀 | 🎭 | ⚔️\n:--|:--|:--:|:--:|:--:\n{huachis_cholo.guild} | {cholo} | {huachis_cholo.perk} | {huachis_cholo.trait} | {huachis_cholo.weapon}\n{huachis_victima.guild} | {victima} | {huachis_victima.perk} | {huachis_victima.trait} | {huachis_victima.weapon}"
+            
+        elif num_victima > num_cholo:
+
+            #Primero verificar que el cholo tenga una cuenta
+            if huachis_cholo.Verificar_Usuario(cholo) == False:
+        
+                return "Perdiste, un momento, no tienes cuenta dentro del sistema. Y ahora que le voy a dar al otro usuario........"
+
+            if tipo == "asalto":
+
+                cantidad_inicial = random.randint(50,500) 
+
+            if tipo == "atraco":
+
+                cantidad_inicial = round((int(huachis_cholo.saldo_total) * random.randint(5,16)) / 100)
+
+            if tipo == "levanton":
+
+                cantidad_inicial = round((int(huachis_cholo.saldo_total) * 16) / 100)
+
+            ajuste = huachis_victima.stats[3] - huachis_cholo.stats[3] 
+
+            cantidad_final = round( cantidad_inicial + ( (cantidad_inicial * ajuste ) / 100 ) )
+
+            if huachis_cholo.saldo_total == 0:
+
+                return f"Perdiste, pero ve el lado positivo, no tienes dinero que darle\n\nGuild | Mujicano | 🌀 | 🎭 | ⚔️\n:--|:--|:--:|:--:|:--:\n{huachis_cholo.guild} | {cholo} | {huachis_cholo.perk} | {huachis_cholo.trait} | {huachis_cholo.weapon}\n{huachis_victima.guild} | {victima} | {huachis_victima.perk} | {huachis_victima.trait} | {huachis_victima.weapon}"
+            
+            
+            if cantidad_final <= 0:
+
+                return f"Perdiste, pero tu build absorbio tus los daños. Te salvaste morr@\n\nGuild | Mujicano | 🌀 | 🎭 | ⚔️\n:--|:--|:--:|:--:|:--:\n{huachis_cholo.guild} | {cholo} | {huachis_cholo.perk} | {huachis_cholo.trait} | {huachis_cholo.weapon}\n{huachis_victima.guild} | {victima} | {huachis_victima.perk} | {huachis_victima.trait} | {huachis_victima.weapon}"
+            
+            elif cantidad_final > huachis_cholo.saldo_total:
+
+                #Enviar Binero
+                huachis_cholo.Enviar_Bineros(victima,huachis_cholo.saldo_total,nota=tipo.capitalize())
+
+                return random.choice(resp_tumbar_victima) + f"__{victima} ganó toda la cartera de {cholo} ({huachis_cholo.saldo_total:,} huachis)__\n\nGuild | Mujicano | 🌀 | 🎭 | ⚔️\n:--|:--|:--:|:--:|:--:\n{huachis_cholo.guild} | {cholo} | {huachis_cholo.perk} | {huachis_cholo.trait} | {huachis_cholo.weapon}\n{huachis_victima.guild} | {victima} | {huachis_victima.perk} | {huachis_victima.trait} | {huachis_victima.weapon}"
+            
+            else:
+
+                #Enviar Binero
+                huachis_cholo.Enviar_Bineros(victima,cantidad_final,nota=tipo.capitalize())
+
+                return random.choice(resp_tumbar_victima) + f"\n\n__{victima} ganó {cantidad_final:,} huachis (de la cartera de {cholo})__\n\nGuild | Mujicano | 🌀 | 🎭 | ⚔️\n:--|:--|:--:|:--:|:--:\n{huachis_cholo.guild} | {cholo} | {huachis_cholo.perk} | {huachis_cholo.trait} | {huachis_cholo.weapon}\n{huachis_victima.guild} | {victima} | {huachis_victima.perk} | {huachis_victima.trait} | {huachis_victima.weapon}"
 
         else:
 
-            #Primero verificar que el remitente tenga una cuenta
-            if huachis_cholo.Verificar_Usuario(cholo) == False:
-        
-                return random.choice(resp_tip_cuenta)
-
-            else:
-
-                #Calcular el monto final
-
-                cantidad_final += round((cantidad_inicial * redditor_victima[1]) / 100) 
-                
-                cantidad_final += round((cantidad_inicial * redditor_cholo[2]) / 100)
-
-                #Verificar que se tenga saldo suficiente para la transaccion
-                if huachis_cholo.saldo_total < cantidad_final:
-
-                    return "Perdiste, pero no tienes dinero que dar."
-            
-                else:
-
-                    #Enviar Binero
-                    huachis_cholo.Enviar_Bineros(victima,cantidad_final,nota=tipo.capitalize())
-
-                    return random.choice(resp_tumbar_victima) + f"\n\n__{victima} ganó {cantidad_final} huachis (de la cartera de {cholo})__\n\nBuild | 🌀 | 🎭 | ⚔️\n:--|:--:|:--:|:--:\n{cholo} | {perks_cholo[0]} | {perks_cholo[1]} | {perks_cholo[2]}\n{victima} | {perks_victima[0]} | {perks_victima[1]} | {perks_victima[2]}"
+            return "Empate tecnico. Baia, tantos calculos para que ninguno gane o pierda, chinguen a su madre los dos" 
 
 def slots(redditor_id,regalo=False):
     """Ahora si es todo un casino"""
@@ -1099,82 +1100,6 @@ def rollthedice(redditor_id,numero):
 
     return f"**Roll The Dice a la mujicana**\n\nDado de {redditor_id}\n\n#{dado_redditor[0]}\n\nDados lanzados por el empleado:\n\n#{' '.join(dados_emoji)}\n\n_{random.choice(resp_dados)}_"
 
-def huachibonos(redditor_id):
-    """Ajusta odds segun configuracion del usuario"""
-
-    #Ajuste para fusca
-    if random.randint(1,100) < 10:
-
-        backfire = 20
-
-    else: 
-
-        backfire = 0
-
-    #Ajuste para mariguana azul
-    if random.randint(1,100) < 21:
-    
-        valor = 20
-
-    else:
-
-        valor = 0
-
-    #Cada huachibono representa una tupla con 3 elementos, (mod odds,mod ganancias, mod perdidas), en caso de perk, se agrega un 4 valor: costo energia
-    perks = {"Normal":(0,0,0,0),"Barrera Susana Distancia":(0,0,0,5),"Jelatina de BANANA":(20,0,0,5),"Seguro para la 3era edad":(0,0,0,5),"Estampita Detente":(30,0,30,5),"Mariguana roja": (50,-20,0,5),"Mariguana azul": (random.randint(20,50),valor,10,5),"Mariguana dorada": (69,0,30,5)}
-
-    traits = {"Normal":(0,0,0),"Chocomilk": (10,20,0),"Carta Blanca":(0,50,0),"Emulsion Scotch":(20,0,0),"Marika":(0,0,0),"Mariguana verde":(20,10,10),"Salchichas con anticongelante":(0,0,30),"Peste":(0,0,0),"Recargando":(0,0,0),"Vacuna": (80,20,0)}
-
-    weapons = {"Navaja":(0,0,0),"Platano":(random.randint(10,50),0,0),"Florecita de vive sin drogas":(30,0,0),"Rata con thinner":(0,25,0),"Fusca":(20,0,backfire),"Ecayecelocico":(20,0,10)}
-
-    #Ingresar a cuenta del redditor
-    Huachis = HuachiNet(redditor_id)
-    
-    #Odds Base
-
-    if redditor_id in vib:
-
-        puntaje_inicial = 1000
-    
-    else:
-
-        puntaje_inicial = random.randint(1,100)
-
-    #Odds ajustados
-    puntaje_final = puntaje_inicial
-
-    #Ajustes puntaje final segun Perk,Trait y Weapon
-    ajuste_perk = perks[Huachis.perk]
-
-    if Huachis.perk != "Normal" or Huachis.perk != "Seguro para la 3era edad" or Huachis.perk != "Barrera Susana Distancia":
-
-        #Verificar que el usuario tenga energia suficiente
-        if Huachis.power > ajuste_perk[3]:
-
-            Huachis.Consumir_Energia(ajuste_perk[3])
-            
-            if ajuste_perk[0] != 0:
-        
-                puntaje_final += (puntaje_inicial * ajuste_perk[0]) / 100
-
-    ajuste_trait = traits[Huachis.trait]
-
-    if ajuste_trait[0] != 0:
-        
-        puntaje_final += (puntaje_inicial * ajuste_trait[0]) / 100
-
-    ajuste_weapon = weapons[Huachis.weapon]
-
-    if ajuste_weapon[0] != 0:
-        
-        puntaje_final += (puntaje_inicial * ajuste_weapon[0]) / 100
-    
-    mod_ganancia = ajuste_perk[1] + ajuste_trait[1] + ajuste_weapon[1]
-
-    mod_perdida = ajuste_perk[2] + ajuste_trait[2] + ajuste_weapon[2]
-
-    return (puntaje_final,mod_ganancia,mod_perdida)
-
 def check_stonk(stonk):
     """Obtener informacion sobre stonk"""
     
@@ -1191,9 +1116,23 @@ def check_stonk(stonk):
 def actualizar_huachibonos(redditor_id,clase,item):
     """Actualizar los huachibonos comprados por el usuario"""
 
-    costos = {"perk": 1000,"trait": 500, "weapon":250 }
+    costos = {"perk": 800,"trait": 400, "weapon":200 }
     
     cantidad = costos[clase]
+
+    nalgoticas = ["LlamadoTuculo","VisionNalgotica","Conxuro",
+                  "LecturaTarot","AguaCalzon","GagBall",
+                  "Darketiza","EAHoe","Voodoo",
+                  "BesoDraculona","OnlyFans","BotasPicos",
+                  "DolorInfinito","Gothicc","TablaOuija"]
+
+    otakos = ["Genkidama","ImpactTrueno","PolvoDiamante",
+              "Rasegan","Omaewamushinderu","EsferaDragon",
+              "PuertaMagica","PiedraEvolutiva","SemillaH",
+              "TestoExodia","Dakimakura","MegaBuster",
+              "CaparazonAzul","Sakabato","Shinigami"]
+
+    guilds = {"AlianzaOtako": otakos,"DominioNalgoticas":nalgoticas}
 
     #Acceder a la cuenta del cliente
     Huachis = HuachiNet(redditor_id)
@@ -1204,6 +1143,12 @@ def actualizar_huachibonos(redditor_id,clase,item):
         return random.choice(resp_tip_cuenta)
 
     else:
+
+        seleccion = guilds[Huachis.guild]
+
+        if item not in seleccion:
+
+            return "Ese huachibono pertenece a otro gremio.\n\nPara conocer los huachibonos de tu clan usa el siguiente comando: !huachibono menu"
 
         #Verificar que se tenga saldo suficiente para la transaccion
         if Huachis.saldo_total < cantidad:
@@ -1216,7 +1161,7 @@ def actualizar_huachibonos(redditor_id,clase,item):
 
             Huachis.Update_Perks(clase,item)
 
-            return random.choice(resp_huachibono)
+            return f"Enhorabuena!, haz comprado {item} al precio mas barato del mercado.\n\nWaporeon, te voy a regalar un pro-tip. Si quieres renovar tu build, solo unete de nuevo a tu gremio! (!guild <opcion>), recibes 3 huachibonos al azar por mil huachicoins.\nRegalado mi weromancer."
 
 def huachiswap(remitente,destinatario,ticker,cantidad):
     """DEX para intercambiar tokens, sin comisiones!"""
@@ -1390,3 +1335,141 @@ def consultar_stonks():
         respuesta += f"{stonk[0]} | {stonk[1]} | {stonk[2]}\n"
 
     return respuesta
+
+def unirse_guild(redditor_id,item):
+    """Unirse a un gremio"""
+
+    nalgoticas = [("LlamadoTuculo","VisionNalgotica","Conxuro",
+                  "LecturaTarot","AguaCalzon"),
+                  ("GagBall","Darketiza","EAHoe",
+                  "Voodoo","BesoDraculona"),
+                  ("OnlyFans","BotasPicos","DolorInfinito",
+                  "Gothicc","TablaOuija")]
+
+    otakos = [("Genkidama","ImpactTrueno","PolvoDiamante",
+              "Rasegan","Omaewamushinderu"),
+              ("EsferaDragon","PuertaMagica","PiedraEvolutiva",
+              "SemillaHermitaño","TestoExodia"),
+              ("Dakimakura","MegaBuster","CaparazonAzul",
+              "Sakabato","Shinigami")]
+
+    guilds = {"AlianzaOtako": otakos,"DominioNalgoticas":nalgoticas}
+
+    cantidad = 1000
+
+    #Acceder a la cuenta del cliente
+    huachis = HuachiNet(redditor_id)
+
+    #Primero verificar que el remitente tenga una cuenta
+    if huachis.Verificar_Usuario(redditor_id) == False:
+        
+        return random.choice(resp_tip_cuenta)
+
+    else:
+
+        #Verificar que se tenga saldo suficiente para la transaccion
+        if huachis.saldo_total < cantidad:
+
+            return random.choice(resp_tip_sinbineros)
+
+        else:
+
+            huachis.Enviar_Bineros("Shop",cantidad,nota=item)
+
+            huachis.Update_Perks("guild",item)
+
+            seleccion = guilds[item]
+
+            perk = random.choice(seleccion[0])
+
+            trait = random.choice(seleccion[1])
+
+            weapon = random.choice(seleccion[2])
+
+            huachis.Update_Perks("perk",perk)
+
+            huachis.Update_Perks("trait",trait)
+
+            huachis.Update_Perks("weapon",weapon)
+
+            return f"Felicidades! Tu solicitud para unirte al gremio {item} ha sido aceptada.\n\nRecibe tu nuevo Build como bono de bienvenida\n\nPerk 🌀 : {perk} | Trait 🎭: {trait} | Weapon ⚔️: {weapon}"
+
+def cambiar_flair(redditor_id,item):
+
+    """Solo hacemos negocios"""
+
+    cantidad = 5000
+
+    #Acceder a la cuenta del cliente
+    huachis_redditor = HuachiNet(redditor_id)
+
+    #Primero verificar que el remitente tenga una cuenta
+    if huachis_redditor.Verificar_Usuario(redditor_id) == False:
+        
+        return random.choice(resp_tip_cuenta)
+
+    else:
+
+        #Verificar que se tenga saldo suficiente para la transaccion
+        if huachis_redditor.saldo_total < cantidad:
+
+            return random.choice(resp_tip_sinbineros)
+
+        else:
+
+            huachis_redditor.Enviar_Bineros("Shop",cantidad,nota="Flair")
+
+            start = item.index("!flair")
+
+            texto = item[start:].replace("!flair").strip()
+
+            return f"{redditor_id}:{texto}"
+
+def tweak_stats(redditor_id):
+
+    """Calcular stats basales + cambios cuando los perks consumen energia"""
+
+    huachis = HuachiNet(redditor_id)
+
+    ultimate_stats = {"Genkidama" : (10,[0,0,(contar_miembros(huachis.guild)* 0.5),0]),
+                 "LlamadoTuculo" : (10,[0,0,(contar_miembros(huachis.guild)* 0.5),0])}
+
+    perks_stats = {"ImpactTrueno" : (5,[0,0,30,0]),
+             "PolvoDiamante" : (5,[0,0,30,0]),
+             "Rasegan" : (5,[0,0,50,0]),
+             "Omaewamushinderu" : (5,[0,0,40,0]),
+             "VisionNalgotica" : (5,[0,0,30,0]),
+             "Conxuro" : (5,[0,0,30,20]),
+             "LecturaTarot" : (5,[0,0,30,10]),
+             "AguaCalzon" : (5,[0,0,40,0]),
+             "Normal" : (0,[0,0,0,0])
+             }
+
+    base_stats = huachis.stats
+    
+    #Conocer perk del usuario
+    if huachis.perk in ultimate_stats:
+
+        mod_stats = ultimate_stats[huachis.perk]
+
+    else:
+
+        mod_stats = perks_stats[huachis.perk]
+
+    #Si no tiene energia regresamos basestats
+    if huachis.power < mod_stats[0]:
+
+        return base_stats
+    
+    else:
+
+        huachis.Consumir_Energia(mod_stats[0])
+
+        new_stats = [ base_stats[i] + mod_stats[1][i] for i in range(4) ]
+
+        return new_stats
+
+def contar_miembros(guild):
+
+    return cursor.execute("SELECT COUNT(usuario) FROM perks WHERE guild = ?",(guild,)).fetchone()[0]
+

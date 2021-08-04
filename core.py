@@ -4,6 +4,7 @@ import sqlite3
 import operator
 import random
 import string
+import json
 
 class HuachiNet():
     """Huachicol as a service
@@ -29,7 +30,9 @@ class HuachiNet():
 
         self.id = usuario
 
-        self.perk, self.power, self.trait, self.weapon = self.Consultar_Perks()
+        self.perk, self.power, self.trait, self.weapon, self.guild = self.Consultar_Perks()
+
+        self.stats = self.Calcular_Stats()
 
         self.saldo_total = self.Consultar_Saldo()
 
@@ -187,9 +190,9 @@ class HuachiNet():
             return resultado[-1]
 
     def Consultar_Perks(self):
-        """Consultar perk, power, trait y arma"""
+        """Consultar perk, power, trait , arma y guild"""
 
-        query = """SELECT perk,power,trait,weapon FROM perks WHERE usuario = ?"""
+        query = """SELECT perk,power,trait,weapon,guild FROM perks WHERE usuario = ?"""
 
         resultado = self.cursor.execute(query,(self.id,)).fetchall()
 
@@ -198,20 +201,20 @@ class HuachiNet():
 
             timestamp = time.time()
             
-            query2 = """INSERT INTO perks (timestamp,usuario,perk,power,trait,weapon) VALUES (?,?,?,?,?,?)"""
+            query2 = """INSERT INTO perks (timestamp,usuario,perk,power,trait,weapon,guild) VALUES (?,?,?,?,?,?,?)"""
 
-            self.cursor.execute(query2,(timestamp,self.id,"Normal",100,"Normal","Navaja"))
+            self.cursor.execute(query2,(timestamp,self.id,"Normal",100,"Normal","Navaja","Normal"))
 
             self.conn.commit()
 
-            return ("Normal",100,"Normal","Navaja")
+            return ("Normal",100,"Normal","Navaja","Normal")
 
         else:
 
             return resultado[-1]
 
     def Update_Perks(self,clase,item):
-        """Agregar y modificar perk,trait y weapon de los mujicanos"""
+        """Agregar y modificar perk,trait, weapon y guild de los mujicanos"""
 
         query = f"""UPDATE perks SET {clase} = ? WHERE usuario = ?"""
 
@@ -220,6 +223,7 @@ class HuachiNet():
         self.cursor.execute(query,(item,self.id))
 
         if clase == "perk":
+
             self.cursor.execute(query2,(self.id,))
 
         self.conn.commit()
@@ -256,3 +260,31 @@ class HuachiNet():
         query = """ SELECT share, SUM(cantidad) as cantidad, AVG(precio) as precio FROM shares WHERE usuario = ? AND share in (SELECT share FROM shares WHERE usuario = ?) GROUP BY share ORDER BY cantidad DESC"""
 
         return self.cursor.execute(query,(self.id,self.id)).fetchall()
+
+    def Calcular_Stats(self):
+        """NRPG - Niño Rata Playing Game"""
+
+        baseStats = {"ConductoresNocturnos" : [70,50,40,40],
+                     "AlianzaOtako" : [30,70,40,60],
+                     "DominioNalgoticas" : [70,30,60,40],
+                     "Corvidos" : [40,60,40,60],
+                     "Normal" : [50,50,50,50]}
+
+        perkStats = json.loads(open("./assets/perks.json","r",encoding="utf-8").read())
+
+        traitStats = json.loads(open("./assets/traits.json","r",encoding="utf-8").read())
+
+        weaponStats = json.loads(open("./assets/weapons.json","r",encoding="utf-8").read())
+
+        #Stats base + perks stats
+        base = baseStats[self.guild]
+
+        perk = perkStats[self.perk]
+
+        trait = traitStats[self.trait]
+
+        weapon = weaponStats[self.weapon]
+
+        return [ base[i] + perk[i] + trait[i] + weapon[i] for i in range(4) ]
+    
+   
