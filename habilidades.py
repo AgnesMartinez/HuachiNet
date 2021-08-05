@@ -1421,7 +1421,7 @@ def cambiar_flair(redditor_id,item):
 
             start = item.index("!flair")
 
-            texto = item[start:].replace("!flair").strip()
+            texto = item[start:].replace("!flair","").strip()
 
             return f"{redditor_id}:{texto}"
 
@@ -1473,3 +1473,12 @@ def contar_miembros(guild):
 
     return cursor.execute("SELECT COUNT(usuario) FROM perks WHERE guild = ?",(guild,)).fetchone()[0]
 
+def check_build(redditor_id):
+
+    """Consultar build"""
+
+    huachis = HuachiNet(redditor_id)
+
+    stats = huachis.stats
+
+    return f"Guild: {huachis.guild}\n\nBuild:\n🌀 {huachis.perk} | 🎭{huachis.trait} | ⚔️ {huachis.weapon}\n\nStats:\nAtk ⚔️{stats[0]} | Def 🛡️ {stats[1]} | Magia ✨ {stats[2]} | Dinero💰 {stats[3]}"

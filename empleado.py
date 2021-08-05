@@ -234,6 +234,22 @@ def empleado_del_mes():
                                 #Enviar mensaje de error si el empleado no entendio lo que recibio
                                 error_log(f"Guild - Usuario {str(comment.author)} - Comentario {str(comment.id)}" + traceback.format_exc())
                                 reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
+
+                        elif "!build" in item:
+
+                            comandos += 1
+                            try:
+                                
+                                resultado = check_build(str(comment.author))
+                                    
+                                #Responder al cliente
+                                reddit.redditor(str(comment.author)).message("Build Stats",resultado)
+
+                                               
+                            except:
+                                #Enviar mensaje de error si el empleado no entendio lo que recibio
+                                error_log(f"Build - Usuario {str(comment.author)} - Comentario {str(comment.id)}" + traceback.format_exc())
+                                reddit.redditor(str(comment.author)).message("Mensaje Error",random.choice(resp_empleado_error))
                         
                         elif "!asalto" in item:
 
