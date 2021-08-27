@@ -7,9 +7,15 @@ shops = {
   'menu shop' : ("Menu Shop","__HuachiStore - Abierto cuando llegamos, cerrado cuando nos vamos__\n\nEnvia un regalo usando el comando shop, seguido de una opcion del menu, todo a 5 huachis.\n\nRegalo | subcomando\n:--|--:\nMonas Chinas | monachina\nTrapitos | trapo\nFurros | furro\nHuachito | huachito\nNalgoticas | nalgotica\nMDLP | cura / corvido\nGanosas (Revistas para adultos) | chambeadora\nGalleta de la fortuna | galleta\n\nCompleta tu compra de la siguiente manera:\n\n    shop comando\n\n    Ejemplo: shop monachina\n\n    (no olvides el signo de exclamación)\n\nUsalo en la seccion de comentarios."),
 
   #Menus por guilds
-  'AlianzaOtako' : ("Huachibonos - Alianza Otako","__Huachibonos - Kawaii desu ne! Tenemos los mejores precios de la region__\n\nRecuerda que los huachibonos 🌀 consumen energia! Para recargar tu huachibono 🌀 necesitas comprar uno nuevo. La energia no es acumulable.\n\nCosto por huachibono: 🌀 = 800  🎭 = 400  ⚔️ = 200\n\nHuachibono | subcomando\n:--|--:\nGenkidama 🌀 | genkidama\nImpactTrueno 🌀 | pikachu\nPolvoDiamante 🌀 | diamante\nRasegan 🌀 | naruto\nOmaewamushinderu 🌀 | omaewa\nEsferaDragon 🎭 | dragonball\nPuerta Magica 🎭 | doraemon\nPiedraEvolutiva 🎭 | piedra\nSemilla Hermitaño 🎭 | semilla\nTesticulos Exodia 🎭 | exodia\nDakimakura ⚔️ | waifu\nMegaBuster ⚔️ | megaman\nCaparazol Azul ⚔️ | caparazon\nSakabato ⚔️ | sakabato\nShinigami ⚔️ | demonio\n\nCompleta tu compra de la siguiente manera:\n\n!huachibono waifu (comando <opcion>)\n\nUsa el comando en la seccion de comentarios."),
+  'AlianzaOtako' : ("Huachibonos - Alianza Otako","__Huachibonos - Kawaii desu ne! Tenemos los mejores precios de la region__\n\n[Informacion sobre huachibonos](https://www.reddit.com/r/TechoNegro/comments/oy3qdi/huachibonos_alianzaotako/)\n\nRecuerda que los huachibonos 🌀 consumen energia! Para recargar tu huachibono 🌀 necesitas comprar uno nuevo. La energia no es acumulable.\n\nCosto por huachibono: 🌀 = 800  🎭 = 400  ⚔️ = 200\n\nHuachibono | subcomando\n:--|--:\nGenkidama 🌀 | genkidama\nImpactTrueno 🌀 | pikachu\nPolvoDiamante 🌀 | diamante\nRasegan 🌀 | naruto\nOmaewamushinderu 🌀 | omaewa\nEsferaDragon 🎭 | dragonball\nPuerta Magica 🎭 | doraemon\nPiedraEvolutiva 🎭 | piedra\nSemilla Hermitaño 🎭 | semilla\nTesticulos Exodia 🎭 | exodia\nDakimakura ⚔️ | waifu\nMegaBuster ⚔️ | megaman\nCaparazol Azul ⚔️ | caparazon\nSakabato ⚔️ | sakabato\nShinigami ⚔️ | demonio\n\nCompleta tu compra de la siguiente manera:\n\n!huachibono waifu (comando <opcion>)\n\nUsa el comando en la seccion de comentarios."),
   
-  'DominioNalgoticas' : ("Huachibonos - Dominio Nalgoticas","__Huachibonos - Bienvenido al gremio mas oscuro y redondo__\n\nRecuerda que los huachibonos 🌀 consumen energia! Para recargar tu huachibono 🌀 necesitas comprar uno nuevo. La energia no es acumulable.\n\nCosto por huachibono: 🌀 = 800  🎭 = 400  ⚔️ = 200\n\nHuachibono | subcomando\n:--|--:\nEl Llamado de Tuculo 🌀 | tuculo\nVision Nalgotica 🌀 | nalgavision\nConxuro 🌀 | conxuro\nLectura de Tarot 🌀 | tarot\nAgua de Calzon Embotellada 🌀 | calzon\nGagBall 🎭 | gagball\nDarketiza 🎭 | tachas\nEdgar Allan Hoe 🎭 | allanhoe\nMuñeco Voodoo 🎭 | budu\nEl Beso de Draculona 🎭 | draculona\nCuenta OnlyFans ⚔️ | onlyfans\nBotas con picos ⚔️ | botas\nLa maldicion del dolor infinito ⚔️ | blueballs\nGothicc ⚔️ | gothic\nTabla Ouija ⚔️ | ouija\n\nCompleta tu compra de la siguiente manera:\n\n!huachibono draculona (comando <opcion>)\n\nUsa el comando en la seccion de comentarios."),
+  'DominioNalgoticas' : ("Huachibonos - Dominio Nalgoticas","__Huachibonos - Bienvenido al gremio mas oscuro y redondo__\n\n[Informacion sobre huachibonos](https://www.reddit.com/r/TechoNegro/comments/oy3sjp/huachibonos_dominio_nalgoticas/)\n\nRecuerda que los huachibonos 🌀 consumen energia! Para recargar tu huachibono 🌀 necesitas comprar uno nuevo. La energia no es acumulable.\n\nCosto por huachibono: 🌀 = 800  🎭 = 400  ⚔️ = 200\n\nHuachibono | subcomando\n:--|--:\nEl Llamado de Tuculo 🌀 | tuculo\nVision Nalgotica 🌀 | nalgavision\nConxuro 🌀 | conxuro\nLectura de Tarot 🌀 | tarot\nAgua de Calzon Embotellada 🌀 | calzon\nGagBall 🎭 | gagball\nDarketiza 🎭 | tachas\nEdgar Allan Hoe 🎭 | allanhoe\nMuñeco Voodoo 🎭 | budu\nEl Beso de Draculona 🎭 | draculona\nCuenta OnlyFans ⚔️ | onlyfans\nBotas con picos ⚔️ | botas\nLa maldicion del dolor infinito ⚔️ | blueballs\nGothicc ⚔️ | gothic\nTabla Ouija ⚔️ | ouija\n\nCompleta tu compra de la siguiente manera:\n\n!huachibono draculona (comando <opcion>)\n\nUsa el comando en la seccion de comentarios."),
+  
+  'ConductoresNocturnos' : ("Huachibonos - Conductores Nocturnos","__Huachibonos - Que quede claro, no nos gustan las femboys.__\n\n[Informacion sobre huachibonos](https://www.reddit.com/r/TechoNegro/comments/p8mhvv/huachibonos_conductores_nocturnos/)\n\nRecuerda que los huachibonos 🌀 consumen energia! Para recargar tu huachibono 🌀 necesitas comprar uno nuevo. La energia no es acumulable.\n\nCosto por huachibono: 🌀 = 800  🎭 = 400  ⚔️ = 200\n\nHuachibono | subcomando\n:--|--:\nLa Bendicion de Raquel 🌀 | raquel\nCero Miedo 🌀 | cocaina\nCampeon de Ajedrez 🌀 | ajedrez\nMona Inflable 🌀 | inflable\nMALVERDE 🌀 | malverde\nSemen Ardiente 🎭 | gonorrea\nProxeneta 🎭 | pimp\nAngeles de Charlie 🎭 | charlie\nRevistas Chambeadoras 🎭 | chambeadoras\nKing of the road 🎭 | king\nStiletto ⚔️ | stiletto\nBrazo de trailero ⚔️ | trailero\nMenage a Trapo ⚔️ | trio\nLa pastila azul ⚔️ | viagra\nDragon Drilldo ⚔️ | dildo\n\nCompleta tu compra de la siguiente manera:\n\n!huachibono dildo (comando <opcion>)\n\nUsa el comando en la seccion de comentarios."),
+  
+  'Corvidos' : ("Huachibonos - Corvidos","__Huachibonos - La cura contra la pestilencia moderna__\n\n[Informacion sobre huachibonos](https://www.reddit.com/r/TechoNegro/comments/p8mjjj/huachibonos_corvidos/)\n\nRecuerda que los huachibonos 🌀 consumen energia! Para recargar tu huachibono 🌀 necesitas comprar uno nuevo. La energia no es acumulable.\n\nCosto por huachibono: 🌀 = 800  🎭 = 400  ⚔️ = 200\n\nHuachibono | subcomando\n:--|--:\nExorcismo de fantasmas en la sangre 🌀 | exorcismo\nParvada de Cuervos 🌀 | cuervos\nSapos Alucinogenos 🌀 | bufotoxina\nBitcoin Medieval 🎭 | bitcoin\nSapo 🎭 | sapo\nMascara MDLP 🎭 | mascara\nSanguijuela Goliat ⚔️ | sanguijuela\nPalo Medico ⚔️ | palo\nJeringa con cocaina ⚔️ | jeringa\n\nCompleta tu compra de la siguiente manera:\n\n!huachibono bitcoin (comando <opcion>)\n\nUsa el comando en la seccion de comentarios."),
+  
+  
   #huachibonos
   'bonos perks' : {"genkidama" : "Genkidama", 
                    "pikachu" : "ImpactTrueno", 
@@ -20,7 +26,16 @@ shops = {
                    "nalgavision" : "VisionNalgotica",
                    "conxuro":"Conxuro",
                    "tarot":"LecturaTarot", 
-                   "calzon": "AguaCalzon"},
+                   "calzon": "AguaCalzon",
+                   "raquel" : "BendicionRaquel", 
+                   "cocaina" : "CeroMiedo",
+                   "ajedrez":"CampeonAjedrez",
+                   "inflable":"MonaInflable", 
+                   "malverde": "MALVERDE",
+                   "exorcismo": "ExorcismoFantasmas",
+                   "cuervos": "ParvadaCuervos",
+                   "bufotoxina": "SaposAlucinogenos"},
+                   
 
   'bonos traits' : {"dragonball" : "EsferaDragon", 
                     "doraemon" : "PuertaMagica", 
@@ -31,7 +46,16 @@ shops = {
                     "tachas": "Darketiza", 
                     "allanhoe" : "EAHoe", 
                     "budu" : "Voodoo", 
-                    "draculona" : "BesoDraculona"},
+                    "draculona" : "BesoDraculona",
+                    "gonorrea" : "SemenArdiente", 
+                    "pimp" : "Proxeneta",
+                    "charlie":"AngelesCharlie",
+                    "chambeadoras":"Chambeadoras", 
+                    "king": "KingoftheRoad",
+                    "bitcoin": "BitcoinMedieval",
+                    "sapo": "Sapo",
+                    "mascara": "MascaraMDLP"}
+                    ,
 
   'bonos weapons' : {"waifu" : "Dakimakura", 
                      "megaman" : "MegaBuster", 
@@ -42,10 +66,20 @@ shops = {
                      "botas" : "BotasPicos", 
                      "blueballs" : "DolorInfinito", 
                      "gothic" : "Gothicc", 
-                     "ouija" : "TablaOuija"},
+                     "ouija" : "TablaOuija",
+                     "stiletto" : "Stiletto", 
+                     "trailero" : "BrazoTrailero",
+                     "trio":"MenageaTrapo",
+                     "viagra":"PastillaAzul", 
+                     "dildo": "DragonDrilldo",
+                     "sanguijuela": "SanguijuelaGoliat",
+                     "palo": "PaloMedico",
+                     "jeringa": "JeringaCocaina"},
   
   'bonos guilds' : {"otakos" : "AlianzaOtako", 
-                    "nalgoticas" : "DominioNalgoticas" },
+                    "nalgoticas" : "DominioNalgoticas",
+                    "conductores" : "ConductoresNocturnos",
+                    "corvidos": "Corvidos"},
 
   'bonos opciones' : ["genkidama","pikachu","diamante",
                       "naruto","omaewa","tuculo",
@@ -56,11 +90,25 @@ shops = {
                       "budu","dacrulona","waifu",
                       "megaman","caparazon","sakabato",
                       "demonio","onlyfans","botas",
-                      "blueballs","gothic","ouija"]
+                      "blueballs","gothic","ouija",
+                      "raquel","cocaina","ajedrez",
+                      "inflable","malverde","gonorrea",
+                      "pimp","charlie","chambeadoras",
+                      "king","stiletto","trailero",
+                      "trio","viagra","dildo",
+                      "exorcismo","cuervos","bufotoxina",
+                      "bitcoin","sapo","mascara",
+                      "sanguijuela","palo","jeringa"]
 
   
 
 }
+
+prohibido = ["Shop","HuachiSwap","Bodega","Huachicuenta"]
+
+vib = ["MarcoCadenas","Empleado_del_mes","Disentibot","AutoModerator","UnidadVictimasEsp"]
+
+stonks = shops['stonks']
 
 resp_saldo = open("./assets/frases/frases_saldo.txt", "r", encoding="utf-8").read().splitlines()
 

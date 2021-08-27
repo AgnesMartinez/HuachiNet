@@ -2,12 +2,6 @@ import sqlite3
 import time
 from datetime import datetime
 
-stonks = ["AAPL","AMZN","TSLA","MRNA","NFLX","NVDA","NIO",
-          "WMT","COST","ROKU","SPOT","NKE","FTCH","UBER",
-          "BABA","TUP","GME","NTDOY","SNE","MSFT","INTC",
-          "HPQ","AMD","BTC-USD","ETH-USD","LTC-USD",
-          "VET-USD","NANO-USD","DOGE-USD"]
-
 #Conexion a BD
 conn = sqlite3.connect('boveda.sqlite3')
 
@@ -44,19 +38,9 @@ tabla_perks = """CREATE TABLE IF NOT EXISTS perks (
     perk VARCHAR(255),
     power INTEGER,
     trait VARCHAR(255),
-    weapon VARCHAR(255)
+    weapon VARCHAR(255),
+    guild VARCHAR(255)
 )"""
-
-tabla_shares = """CREATE TABLE IF NOT EXISTS shares (
-    ID INTEGER PRIMARY KEY AUTOINCREMENT,
-    timestamp VARCHAR(255),
-    usuario VARCHAR(255),
-    cantidad INTEGER,
-    share VARCHAR(255),
-    precio VARCHAR(255),
-    origen_destino VARCHAR(255))"""
-
-index6 = """CREATE INDEX IF NOT EXISTS ind_usuario ON shares (usuario)"""
 
 index5 = """CREATE INDEX IF NOT EXISTS ind_usuario ON perks (usuario)"""
 
@@ -93,16 +77,6 @@ cursor.execute(index4)
 cursor.execute(tabla_perks)
 
 cursor.execute(index5)
-
-cursor.execute(tabla_shares)
-
-cursor.execute(index6)
-
-#for stonk in stonks:
-
-#    query = """INSERT into shares (timestamp,usuario,cantidad,share,precio,origen_destino) VALUES (?,?,?,?,?,?)"""
-
-#    cursor.execute(query,(time.time(),"HuachiSwap",10000000,stonk,0,"Genesis"))
 
 conn.commit()
 
