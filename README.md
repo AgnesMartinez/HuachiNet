@@ -18,7 +18,7 @@
  
  -A diferencia de las otras criptomonedas, la huachicoin es centralizada y super elitista, la entrada a la red es unicamente bajo invitacion.
  
- -Existen 10 millones de huachicoins en este momento, pero se pueden extraer mas del subsuelo.
+ -Existen 30 millones de huachicoins en este momento, pero se pueden extraer mas del subsuelo.
  
  -No existe ICO, ni venta privada, la distribucion sera organica conforme crezca la adopcion de la red.
  
