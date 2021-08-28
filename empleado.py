@@ -1,5 +1,6 @@
 # This Python file uses the following encoding: utf-8
 from core import *
+import concurrent.futures
 import traceback
 
 cirilo = Empleado_del_mes()
@@ -16,7 +17,7 @@ tareas = {"!tip" : cirilo.tip,
           "!build" : cirilo.build,
           "!asalto" : cirilo.asaltos,
           "!atraco" : cirilo.asaltos,
-          "!levanton" : cirilo.asaltos,
+          "!levanton" : cirilo.levanton,
           "!huachito" : cirilo.huachito,
           "!poker" : cirilo.poker,
           "!huachilate" : cirilo.huachilate,
@@ -37,70 +38,81 @@ def Jornada():
 
     movimientos = 0   
 
-    #Buscar subreddits
-    for subreddit in config.SUBREDDITS:
-       
-        for comment in reddit.subreddit(subreddit).comments(limit=30):
+    #Cuidado con el futuro, es incierto.
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
 
-            if comment.parent().author != None and comment.parent().author != "None":
+        #Buscar subreddits
+        for subreddit in config.SUBREDDITS:
+        
+            for comment in reddit.subreddit(subreddit).comments(limit=30):
 
-                texto = str(comment.body).lower()
+                if comment.parent().author != None and comment.parent().author != "None":
 
-                remitente = str(comment.author)
+                    texto = str(comment.body).lower()
 
-                destinatario = str(comment.parent().author)
+                    remitente = str(comment.author)
 
-                id = str(comment.id)
-                
-                #Buscar si el comentario ha sido procesado previamante
-                if cirilo.buscar_log(id) == False:
+                    destinatario = str(comment.parent().author)
 
-                    #Agregar comentario al log
-                    cirilo.actualizar_log(id)
+                    id = str(comment.id)
 
-                    comandos = cirilo.comandos(texto)
+                    #Buscar si el comentario ha sido procesado previamante
+                    if cirilo.buscar_log(id) == False:
 
-                    if comandos == None:
+                        #Agregar comentario al log
+                        cirilo.actualizar_log(id)
+
+                        comandos = cirilo.comandos(texto)
+
+                        if comandos == None:
+
+                            continue
+
+                        else:
+
+                            for comando in comandos:
+                            
+                                if comando in ["!tip","!shop","!huachiswap"]:
+
+                                    executor.submit(tareas[comando],texto,remitente,destinatario,id)
                         
-                        continue
+                                    movimientos += 1
 
-                    else:
+                                if comando in ["!huachibono","!guild","!huachito","!huachilate","!huachilote","!rtd","!long","!short","!comprar","!vender"]:
+                                
+                                    executor.submit(tareas[comando],texto,remitente,id)
 
-                        for comando in comandos:
-                        
-                            if comando in ["!tip","!shop","!huachiswap"]:
-                            
-                                tareas[comando](texto,remitente,destinatario,id)
-    
-                                movimientos += 1
-    
-                            if comando in ["!huachibono","!guild","!huachito","!huachilate","!huachilote","!rtd","!long","!short","!comprar","!vender"]:
-                            
-                                tareas[comando](texto,remitente,id)
-    
-                                movimientos += 1
-    
-                            if comando in ["!saldo","!saldazo","!rank","!rankme","!rank25","!build","!poker","!portafolio","!stonks"]:
-                            
-                                tareas[comando](remitente,id)
-    
-                                movimientos += 1
-    
-                            if comando in ["!asalto","!atraco","!levanton"]:
-                            
-                                tipo = comando.replace("!","").strip()
-    
-                                tareas[comando](remitente,destinatario,tipo,id)
-    
-                                movimientos += 1
-    
-                            if comando == "!flair":
-                            
-                                tareas[comando](str(comment.body),remitente,id)
-    
-                                movimientos += 1
-    
-    return movimientos
+                                    movimientos += 1
+
+                                if comando in ["!saldo","!saldazo","!rank","!rankme","!rank25","!build","!poker","!portafolio","!stonks"]:
+                                
+                                    executor.submit(tareas[comando],remitente,id)
+
+                                    movimientos += 1
+
+                                if comando in ["!asalto","!atraco","!levanton"]:
+
+                                    if comando == "!levanton":
+
+                                        executor.submit(tareas[comando],texto,remitente,id)
+
+                                        movimientos += 1
+
+                                    else:
+                                    
+                                        tipo = comando.replace("!","").strip()
+
+                                        executor.submit(tareas[comando],remitente,destinatario,tipo,id)
+
+                                        movimientos += 1
+
+                                if comando == "!flair":
+                                
+                                    executor.submit(tareas[comando],str(comment.body),remitente,id)
+
+                                    movimientos += 1
+
+        return movimientos
 
                     
 def servicio_al_cliente():

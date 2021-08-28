@@ -16,7 +16,7 @@ import math
 import traceback
 from misc import *
 
-conn = sqlite3.connect("./boveda.sqlite3")
+conn = sqlite3.connect("./boveda.sqlite3",check_same_thread=False)
 
 cursor = conn.cursor()
 
@@ -47,7 +47,7 @@ class HuachiNet():
 
     def __init__(self,usuario):
         #Conexion a BD
-        self.conn = sqlite3.connect("boveda.sqlite3")
+        self.conn = sqlite3.connect("boveda.sqlite3",check_same_thread=False)
 
         self.cursor = self.conn.cursor()
 
@@ -1773,7 +1773,7 @@ class Empleado_del_mes():
 
     def __init__(self):
 
-        self.conn = sqlite3.connect("./boveda.sqlite3")
+        self.conn = sqlite3.connect("./boveda.sqlite3",check_same_thread=False)
 
         self.cursor = self.conn.cursor()
 
@@ -1787,10 +1787,14 @@ class Empleado_del_mes():
                         "!guild","!build","!asalto","!atraco",
                         "!levanton","!poker","!huachilate","!huachito",
                         "!huachilote","!rtd","!portafolio",
-                        "!stonks","!comprar","!vender",
-                        "!huachiswap","!flair"]
+                        "!stonks","!comprar","!vender","!long",
+                        "!huachiswap","!flair","!short"]
 
             return [ cachito for cachito in texto.split() if cachito in comandos ]
+
+        else:
+
+            return None
     
     def error_log(self,error):
         """Actualizar el error log"""
@@ -2081,6 +2085,24 @@ class Empleado_del_mes():
             self.error_log(mensaje)
 
             reddit.redditor(cholo).message("Mensaje Error",random.choice(resp_empleado_error))
+
+    def levanton(self,texto,cholo,id):
+
+        #Realizar consulta
+        try:
+            victima = buscar_usuario(texto)
+
+            resultado = asalto(cholo,victima,"levanton")
+
+            #Responder al cliente
+            reddit.comment(id).reply(resultado)
+        except:
+            #Enviar mensaje de error si el empleado no entendio lo que recibio
+
+            #error_log(f"Levanton - Usuario {str(comment.author)} - Comentario {str(comment.id)}" + traceback.format_exc())
+
+            reddit.redditor(cholo).message("Mensaje Error",random.choice(resp_empleado_error))
+
                                     
     def huachito(self,texto,remitente,id):
 
