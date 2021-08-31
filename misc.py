@@ -146,6 +146,8 @@ furros = open("./assets/shop/furro.txt", "r", encoding="utf-8").read().splitline
 
 nalgoticas = open("./assets/shop/nalgoticas.txt", "r", encoding="utf-8").read().splitlines()
 
+viejos = open("./assets/shop/viejos.txt", "r", encoding="utf-8").read().splitlines()
+
 curas = open("./assets/shop/curas.txt", "r", encoding="utf-8").read().splitlines()
 
 chambeadoras = open("./assets/shop/ganosas.txt", "r", encoding="utf-8").read().splitlines()

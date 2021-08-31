@@ -79,17 +79,10 @@ class HuachiNet():
     def Verificar_Usuario(self,usuario):
         """Verificar si existe el cliente en la BD"""
 
-        existe = False
-
         query = """SELECT ID FROM transacciones WHERE usuario=? LIMIT 1"""
 
-        resultado = self.cursor.execute(query,(usuario,)).fetchone()
+        return True if self.cursor.execute(query,(usuario,)).fetchone() else False
 
-        if resultado != None:
-
-            existe = True
-
-        return existe
 
     def Bono_Bienvenida(self,usuario):
         """Entregar bineros a los clientes nuevos"""
@@ -351,13 +344,7 @@ def tip(remitente,destinatario,cantidad) -> tuple:
 
         else:
             #calcula la edad del destinatario para evitar spam de cuentas recien creadas
-            if destinatario == "Empleado_del_mes":
-                
-                cuenta_dias = 30
-            
-            else:
-
-                cuenta_dias = edad_cuenta(destinatario)
+            cuenta_dias = 30 if destinatario == 'Empleado_del_mes' else edad_cuenta(destinatario)
 
             if cuenta_dias < 28:
 
@@ -386,13 +373,8 @@ def tip(remitente,destinatario,cantidad) -> tuple:
 def edad_cuenta(redditor_id) -> int:
     """calcular la edad en dias de la cuenta"""
 
-    cliente =  reddit.redditor(redditor_id).created_utc
-    
-    f_cuenta = datetime.fromtimestamp(cliente)
-
-    f_hoy = datetime.utcnow()
-
-    diff =  f_hoy - f_cuenta
+    #timestamp ahora - timestamp de la creacion de la cuenta del redditor
+    diff = datetime.utcnow() - datetime.fromtimestamp(reddit.redditor(redditor_id).created_utc)
 
     return int(diff.days)
 
@@ -788,6 +770,14 @@ def shop(remitente,destinatario,regalo):
                 nalgotica = random.choice(nalgoticas)
 
                 reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una nalgotica, 2spoopy4me \n\n [Abrir Regalo]({nalgotica})")
+
+                return random.choice(resp_shop)
+
+            elif regalo == 'viejo' or 'paella':
+
+                viejo = random.choice(viejos)
+
+                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado un viejo sabrozo, cuidoado porque salpica \n\n [Abrir Regalo]({viejo})")
 
                 return random.choice(resp_shop)
 

@@ -194,6 +194,3 @@ if __name__ == "__main__":
             file.write(stats + "\n")
 
         time.sleep(30)
-        
-    
-    

@@ -79,5 +79,3 @@ cursor.execute(tabla_perks)
 cursor.execute(index5)
 
 conn.commit()
-
-
