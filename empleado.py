@@ -5,7 +5,7 @@ import traceback
 
 cirilo = Empleado_del_mes()
 
-tareas = {"!tip" : cirilo.tip,
+tareas = {"!tip" : cirilo.propina,
           "!saldo" : cirilo.saldazo,
           "!saldazo": cirilo.saldazo,
           "!rankme" : cirilo.rankme,
@@ -39,7 +39,7 @@ def Jornada():
     movimientos = 0   
 
     #Cuidado con el futuro, es incierto.
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
 
         #Buscar subreddits
         for subreddit in config.SUBREDDITS:
@@ -48,19 +48,10 @@ def Jornada():
 
                 if comment.parent().author != None and comment.parent().author != "None":
 
-                    texto = str(comment.body).lower()
-
-                    remitente = str(comment.author)
-
-                    destinatario = str(comment.parent().author)
-
-                    id = str(comment.id)
-
                     #Buscar si el comentario ha sido procesado previamante
                     if cirilo.buscar_log(id) == False:
 
-                        #Agregar comentario al log
-                        cirilo.actualizar_log(id)
+                        texto = str(comment.body).lower()
 
                         comandos = cirilo.comandos(texto)
 
@@ -69,6 +60,15 @@ def Jornada():
                             continue
 
                         else:
+
+                            #Agregar comentario al log
+                            cirilo.actualizar_log(id)
+
+                            remitente = str(comment.author)
+
+                            destinatario = str(comment.parent().author)
+
+                            id = str(comment.id)
 
                             for comando in comandos:
                             
@@ -84,7 +84,7 @@ def Jornada():
 
                                     movimientos += 1
 
-                                if comando in ["!saldo","!saldazo","!rank","!rankme","!rank25","!build","!poker","!portafolio","!stonks"]:
+                                if comando in ["!saldo","!saldazo","!rank","!rankme","!rank25","!build","!portafolio","!stonks"]:
                                 
                                     executor.submit(tareas[comando],remitente,id)
 
@@ -106,6 +106,12 @@ def Jornada():
 
                                         movimientos += 1
 
+                                if comando == "!poker":
+
+                                    executor.submit(tareas[comando],remitente,destinatario,id)
+
+                                    movimientos += 1
+                                
                                 if comando == "!flair":
                                 
                                     executor.submit(tareas[comando],str(comment.body),remitente,id)
