@@ -16,10 +16,6 @@ import math
 import traceback
 from misc import *
 
-conn = sqlite3.connect("./boveda.sqlite3",check_same_thread=False)
-
-cursor = conn.cursor()
-
 HEADERS = {'User-Agent':'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36'}
 
 reddit = praw.Reddit(client_id=config.APP_ID, 
@@ -1240,9 +1236,9 @@ def huachilate(redditor_id):
 
             valores = (time.time(),redditor_id,huachiclave[1])
             
-            conn.execute("""INSERT INTO boletitos (timestamp,usuario,huachiclave) VALUES (?,?,?)""",valores)
+            Huachis_redditor.cursor.execute("""INSERT INTO boletitos (timestamp,usuario,huachiclave) VALUES (?,?,?)""",valores)
 
-            conn.commit()
+            Huachis_redditor.conn.commit()
 
             huachicuenta = HuachiNet("Huachicuenta")
 
@@ -1258,7 +1254,7 @@ def premio_huachilate():
 
     huachiclave = huachicuenta.Huachiclave()
 
-    participantes = [usuario[0] for usuario in cursor.execute("""SELECT usuario FROM boletitos WHERE huachiclave = ?""",(huachiclave[1],)).fetchall()]
+    participantes = [usuario[0] for usuario in huachicuenta.cursor.execute("""SELECT usuario FROM boletitos WHERE huachiclave = ?""",(huachiclave[1],)).fetchall()]
 
     ganadores = set(random.sample(participantes,k = 50))
 
@@ -1301,9 +1297,9 @@ def premio_huachilate():
             reddit.subreddit(sub).submit(f'Ganadores del Huachilate serie: "{huachiclave[1]}" :D', selftext=selftext)
 
     #Actualizar columna entregado para que se genere nueva huachiclave
-    cursor.execute("""UPDATE huachilate SET entregado = 1 WHERE huachiclave = ?""",(huachiclave[1],))
+    huachicuenta.cursor.execute("""UPDATE huachilate SET entregado = 1 WHERE huachiclave = ?""",(huachiclave[1],))
 
-    conn.commit()
+    huachicuenta.conn.commit()
 
 def rollthedice(redditor_id,numero):
     """Juego de dados"""
@@ -1796,7 +1792,9 @@ def tweak_stats(redditor_id):
 
 def contar_miembros(guild):
 
-    return cursor.execute("SELECT COUNT(usuario) FROM perks WHERE guild = ?",(guild,)).fetchone()[0]
+    huachis = HuachiNet("Empleado_del_mes")
+    
+    return huachis.cursor.execute("SELECT COUNT(usuario) FROM perks WHERE guild = ?",(guild,)).fetchone()[0]
 
 def check_build(redditor_id):
 
@@ -1832,7 +1830,7 @@ class Empleado_del_mes():
                         "!stonks","!comprar","!vender","!long",
                         "!huachiswap","!flair","!short"]
 
-            return [ cachito for cachito in texto.split() if cachito in comandos ]
+            return [ comando for comando in comandos if comando in texto ]
 
         else:
 
@@ -2038,22 +2036,22 @@ class Empleado_del_mes():
                     
                     return None
                                     
-                for cachito in texto.split():
+                for opcion in opciones:
                             
-                    if cachito in opciones:
+                    if opcion in texto:
                                     
-                        if cachito in perks:
+                        if opcion in perks:
                             #comprar huachibono
-                            self.shop_huachibono("perk",perks[cachito])
+                            self.shop_huachibono(remitente,"perk",perks[opcion])
                         
-                        elif cachito in traits:
+                        elif opcion in traits:
                             #comprar huachibono
-                            self.shop_huachibono("trait",traits[cachito])
+                            self.shop_huachibono(remitente,"trait",traits[opcion])
                         
-                        elif cachito in weapons:
+                        elif opcion in weapons:
                             #comprar huachibono
                             
-                            self.shop_huachibono("weapon",weapons[cachito])
+                            self.shop_huachibono(remitente,"weapon",weapons[opcion])
             else:
                 #No pertenece a un guild
                 reddit.redditor(remitente).message("Oh no....","No perteneces a un clan, no hay huachibonos.\nUsa el comando !guild seguido de un clan: (otakos | nalgoticas | conductores | corvidos)")
@@ -2083,8 +2081,6 @@ class Empleado_del_mes():
                                     
                     #Responder al cliente
                     reddit.redditor(remitente).message("Enhorabuena!",resultado)        
-
-                return None
 
         except:
             #Enviar mensaje de error si el empleado no entendio lo que recibio
@@ -2165,27 +2161,27 @@ class Empleado_del_mes():
                 
                 cantidad = 1
                 
-                respuesta = "__Rasca y gana con Huachito - Loteria Mujicana__"
+            respuesta = "__Rasca y gana con Huachito - Loteria Mujicana__"
                 
-                if cantidad < 31:
+            if cantidad < 31:
                     
-                    for i in range(cantidad):
+                for i in range(cantidad):
                                         
-                        resultado = slots(remitente)
+                    resultado = slots(remitente)
                         
-                        respuesta +=  f"\n\n{resultado}\n\n***"
+                    respuesta +=  f"\n\n{resultado}\n\n***"
                         
-                        if cantidad < 6:
+                if cantidad < 6:
                             
-                            #Responder al cliente en comentarios
+                    #Responder al cliente en comentarios
                             
-                            reddit.comment(id).reply(respuesta)
+                    reddit.comment(id).reply(respuesta)
                                     
-                        else:
+                else:
                             
-                            #Responder al cliente por DM
+                    #Responder al cliente por DM
                             
-                            reddit.redditor(remitente).message(f"Compraste {cantidad} huachitos!",respuesta)
+                    reddit.redditor(remitente).message(f"Compraste {cantidad} huachitos!",respuesta)
                                         
         except:
             #Enviar mensaje de error si el empleado no entendio lo que recibio
