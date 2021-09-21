@@ -1,3 +1,4 @@
+# This Python file uses the following encoding: utf-8
 from datetime import datetime
 import time
 import sqlite3
@@ -7,14 +8,15 @@ import json
 import re
 import collections
 import operator
-import requests
-from bs4 import BeautifulSoup
 from decimal import *
 import praw
 import config
 import math
 import traceback
+import requests
 from misc import *
+from PIL import Image, ImageDraw, ImageFont
+from base64 import b64encode
 
 HEADERS = {'User-Agent':'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36'}
 
@@ -55,6 +57,8 @@ class HuachiNet():
 
         self.saldo_total = self.Consultar_Saldo()
 
+        self.saldo_bancadenas = self.Consulta_Bancadenas()
+
         self.historial = self.Historial_Cuenta()
 
         self.depositos = self.Historial_Cuenta(tipo_movimiento="Deposito")
@@ -71,21 +75,20 @@ class HuachiNet():
 
         self.levantones = self.Historial_Cuenta(tipo_movimiento="Levanton")
 
-
     def Verificar_Usuario(self,usuario):
         """Verificar si existe el cliente en la BD"""
-
-        existe = False
 
         query = """SELECT ID FROM transacciones WHERE usuario=? LIMIT 1"""
 
         resultado = self.cursor.execute(query,(usuario,)).fetchone()
 
-        if resultado != None:
+        if resultado == None:
 
-            existe = True
+            return False
 
-        return existe
+        else:
+
+            return True
 
     def Bono_Bienvenida(self,usuario):
         """Entregar bineros a los clientes nuevos"""
@@ -133,7 +136,6 @@ class HuachiNet():
 
             self.conn.commit()
 
-
     def Consultar_Saldo(self):
         """Consulta el saldo total del cliente"""
 
@@ -145,7 +147,6 @@ class HuachiNet():
 
         return resultado[0]
         
-
     def Historial_Cuenta(self, tipo_movimiento = "Global"):
         """Consultar historial de movimientos del cliente desde el inicio de la cuenta"""
         
@@ -162,8 +163,7 @@ class HuachiNet():
             parametros = (self.id,tipo_movimiento)
 
         return self.cursor.execute(query,parametros).fetchall()
-        
-             
+                    
     def Mujicanos(self):
         """Lista de usuarios activos"""
 
@@ -260,36 +260,15 @@ class HuachiNet():
 
         self.conn.commit()
 
-    def Enviar_Shares(self,usuario,cantidad,share,precio):
-        """Huachiswap"""
-
-        query = """INSERT INTO shares (timestamp,usuario,cantidad,share,precio,origen_destino) VALUES (?,?,?,?,?,?)"""
-
-        timestamp = time.time()
-
-        self.cursor.execute(query,(timestamp,usuario,cantidad,share,precio,self.id)) 
-
-        negativo = cantidad - (cantidad * 2)
-
-        self.cursor.execute(query,(timestamp,self.id,negativo,share,precio,usuario))
-
-        self.conn.commit()
-
-    def Consultar_Shares(self):
-        """Consulta tu portafolio"""
-
-        query = """ SELECT share, SUM(cantidad) as cantidad, AVG(precio) as precio FROM shares WHERE usuario = ? AND share in (SELECT share FROM shares WHERE usuario = ?) GROUP BY share ORDER BY cantidad DESC"""
-
-        return self.cursor.execute(query,(self.id,self.id)).fetchall()
-
     def Calcular_Stats(self):
         """NRPG - Niño Rata Playing Game"""
 
-        baseStats = {"ConductoresNocturnos" : [70,50,40,40],
-                     "AlianzaOtako" : [30,70,40,60],
-                     "DominioNalgoticas" : [70,30,60,40],
+        baseStats = {"ConductoresNocturnos" : [60,50,40,40],
+                     "AlianzaOtako" : [30,60,40,60],
+                     "DominioNalgoticas" : [60,30,60,40],
                      "Corvidos" : [40,60,40,60],
-                     "Normal" : [50,50,50,50]}
+                     "Normal" : [50,50,50,50],
+                     "ElForastero" : [50,50,50,50]}
 
         perkStats = json.loads(open("./assets/perks.json","r",encoding="utf-8").read())
 
@@ -308,6 +287,27 @@ class HuachiNet():
 
         return [ base[i] + perk[i] + trait[i] + weapon[i] for i in range(4) ]
     
+    def Consulta_Bancadenas(self):
+
+        """Consulta saldo en Bancadenas"""
+
+        query = "SELECT SUM(cantidad) FROM bancadenas WHERE usuario = ?"
+
+        return self.cursor.execute(query,(self.id,)).fetchone()[0]
+
+    def Registro_Bancadenas(self,cantidad,nota):
+
+        """Registrar movimientos de cuenta en Bancadenas"""
+
+        query = "INSERT INTO bancadenas (timestamp,usuario,cantidad,nota) VALUES (?,?,?,?)"
+
+        timestamp = time.time()
+
+        self.cursor.execute(query,(timestamp,self.id,cantidad,nota))
+
+        self.conn.commit()
+
+
 
 def saldazo(redditor_id) -> str:
     """Abierto todos los dias de 7am a 10pm"""
@@ -323,7 +323,7 @@ def saldazo(redditor_id) -> str:
         return random.choice(resp_tip_cuenta)
 
     else:
-        return random.choice(resp_saldo) + f"\n\n{huachis.saldo_total:,} Huachis + {huachis.power} unidades de energia 🌀"
+        return random.choice(resp_saldo) + f"\n\nCartera Principal: {huachis.saldo_total:,} huachis + {huachis.power} unidades de energia 🌀\n\nCuenta Bancadenas: {huachis.saldo_bancadenas} huachis"
 
 def tip(remitente,destinatario,cantidad) -> tuple:
     """Dar propina por publicaciones y comentarios"""
@@ -347,17 +347,11 @@ def tip(remitente,destinatario,cantidad) -> tuple:
 
         else:
             #calcula la edad del destinatario para evitar spam de cuentas recien creadas
-            if destinatario == "Empleado_del_mes":
-                
-                cuenta_dias = 30
-            
-            else:
-
-                cuenta_dias = edad_cuenta(destinatario)
+            cuenta_dias = 30 if destinatario == 'Empleado_del_mes' else edad_cuenta(destinatario)
 
             if cuenta_dias < 28:
 
-                return "El usuario al que quieres enviar no tiene la madurez suficiente para entrar al sistema, es un pinche mocoso miado, dejalo ahi."
+                return (False,"El usuario al que quieres enviar no tiene la madurez suficiente para entrar al sistema, es un pinche mocoso miado, dejalo ahi.")
 
             else:
                 
@@ -382,13 +376,7 @@ def tip(remitente,destinatario,cantidad) -> tuple:
 def edad_cuenta(redditor_id) -> int:
     """calcular la edad en dias de la cuenta"""
 
-    cliente =  reddit.redditor(redditor_id).created_utc
-    
-    f_cuenta = datetime.fromtimestamp(cliente)
-
-    f_hoy = datetime.utcnow()
-
-    diff =  f_hoy - f_cuenta
+    diff = datetime.utcnow() - datetime.fromtimestamp(reddit.redditor(redditor_id).created_utc)
 
     return int(diff.days)
 
@@ -536,14 +524,14 @@ def asalto(cholo,victima,tipo):
                 #Enviar Binero
                 huachis_victima.Enviar_Bineros(cholo,huachis_victima.saldo_total,nota=tipo.capitalize())
 
-                return random.choice(resp_tumbar_cholo) + f"\n\n__{cholo} ganó toda la cartera de {victima} ({huachis_victima.saldo_total:,} huachis)__\n\nGuild | Mujicano | 🌀 | 🎭 | ⚔️\n:--|:--|:--:|:--:|:--:\n{huachis_cholo.guild} | {cholo} | {huachis_cholo.perk} | {huachis_cholo.trait} | {huachis_cholo.weapon}\n{huachis_victima.guild} | {victima} | {huachis_victima.perk} | {huachis_victima.trait} | {huachis_victima.weapon}"
+                return  f"{random.choice(resp_tumbar_cholo)}\n\n__{cholo} ganó toda la cartera de {victima} ({huachis_victima.saldo_total:,} huachis)__\n\nGuild | Mujicano | 🌀 | 🎭 | ⚔️\n:--|:--|:--:|:--:|:--:\n{huachis_cholo.guild} | {cholo} | {huachis_cholo.perk} | {huachis_cholo.trait} | {huachis_cholo.weapon}\n{huachis_victima.guild} | {victima} | {huachis_victima.perk} | {huachis_victima.trait} | {huachis_victima.weapon}"
             
             else:
 
                 #Enviar Binero
                 huachis_victima.Enviar_Bineros(cholo,cantidad_final,nota=tipo.capitalize())
 
-                return random.choice(resp_tumbar_cholo) + f" \n\n__{cholo} ganó {cantidad_final:,} huachis (de la cartera de {victima})__\n\nGuild | Mujicano | 🌀 | 🎭 | ⚔️\n:--|:--|:--:|:--:|:--:\n{huachis_cholo.guild} | {cholo} | {huachis_cholo.perk} | {huachis_cholo.trait} | {huachis_cholo.weapon}\n{huachis_victima.guild} | {victima} | {huachis_victima.perk} | {huachis_victima.trait} | {huachis_victima.weapon}"
+                return  f"{random.choice(resp_tumbar_cholo)}\n\n__{cholo} ganó {cantidad_final:,} huachis (de la cartera de {victima})__\n\nGuild | Mujicano | 🌀 | 🎭 | ⚔️\n:--|:--|:--:|:--:|:--:\n{huachis_cholo.guild} | {cholo} | {huachis_cholo.perk} | {huachis_cholo.trait} | {huachis_cholo.weapon}\n{huachis_victima.guild} | {victima} | {huachis_victima.perk} | {huachis_victima.trait} | {huachis_victima.weapon}"
             
         elif num_victima > num_cholo:
 
@@ -582,14 +570,14 @@ def asalto(cholo,victima,tipo):
                 #Enviar Binero
                 huachis_cholo.Enviar_Bineros(victima,huachis_cholo.saldo_total,nota=tipo.capitalize())
 
-                return random.choice(resp_tumbar_victima) + f"\n\n__{victima} ganó toda la cartera de {cholo} ({huachis_cholo.saldo_total:,} huachis)__\n\nGuild | Mujicano | 🌀 | 🎭 | ⚔️\n:--|:--|:--:|:--:|:--:\n{huachis_cholo.guild} | {cholo} | {huachis_cholo.perk} | {huachis_cholo.trait} | {huachis_cholo.weapon}\n{huachis_victima.guild} | {victima} | {huachis_victima.perk} | {huachis_victima.trait} | {huachis_victima.weapon}"
+                return f"{random.choice(resp_tumbar_victima)}\n\n__{victima} ganó toda la cartera de {cholo} ({huachis_cholo.saldo_total:,} huachis)__\n\nGuild | Mujicano | 🌀 | 🎭 | ⚔️\n:--|:--|:--:|:--:|:--:\n{huachis_cholo.guild} | {cholo} | {huachis_cholo.perk} | {huachis_cholo.trait} | {huachis_cholo.weapon}\n{huachis_victima.guild} | {victima} | {huachis_victima.perk} | {huachis_victima.trait} | {huachis_victima.weapon}"
             
             else:
 
                 #Enviar Binero
                 huachis_cholo.Enviar_Bineros(victima,cantidad_final,nota=tipo.capitalize())
 
-                return random.choice(resp_tumbar_victima) + f"\n\n__{victima} ganó {cantidad_final:,} huachis (de la cartera de {cholo})__\n\nGuild | Mujicano | 🌀 | 🎭 | ⚔️\n:--|:--|:--:|:--:|:--:\n{huachis_cholo.guild} | {cholo} | {huachis_cholo.perk} | {huachis_cholo.trait} | {huachis_cholo.weapon}\n{huachis_victima.guild} | {victima} | {huachis_victima.perk} | {huachis_victima.trait} | {huachis_victima.weapon}"
+                return f"{random.choice(resp_tumbar_victima)}\n\n__{victima} ganó {cantidad_final:,} huachis (de la cartera de {cholo})__\n\nGuild | Mujicano | 🌀 | 🎭 | ⚔️\n:--|:--|:--:|:--:|:--:\n{huachis_cholo.guild} | {cholo} | {huachis_cholo.perk} | {huachis_cholo.trait} | {huachis_cholo.weapon}\n{huachis_victima.guild} | {victima} | {huachis_victima.perk} | {huachis_victima.trait} | {huachis_victima.weapon}"
 
         else:
 
@@ -787,6 +775,22 @@ def shop(remitente,destinatario,regalo):
 
                 return random.choice(resp_shop)
 
+            elif regalo == 'doujin':
+
+                doujin = random.choice(doujins)
+
+                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado hentai, Yamete kudasai!\n\n [Abrir Regalo]({doujin})")
+
+                return random.choice(resp_shop)
+
+            elif regalo == 'viejo' or regalo == 'paella' :
+
+                viejo = random.choice(viejos)
+
+                reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado un viejo sabrozo, cuidoado porque salpica \n\n [Abrir Regalo]({viejo})")
+
+                return random.choice(resp_shop)
+            
             elif regalo == 'cura':
 
                 cura = random.choice(curas)
@@ -802,6 +806,7 @@ def shop(remitente,destinatario,regalo):
                 reddit.redditor(destinatario).message("Te mandaron un regalito.....",f"{remitente} te ha enviado una chambeadora, Revisas fogosas, pura picardia mexicana con el clasico sexismo de la epoca!\n\n [Abrir Regalo]({chambeadora})")
 
                 return random.choice(resp_shop)
+
               
             elif regalo == 'galleta':
 
@@ -1282,7 +1287,7 @@ def premio_huachilate():
 
     fecha_huachilote = datetime.fromtimestamp(float(huachiclave[0])).ctime()
 
-    selftext = f"Los ganadores de este Huachilote, con fecha y hora de {fecha_huachilote}　 　　　　　　　　　　 ✦ 　　　　   　 　　　˚　　　　　　　　　　　　　　*　　　　　　   　　　　　　　　　　　　　　　.　　　　　　　　　　　　　　. 　　      💫 　　　　　　　 ✦              🌝  　　　　 　　　　　 🌠 　                                               \n\n👻  ,　　   　.　　　　　　　　　　　　　.　　　ﾟ　  　　　.　　　　　　　　　　　　　.   ,　　　　　　.　　　　　　 ☀                                                🌞  　　　　　           ☄        . 　　　　　　　　　　.　　　　　　　　　      👽　　      　　. 　　　　　　,　　  　　　　.　　　　　　 ☀                                  　 ☄ 　　　    　　✦\n\n    1er | {ganadores[0]} | {premios[0]:,} huachis\n\n✦ 　   　　　,　　　　　　　　　🚀 　　　　 　　,　　　 ‍ ‍ ‍ ‍ 　　　　🌠 　　　　　　　　　　　 　 　　　　　　　　　　　˚　　　 　   　　　　,　　    　　　　　　　.　　　                  🛰  　　    　　 　　　　　.　　　　　　　　　　　　.　　　　　　　　　　　　　　　* 　　   　　　　　 ✦ 　　　　　　　  　\n\n🌟 　　 　　　　　　　 　　　　　.　　　　　　　　　　　　　　　　　　.　　　　　    　　. 　 　　　　　.　　　　  🌚                                                             🌠  　　　　　   　　　　　.　　　　　　　　　　　.　　　　　　　　　　   　 ˚　　　          \n\n👽 　　　　ﾟ　　　　　.　　　                             　　                      🛸 　　　　　　　　　　. 　　 　                            🌎 ‍ ‍ ‍ ‍ ‍ ‍ ‍ ‍ ‍ ‍             ,　 　　　　　            　　*.　　　　　 　　　　.　　　　　　　　　　 ✦ 　　　˚　　　　　　*　👾\n\n    2do | {ganadores[1]} | {premios[1]:,} huachis\n\n. 　. .　　　　　　　　　　 ✦ 　　　　   　 　　　 🛰˚　　　　　　　　　　　　　　*　　　　　　　　　　　　.　　　　　　　　　　　　. 　　 　　　 🌟 　                                   \n\n👾                               ✦ 　　　                         　　 🌠 　　　　　 　 ‍ ‍ ‍ ‍　 　　 ☄ 　　　　　　　　　　,　　   　 　　　　,　　    　　　　　　　　　.　　　  　　    　　　　　 　　　　　.　　　　　　　　　　　　　.　　　　　　　　　　　　　　　* ✦ 　　　　　　　         　        　 👽 　　　 　　 　                     　\n\n ☄ 　　　　　 　　　　　.　　　　　　　　　　　　　　　.　　　　　　　　　　　　　.　　　ﾟ　  　　　.　　　 🛸 　　　　　　　　　 　. ,　　　　　　　.　　　　　　    　　　　🌞 　　　　　　　 　. ☄\n\n    3er | {ganadores[2]} | {premios[2]:,} huachis\n\n✦ 　   　　　,　　　　　　　　　　　              🚀 　　　　 　　,　　　 ‍ ‍ ‍ ‍ 　                     \n\n🌌.　　　　　 　　                              🌟 　　　.　　　　　　　　　　　　　 　　　　　　　　　　　　　˚　　   　　                                  　　,　　　　　 🌝 　　　       　   　                 　　　 🛸 　　　　.　　 　                           \n\n🛰  　　    　　　　　 　　　　　.　　　　　　　　　　　　　.　　　　 👾　　　　　　　　　* 　　   　　　 　　 ✦ 　　　　　　　         　    🌟 .　　　　　　　　　　　　　　　　　　.　　                   🦜 　　. 　 　　                            　.　　　　 \n\n🌚 .　　　　　　　　　　　.　　　　　　　 👽 　　　                                          　🌜ﾟ　　　　　.　　　　　　　　　　　　　　　. 　　 　\n\n🌎 ‍ ‍ ‍ ‍ ‍ ‍ ‍ ‍ ‍ ‍ ,　 　　　　　　　　　　　　 　　*.　　　　　 　　　　　　　　　　　　　　.　　　　　　　　　　 ✦ 　　　　   　              　　　˚              Felicidades a los ganadores del huachilote　 🛸 　　　　　   　　　　　　　　　　　　　.　　　　　　　　　　　　　　."
+    selftext = f"Los ganadores de este Huachilote, con fecha y hora de {fecha_huachilote}　 　　　　　　　　　　 ✦ 　　　　   　 　　　˚　　　　　　　　　　　　　　*　　　　　　   　　　　　　　　　　　　　　　.　　　　　　　　　　　　　　. 　　      💫 　　　　　　　 ✦              🌝  　　　　 　　　　　 🌠 　                                               \n\n👻  ,　　   　.　　　　　　　　　　　　　.　　　ﾟ　  　　　.　　　　　　　　　　　　　.   ,　　　　　　.　　　　　　 ☀                                                🌞  　　　　　           ☄        . 　　　　　　　　　　.　　　　　　　　　      👽　　      　　. 　　　　　　,　　  　　　　.　　　　　　 ☀                                  　 ☄ 　　　    　　✦\n\n    1er | {ganadores[0]} | {premios[0]:,} huachis\n\n✦ 　   　　　,　　　　　　　　　🚀 　　　　 　　,　　　 ‍ ‍ ‍ ‍ 　　　　🌠 　　　　　　　　　　　 　 　　　　　　　　　　　˚　　　 　   　　　　,　　    　　　　　　　.　　　                  🛰  　　    　　 　　　　　.　　　　　　　　　　　　.　　　　　　　　　　　　　　　* 　　   　　　　　 ✦ 　　　　　　　  　\n\n🌟 　　 　　　　　　　 　　　　　.　　　　　　　　　　　　　　　　　　.　　　　　    　　. 　 　　　　　.　　　　  🌚                                                             🌠  　　　　　   　　　　　.　　　　　　　　　　　.　　　　　　　　　　   　 ˚　　　          \n\n👽 　　　　ﾟ　　　　　.　　　                             　　                      🛸 　　　　　　　　　　. 　　 　                            🌎 ‍ ‍ ‍ ‍ ‍ ‍ ‍ ‍ ‍ ‍             ,　 　　　　　            　　*.　　　　　 　　　　.　　　　　　　　　　 ✦ 　　　˚　　　　　　*　👾\n\n    2do | {ganadores[1]} | {premios[1]:,} huachis\n\n. 　. .　　　　　　　　　　 ✦ 　　　　   　 　　　 🛰˚　　　　　　　　　　　　　　*　　　　　　　　　　　　.　　　　　　　　　　　　. 　　 　　　 🌟 　                                   \n\n👾                               ✦ 　　　                         　　 🌠 　　　　　 　 ‍ ‍ ‍ ‍　 　　 ☄ 　　　　　　　　　　,　　   　 　　　　,　　    　　　　　　　　　.　　　  　　    　　　　　 　　　　　.　　　　　　　　　　　　　.　　　　　　　　　　　　　　　* ✦ 　　　　　　　         　        　 👽 　　　 　　 　                     　\n\n ☄ 　　　　　 　　　　　.　　　　　　　　　　　　　　　.　　　　　　　　　　　　　.　　　ﾟ　  　　　.　　　 🛸 　　　　　　　　　 　. ,　　　　　　　.　　　　　　    　　　　🌞 　　　　　　　 　. ☄\n\n    3er | {ganadores[2]} | {premios[2]:,} huachis\n\n✦ 　   　　　,　　　　　　　　　　　              🚀 　　　　 　　,　　　 ‍ ‍ ‍ ‍ 　                     \n\n🌌.　　　　　 　　                              🌟 　　　.　　　　　　　　　　　　　 　　　　　　　　　　　　　˚　　   　　                                  　　,　　　　　 🌝 　　　       　   　                 　　　 🛸 　　　　.　　 　                           \n\n🛰  　　    　　　　　 　　　　　.　　　　　　　　　　　　　.　　　　 👾　　　　　　　　　* 　　   　　　 　　 ✦ 　　　　　　　         　    🌟 .　　　　　　　　　　　　　　　　　　.　　                   🦜 　　. 　 　　                            　.　　　　 \n\n🌚 .　　　　　　　　　　　.　　　　　　　 👽 　　　                                          　🌜ﾟ　　　　　.　　　　　　　　　　　　　　　. 　　 　\n\n🌎 ‍ ‍ ‍ ‍ ‍ ‍ ‍ ‍ ‍ ‍ ,　 　　　　　　　　　　　　 　　*.　　　　　 　　　　　　　　　　　　　　.　　　　　　　　　　 ✦ 　　　　   　                Felicidades a los ganadores del huachilote　 🛸 　　　　　　　　　　　.　　　　　　　　　."
 
     subs = ["Mujico","TechoNegro","memexico"]
     # huachinews flair_id='a0a7193c-579b-11eb-8162-0e6a96a0cacd'
@@ -1390,19 +1395,6 @@ def rollthedice(redditor_id,numero):
 
     return f"**Roll The Dice a la mujicana**\n\nDado de {redditor_id}\n\n#{dado_redditor[0]}\n\nDados lanzados por el empleado:\n\n#{' '.join(dados_emoji)}\n\n_{random.choice(resp_dados)}_"
 
-def check_stonk(stonk):
-    """Obtener informacion sobre stonk"""
-    
-    pagina = requests.get(f"https://finance.yahoo.com/quote/{stonk}", headers=HEADERS)
-
-    sopita = BeautifulSoup(pagina.text,features = 'lxml')
-    
-    banner = sopita.find('div',{'id':'quote-header-info'})
-
-    valores = banner.find_all('span',{'class':'Trsdu(0.3s)'})
-
-    return (banner.h1.text,valores[0].text,valores[1].text)
-
 def actualizar_huachibonos(redditor_id,clase,item):
     """Actualizar los huachibonos comprados por el usuario"""
 
@@ -1428,9 +1420,9 @@ def actualizar_huachibonos(redditor_id,clase,item):
               "KingoftheRoad","Stiletto","BrazoTrailero",
               "MenageaTrapo","PastillaAzul","DragonDrilldo"]
 
-    corvidos = ["ExorcismoFantasmas","ParvadaCuervos","SaposAlucinogenos",
-              "BitcoinMedieval","Sapo","MascaraMDLP",
-              "SanguijuelaGoliat","PaloMedico","JeringaCocaina"]
+    corvidos = ["ExorcismoFantasmas","ParvadaCuervos","SaposAlucinogenos","Trepanacion","Sangria",
+              "BitcoinMedieval","Sapo","MascaraMDLP","BibliaLuisXIV","HierbasAromaticas",
+              "SanguijuelaGoliat","PaloMedico","JeringaCocaina","SerruchoOxidado","Flammenwerfer"]
 
     guilds = {"AlianzaOtako": otakos,"DominioNalgoticas":nalgoticas,
               "ConductoresNocturnos" : conductores, "Corvidos": corvidos}
@@ -1464,179 +1456,6 @@ def actualizar_huachibonos(redditor_id,clase,item):
 
             return f"Enhorabuena!, haz comprado {item} al precio mas barato del mercado.\n\nWaporeon, Si quieres renovar tu build, solo unete de nuevo a tu gremio! (!guild <opcion>), recibes 3 huachibonos al azar por mil huachicoins."
 
-def huachiswap(remitente,destinatario,ticker,cantidad):
-    """DEX para intercambiar tokens, sin comisiones!"""
-
-    if remitente in prohibido:
-        return "wow :O chico listo"
-
-    #Acceder a la HuachiNet
-    Huachis = HuachiNet(remitente)
-
-    #Primero verificar que el remitente tenga una cuenta
-    if Huachis.Verificar_Usuario(remitente) == False:
-        
-        return random.choice(resp_tip_cuenta)
-
-    shares = Huachis.Consultar_Shares()
-
-    for share in shares:
-
-        if ticker == share[0]:
-
-            total = share[1]
-
-            if total < cantidad:
-                
-                return f"Hijole wer@, no tienes suficientes {ticker} para completar la transaccion\n\nTienes {total:,} {ticker} en tu portafolio."
-
-            else:
-
-                stonk = check_stonk(ticker)
-
-                Huachis.Enviar_Shares(destinatario,cantidad,ticker,stonk[1])
-
-                return random.choice(resp_huachiswap)
-
-    return "Ah caray! de esas no tiene! ¿Seguro que no se las robaron?"
-
-def buy(redditor_id,ticker,cantidad):
-    """PUMP IT"""
-
-    if redditor_id in prohibido:
-        return "wow :O chico listo"
-
-    if ticker in stonks:
-
-        #Acceder a la HuachiNet redditor
-        Huachis_redditor = HuachiNet(redditor_id)
-
-        #Primero verificar que el redditor tenga una cuenta
-        if Huachis_redditor.Verificar_Usuario(redditor_id) == False:
-        
-            return random.choice(resp_tip_cuenta)
-    
-        #Obtener informacion de la stonk
-        stonk = check_stonk(ticker)
-
-        #Calcular el costo total de la operacion: 1 huachis = 3 dolares
-        costo_total = round((Decimal(stonk[1].replace(",","")) * cantidad) / 3)
-
-        if costo_total > Huachis_redditor.saldo_total:
-
-            return random.choice(resp_tip_sinbineros)
-    
-        else:
-
-            Huachis_redditor.Enviar_Bineros("HuachiSwap",costo_total,nota=f"{ticker}")
-
-            #Acceder a cuenta del broker
-            Huachis_broker = HuachiNet("HuachiSwap")
-
-            Huachis_broker.Enviar_Shares(redditor_id,cantidad,ticker,stonk[1].replace(",",""))
-
-            return f"Compraste {cantidad:,} ({ticker}) a ${stonk[1]} por token\n\nMonto total de {costo_total * 3:,} usd ({costo_total:,} huachis UwU) retirados de tu cuenta\n\nPortafolio actualizado! Gracias por usar HuachiSwap ^_^" 
-
-    else:
-
-        return "Esa stonk no la tenemos en existencia, verifica que sea la correcta o que este listada en HuachiSwap 'UwU'"
-
-def sell(redditor_id,ticker,cantidad):
-    """DUMP IT"""
-
-    if redditor_id in prohibido:
-        return "wow :O chico listo"
-
-    #Acceder a la HuachiNet redditor
-    Huachis_redditor = HuachiNet(redditor_id)
-
-    #Primero verificar que el redditor tenga una cuenta
-    if Huachis_redditor.Verificar_Usuario(redditor_id) == False:
-        
-        return random.choice(resp_tip_cuenta)
-
-    #Obtener portafolio de redditor
-    shares = Huachis_redditor.Consultar_Shares()
-
-    for share in shares:
-
-        #Verificar que tenga el activo a vender
-        if ticker == share[0]:
-
-            if int(share[1]) < cantidad:
-
-                return f"Hijole wer@, no tienes suficientes {ticker} para completar la transaccion\n\nTienes {share[1]:,} ({ticker}) en tu portafolio."
-
-            else:
-                
-                #Obtener informacion de la stonk
-                stonk = check_stonk(ticker)
-
-                #Vender shares!
-                Huachis_redditor.Enviar_Shares("HuachiSwap",cantidad,ticker,stonk[1].replace(",",""))
-
-                #Acceder a cuenta de broker
-
-                Huachis_broker = HuachiNet("HuachiSwap")
-
-                #Calcular dinero a enviar
-
-                costo_total = round((cantidad * Decimal(stonk[1].replace(",",""))) / 3)
-
-                Huachis_broker.Enviar_Bineros(redditor_id,costo_total,nota=f"{ticker}")
-
-                return f"Vendiste {cantidad:,} ({ticker}) a ${stonk[1]} por token\n\nMonto total de {costo_total * 3:,} usd ({costo_total:,} huachis UwU) abonados a tu cuenta\n\nPortafolio actualizado! Gracias por usar HuachiSwap ^_^" 
-
-    return "Ah caray! de esas no tiene! ¿Seguro que no se las robaron?"
-
-def portafolio(redditor_id):
-    """Huachifolio"""
-
-    #Acceder a cuenta del redditor
-    Huachis = HuachiNet(redditor_id)
-
-    #Primero verificar que el redditor tenga una cuenta
-    if Huachis.Verificar_Usuario(redditor_id) == False:
-        
-        return random.choice(resp_tip_cuenta)
-
-    respuesta = f"Cartera de {redditor_id}:\n\nRecuerda: 1 huachis = 3 dolares!\n\nStonk (ticker) | Cantidad | Precio Promedio (usd) | Precio Actual (usd) | Valor Inicial (huachis) | Valor Actual (huachis)\n:--|:--:|:--:|:--:|--:|--:\n"
-
-    shares = Huachis.Consultar_Shares()
-
-    if shares != []:
-
-        for share in shares:
-
-            if share[1] > 1:
-
-                stonk = check_stonk(share[0])
-
-                valor_actual = round((share[1] * Decimal(stonk[1].replace(",",""))) / 3)
-
-                valor_inicial = round((share[1] * Decimal(share[2])) / 3)
-
-                respuesta += f"{share[0]} | {share[1]:,} | {share[2]:,} | {stonk[1]} | {valor_inicial:,} | {valor_actual:,} \n"
-
-        return respuesta
-
-    else:
-
-        return "No tienes tokens! Lastima, usa HuachiSwap para comprar y vender tokens, no te quedes fuera de la diversion! :D"
-
-def consultar_stonks():
-    """Crear tabla de stonks disponibles en HuachiSwap"""
-
-    respuesta = "HuachiSwap Liquidity Pool\n\nStonk (ticker) | Precio (usd) | Cambio 24 hrs\n:--|:--:|:--:\n"
-
-    for ticker in stonks:
-
-        stonk = check_stonk(ticker)
-
-        respuesta += f"{stonk[0]} | {stonk[1]} | {stonk[2]}\n"
-
-    return respuesta
-
 def unirse_guild(redditor_id,item):
     """Unirse a un gremio"""
 
@@ -1660,9 +1479,9 @@ def unirse_guild(redditor_id,item):
               "KingoftheRoad"),("Stiletto","BrazoTrailero",
               "MenageaTrapo","PastillaAzul","DragonDrilldo")]
 
-    corvidos = [("ExorcismoFantasmas","ParvadaCuervos","SaposAlucinogenos"),
-              ("BitcoinMedieval","Sapo","MascaraMDLP"),
-              ("SanguijuelaGoliat","PaloMedico","JeringaCocaina")]
+    corvidos = [("ExorcismoFantasmas","ParvadaCuervos","SaposAlucinogenos","Trepanacion","Sangria"),
+              ("BitcoinMedieval","Sapo","MascaraMDLP","BibliaLuisXIV","HierbasAromaticas"),
+              ("SanguijuelaGoliat","PaloMedico","JeringaCocaina","SerruchoOxidado","Flammenwerfer")]
 
     guilds = {"AlianzaOtako": otakos,"DominioNalgoticas":nalgoticas,
               "ConductoresNocturnos": conductores, "Corvidos": corvidos}
@@ -1746,7 +1565,7 @@ def tweak_stats(redditor_id):
     ultimate_stats = {"Genkidama" : (10,[0,0,(contar_miembros(huachis.guild)* 0.5),0]),
                  "LlamadoTuculo" : (10,[0,0,(contar_miembros(huachis.guild)* 0.5),0]),
                  "BendicionRaquel" : (10,[0,0,0,(contar_miembros(huachis.guild)* 0.5)]),
-                 "ExorcismoFantasmas" : (0,[0,0,50 + (contar_miembros(huachis.guild)* 0.5),0])
+                 "ExorcismoFantasmas" : (10,[0,0,50 + (contar_miembros(huachis.guild)* 0.5),0])
                  }
 
     perks_stats = {"ImpactTrueno" : (5,[0,0,30,0]),
@@ -1758,12 +1577,15 @@ def tweak_stats(redditor_id):
              "LecturaTarot" : (5,[0,0,30,10]),
              "AguaCalzon" : (5,[0,0,40,0]),
              "Normal" : (0,[0,0,0,0]),
-             "CeroMiedo" : (5,[0,-30,30,0]),
+             "CeroMiedo" : (5,[0,-30,20,0]),
              "CampeonAjedrez" : (5,[0,0,30,0]),
-             "MonaInflable" : (5,[0,50,0,0]),
-             "MALVERDE" : (5,[0,0,40,0]),
+             "MonaInflable" : (5,[0,30,0,0]),
+             "MALVERDE" : (5,[0,0,30,0]),
              "ParvadaCuervos" : (5,[0,0,30,0]),
-             "SaposAlucinogenos" : (5,[0,0,40,0])
+             "SaposAlucinogenos" : (5,[0,0,40,0]),
+             "Trepanacion" : (5,[0,0,20,0]),
+             "Sangria" : (5,[0,0,10,0]),
+             "Gabardina" : (0,[0,0,0,0])
              }
 
     base_stats = huachis.stats
@@ -1806,7 +1628,173 @@ def check_build(redditor_id):
 
     return f"Guild: {huachis.guild}\n\nBuild:\n🌀 {huachis.perk} | 🎭{huachis.trait} | ⚔️ {huachis.weapon}\n\nStats:\nAtk ⚔️{stats[0]} | Def 🛡️ {stats[1]} | Magia ✨ {stats[2]} | Dinero💰 {stats[3]}"
 
+def deposito_bancadenas(redditor_id,cantidad):
+    """Depositar churupos en bancadenas"""
 
+    #Acceder a cuenta del cliente
+
+    huachis = HuachiNet(redditor_id)
+
+    #Verificar que tenga cuenta en la HuachiNet
+    if huachis.Verificar_Usuario(redditor_id) == False:
+        
+        return random.choice(resp_tip_cuenta)
+
+    if huachis.saldo_total < cantidad:
+
+        return random.choice(resp_tip_sinbineros)
+
+    else:
+
+        #PROTECCION cuando no se tiene cuenta en Bancadenas
+        if huachis.saldo_bancadenas == None:
+
+            saldo_bancadenas = 0
+
+        else:
+
+            saldo_bancadenas = huachis.saldo_bancadenas
+
+        #Limite de cuenta == 30,000 huachis
+        limite_cuenta = 50000
+
+        if saldo_bancadenas >= limite_cuenta:
+
+            return "No puedes depositar mas huachis, saldo maximo de 30,000 huachis por cuenta (┛◉Д◉)┛彡┻━┻ "
+
+        excedente = saldo_bancadenas + cantidad 
+
+        if  excedente > limite_cuenta:
+
+            total = limite_cuenta - saldo_bancadenas
+
+        else:
+
+            total = cantidad
+
+        #Mover huachis de main wallet a bancadenas
+        huachis.Enviar_Bineros("Bancadenas",total)
+
+        #Registrar transaccion en ledger bancadenas
+
+        huachis.Registro_Bancadenas(total,"Deposito")
+
+        return f"La cantidad de {total:,} huachis han sido abonadas a su cuenta\n\nSu Saldo actual es de: {huachis.Consulta_Bancadenas():,} huachicoin(s)\n\nGracias por usar Bancadenas! (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧"
+
+def retiro_bancadenas(redditor_id,cantidad):
+
+    """Retirar churupos de bancadenas"""
+
+    #Acceder a cuenta del cliente
+    huachis_redditor = HuachiNet(redditor_id)
+
+    #Verificar que tenga cuenta en la HuachiNet
+    if huachis_redditor.Verificar_Usuario(redditor_id) == False:
+        
+        return random.choice(resp_tip_cuenta)
+
+    else:
+
+        if huachis_redditor.saldo_bancadenas == None:
+
+            return "Su cuenta en Bancadenas esta llena de lagrimas chairas ಥ_ಥ ..........no tienen valor comercial, deposite algo a su cuenta oiga."
+
+        if huachis_redditor.saldo_bancadenas < cantidad:
+
+            return f"No es posible completar la transferencia, el saldo de su cuenta es insuficiente o(╥﹏╥)o\n\nSu saldo actual es de: {huachis_redditor.saldo_bancadenas:,} huachicoin(s)"
+
+        
+        huachis_bancadenas = HuachiNet("Bancadenas")
+
+        #Mover huachis de bancadenas a main wallet
+        huachis_bancadenas.Enviar_Bineros(redditor_id,cantidad)
+
+        #Registrar transaccion en ledger bancadenas
+        huachis_redditor.Registro_Bancadenas(-cantidad,"Retiro")
+
+        return f"La cantidad de {abs(cantidad):,} huachis han sido retiradas de su cuenta\n\nSu saldo actual es de: {huachis_redditor.Consulta_Bancadenas():,} huachicoin(s)\n\nGracias por usar Bancadenas! (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧"
+
+def generar_im_dinero(faiter1,faiter2,tipo):
+ 
+    cholo = HuachiNet(faiter1)
+
+    victima = HuachiNet(faiter2)
+
+    data = cholo.cursor.execute("SELECT * FROM transacciones WHERE usuario = ? AND nota = ? ORDER BY timestamp DESC ",(faiter1,tipo.capitalize())).fetchone()
+
+    img = Image.new('RGB', (800, 600), color = (38, 50, 56))
+ 
+    d = ImageDraw.Draw(img)
+
+    fnt = ImageFont.truetype("./assets/Symbola.ttf", 28, encoding='unic')
+
+    if data[3] > 0:
+
+        ganador = faiter1
+    
+    else:
+
+        ganador = faiter2
+
+    d.text((50,50), f"👾 Mujico RPG  👾 |  ID: {data[0]}\n\n{faiter1}    Guild    {cholo.guild}\nBuild    ( ⚔ {cholo.stats[0]} | 🛡 {cholo.stats[1]} | ✨ {cholo.stats[2]} | 💰 {cholo.stats[3]} )\n    🌀 {cholo.perk}\n    🎭 {cholo.trait}\n    ⚔ {cholo.weapon}\n---------------------------------------------------------\n\n{faiter2}    Guild    {victima.guild}\nBuild    ( ⚔ {victima.stats[0]} | 🛡 {victima.stats[1]} | ✨ {victima.stats[2]} | 💰 {victima.stats[3]} )\n    🌀 {victima.perk}\n    🎭 {victima.trait}\n    ⚔ {victima.weapon}\n---------------------------------------------------------\n\nGanador: {ganador} ({abs(data[3]):,} huachis)\n    ┬┴┬┴┤( ͡° ͜ʖ├┬┴┬┴", fill=(255,196,0), font=fnt,spacing=5)
+ 
+    img.save('./assets/logos/robo.png')
+
+def generar_im_sin(faiter1,faiter2,won):
+ 
+    cholo = HuachiNet(faiter1)
+
+    victima = HuachiNet(faiter2)
+
+    img = Image.new('RGB', (800, 600), color = (38, 50, 56))
+ 
+    d = ImageDraw.Draw(img)
+
+    fnt = ImageFont.truetype("./assets/Symbola.ttf", 28, encoding='unic')
+
+    if won == 1:
+
+        ganador = faiter1
+    
+    else:
+
+        ganador = faiter2
+
+    d.text((50,50), f"👾 Mujico RPG  👾\n\n{faiter1}    Guild    {cholo.guild}\nBuild    ( ⚔ {cholo.stats[0]} | 🛡 {cholo.stats[1]} | ✨ {cholo.stats[2]} | 💰 {cholo.stats[3]} )\n    🌀 {cholo.perk}\n    🎭 {cholo.trait}\n    ⚔ {cholo.weapon}\n---------------------------------------------------------\n\n{faiter2}    Guild    {victima.guild}\nBuild    ( ⚔ {victima.stats[0]} | 🛡 {victima.stats[1]} | ✨ {victima.stats[2]} | 💰 {victima.stats[3]} )\n    🌀 {victima.perk}\n    🎭 {victima.trait}\n    ⚔ {victima.weapon}\n---------------------------------------------------------\nGanador: {ganador}\n    ┬┴┬┴┤( ͡° ͜ʖ├┬┴┬┴", fill=(255,196,0), font=fnt,spacing=5)
+ 
+    img.save('./assets/logos/robo.png')
+
+def upload_imgur():
+
+    headers = {"Authorization": f"Client-ID {config.IM_CLIENT_ID}"}
+
+    api_key = config.IM_CLIENT_SECRET
+
+    url = "https://api.imgur.com/3/upload.json"
+
+    name = random.choices(string.ascii_letters + string.digits,k = 7)
+
+    data = {
+        'key': api_key, 
+        'image': b64encode(open('./assets/logos/robo.png', 'rb').read()),
+        'type': 'base64',
+        'name': f'{name}',
+        'title': f'Atracos {name}'
+        }
+
+    response = requests.post(url,headers=headers,data=data)
+
+    if response.status_code == 200:
+
+        url = response.json()["data"]["link"]
+
+    else:
+
+        url = ""
+
+    return (response.status_code,url)
+
+    
 class Empleado_del_mes():
 
     """Cirilo por fin fue a la preparatoria :')"""
@@ -1826,9 +1814,8 @@ class Empleado_del_mes():
                         "!rankme","!rank25","!shop","!huachibono",
                         "!guild","!build","!asalto","!atraco",
                         "!levanton","!poker","!huachilate","!huachito",
-                        "!huachilote","!rtd","!portafolio",
-                        "!stonks","!comprar","!vender","!long",
-                        "!huachiswap","!flair","!short"]
+                        "!huachilote","!rtd","!retiro",
+                        "!deposito","!flair"]
 
             return [ comando for comando in comandos if comando in texto ]
 
@@ -2111,10 +2098,68 @@ class Empleado_del_mes():
     def asaltos(self,cholo,victima,tipo,id):
 
         try:
+
             resultado = asalto(cholo,victima,tipo)
 
-            #Responder al cliente
-            reddit.comment(id).reply(resultado)
+            if "Guild | Mujicano" in resultado:
+
+                if "ganó" in resultado:
+
+                    generar_im_dinero(cholo,victima,tipo)
+
+                    url = upload_imgur()
+
+                    respuesta_cirilo = resultado.split("\n\n")[0]
+
+                    if url[0] == 200:
+
+                        #Responder al cliente
+                        reddit.comment(id).reply(f"[{respuesta_cirilo}]({url[1]})")
+
+                    else:
+
+                        reddit.comment(id).reply(resultado)
+
+                if "Ganaste" in resultado or "putiza" in resultado:
+
+                    generar_im_sin(cholo,victima,1)
+
+                    url = upload_imgur()
+
+                    respuesta_cirilo = resultado.split("\n\n")[0]
+
+                    #Responder al cliente
+                    if url[0] == 200:
+
+                        #Responder al cliente
+                        reddit.comment(id).reply(f"[{respuesta_cirilo}]({url[1]})")
+
+                    else:
+
+                        reddit.comment(id).reply(resultado)
+
+                elif "Perdiste" in resultado:
+
+                    generar_im_sin(cholo,victima,0)
+
+                    url = upload_imgur()
+
+                    respuesta_cirilo = resultado.split("\n\n")[0]
+
+                    #Responder al cliente
+                    if url[0] == 200:
+
+                        #Responder al cliente
+                        reddit.comment(id).reply(f"[{respuesta_cirilo}]({url[1]})")
+
+                    else:
+
+                        reddit.comment(id).reply(resultado)
+
+            else:
+
+                #Responder al cliente
+                reddit.comment(id).reply(resultado)
 
         except:
             #Enviar mensaje de error si el empleado no entendio lo que recibio
@@ -2141,8 +2186,7 @@ class Empleado_del_mes():
             #error_log(f"Levanton - Usuario {str(comment.author)} - Comentario {str(comment.id)}" + traceback.format_exc())
 
             reddit.redditor(cholo).message("Mensaje Error",random.choice(resp_empleado_error))
-
-                                    
+                                   
     def huachito(self,texto,remitente,id):
 
         try:
@@ -2274,142 +2318,6 @@ class Empleado_del_mes():
             self.error_log(mensaje)
             
             reddit.redditor(remitente).message("Mensaje Error",random.choice(resp_empleado_error))
-
-    def portafolio(self,remitente,id):
-
-        try:
-                            
-            #Realizamos la consulta
-            resultado = portafolio(remitente)
-                                    
-            #Responder al cliente
-            reddit.redditor(remitente).message("HuachiSwap - Portafolio",resultado)
-            
-                                            
-        except:
-            #Enviar mensaje de error si el empleado no entendio lo que recibio
-            mensaje = f"Portafolio - Usuario {remitente} - Comentario {id}\n{traceback.format_exc()}"
-
-            self.error_log(mensaje)
-            
-            reddit.redditor(remitente).message("Mensaje Error",random.choice(resp_empleado_error))
-
-    def stonks(self,remitente,id):
-
-        try:
-                            
-            #Realizamos la consulta
-            
-            resultado = consultar_stonks()
-                                    
-            #Responder al cliente
-                                
-            reddit.redditor(remitente).message("HuachiSwap Liquidity Pool",resultado)
-        
-                                            
-        except:
-            #Enviar mensaje de error si el empleado no entendio lo que recibio
-            
-            mensaje = f"Stonks - Usuario {remitente} - Comentario {id}\n{traceback.format_exc()}"
-
-            self.error_log(mensaje)
-            
-            reddit.redditor(remitente).message("Mensaje Error",random.choice(resp_empleado_error))
-
-    def comprar(self,texto,remitente,id):
-
-        try:
-            #Comprar X cantidad de tokens.
-            comentario = texto.split()
-                    
-            for i,item in enumerate(comentario,start=0):
-            
-                if "!comprar" in item or "!long" in item:
-                    
-                    ticker = comentario[i+1]
-                                        
-                    cantidad = math.ceil(abs(float(comentario[i+2])))
-                    
-                    compra = buy(remitente,ticker.upper(),cantidad)
-                                        
-                    #Responder al cliente
-                                        
-                    reddit.redditor(remitente).message("HuachiSwap - Resumen de operacion",compra)
-                    
-                    return None
-                            
-        except:
-            
-            #Enviar mensaje de error si el empleado no entendio lo que recibio
-            mensaje = f"Comprar - Usuario {remitente} - Comentario {id}\n{traceback.format_exc()}"
-
-            self.error_log(mensaje)
-                                
-            reddit.redditor(remitente).message("Mensaje Error",random.choice(resp_empleado_error))
-
-    def vender(self,texto,remitente,id):
-
-        try:
-            #Vender X cantidad de tokens.
-                                
-            comentario = texto.split()
-            
-            for i,item in enumerate(comentario,start=0):
-                                    
-                if "!vender" in item or "!short" in item:
-                                        
-                    ticker = comentario[i+1]
-                                        
-                    cantidad = math.ceil(abs(float(comentario[i+2])))
-                    
-                    venta = sell(remitente,ticker.upper(),cantidad)
-                    
-                    #Responder al cliente
-                    
-                    reddit.redditor(remitente).message("HuachiSwap - Resumen de operacion",venta)
-                                        
-                    return None
-        
-        except:
-            #Enviar mensaje de error si el empleado no entendio lo que recibio
-            mensaje = f"Vender - Usuario {remitente} - Comentario {id}\n{traceback.format_exc()}"
-
-            self.error_log(mensaje)
-                                
-            reddit.redditor(remitente).message("Mensaje Error",random.choice(resp_empleado_error))
-
-    def huachiswap (self,texto,remitente,destinatario,id):
-
-        try:
-                                
-            #Enviar X cantidad de tokens.
-            comentario = texto.split()
-            
-            for i,item in enumerate(comentario,start=0):
-                
-                if "!huachiswap" in item:
-                    
-                    ticker = comentario[i+1]
-                    
-                    cantidad = math.ceil(abs(float(comentario[i+2])))
-                            
-                    #Realizamos la consulta
-                    
-                    resultado = huachiswap(remitente,destinatario,ticker.upper(),cantidad)
-                                    
-                    #Responder al cliente
-                    
-                    reddit.redditor(remitente).message("HuachiSwap - Transaccion Exitosa",resultado)
-                    
-                    return None             
-                                            
-        except:
-            #Enviar mensaje de error si el empleado no entendio lo que recibio
-            mensaje = f"HuachiSwap - Usuario {remitente} - Comentario {id}\n{traceback.format_exc()}"
-
-            self.error_log(mensaje)
-            
-            reddit.redditor(remitente).message("Mensaje Error",random.choice(resp_empleado_error))
                         
     def flair(self,texto,remitente,id):
 
@@ -2430,6 +2338,54 @@ class Empleado_del_mes():
         except:
             #Enviar mensaje de error si el empleado no entendio lo que recibio
             mensaje = f"Flair - Usuario {remitente} - Comentario {id}\n{traceback.format_exc()}"
+
+            self.error_log(mensaje)
+            
+            reddit.redditor(remitente).message("Mensaje Error",random.choice(resp_empleado_error))
+
+    def deposito(self,texto,remitente,id):
+
+        try:
+            #Extraemos la cantidad
+            pattern = '!deposito\ *(\d+)'
+                                
+            result = re.findall(pattern, texto)
+
+            cantidad = abs(int(result[0]))
+                                
+            #Realizamos la transaccion
+            resultado = deposito_bancadenas(remitente,cantidad)
+                                    
+            #Responder al cliente
+            reddit.redditor(remitente).message("Bancadenas - Solicitud de deposito",resultado)         
+                                            
+        except:
+            #Enviar mensaje de error si el empleado no entendio lo que recibio
+            mensaje = f"Deposito - Usuario {remitente} - Comentario {id}\n{traceback.format_exc()}"
+
+            self.error_log(mensaje)
+            
+            reddit.redditor(remitente).message("Mensaje Error",random.choice(resp_empleado_error))
+
+    def retiro(self,texto,remitente,id):
+
+        try:
+            #Extraemos la cantidad
+            pattern = '!retiro\ *(\d+)'
+                                
+            result = re.findall(pattern, texto)
+
+            cantidad = abs(int(result[0]))
+                                
+            #Realizamos la transaccion
+            resultado = retiro_bancadenas(remitente,cantidad)
+                                    
+            #Responder al cliente
+            reddit.redditor(remitente).message("Bancadenas - Solicitud de retiro",resultado)         
+                                            
+        except:
+            #Enviar mensaje de error si el empleado no entendio lo que recibio
+            mensaje = f"Retiro - Usuario {remitente} - Comentario {id}\n{traceback.format_exc()}"
 
             self.error_log(mensaje)
             

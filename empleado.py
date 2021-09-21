@@ -23,13 +23,8 @@ tareas = {"!tip": cirilo.propina,
           "!huachilate": cirilo.huachilate,
           "!huachilote": cirilo.huachilate,
           "!rtd": cirilo.rollthedice,
-          "!portafolio": cirilo.portafolio,
-          "!stonks": cirilo.stonks,
-          "!comprar": cirilo.comprar,
-          "!vender": cirilo.vender,
-          "!long": cirilo.comprar,
-          "!short": cirilo.vender,
-          "!huachiswap": cirilo.huachiswap,
+          "!deposito": cirilo.deposito,
+          "!retiro": cirilo.retiro,
           "!flair": cirilo.flair
           }
 
@@ -37,9 +32,10 @@ tareas = {"!tip": cirilo.propina,
 def Jornada():
     """El motor de nuestra huachieconomia"""
 
-    movimientos = 0
-
     # Cuidado con el futuro, es incierto.
+
+    #Los tiempos de cirilo son perfectos
+    tiempos = open("./timelog.txt", "a", encoding="utf-8")
 
     # Buscar subreddits
     for subreddit in config.SUBREDDITS:
@@ -72,35 +68,43 @@ def Jornada():
 
                         for i,comando in enumerate(comandos):
 
-                            if i == 6:
+                            if i == 2:
                                 
-                                continue
+                                break
 
-                            if comando in ["!tip", "!shop", "!huachiswap"]:
+                            if comando in ["!tip", "!shop"]:
+
+                                start = time.time()
 
                                 tareas[comando](texto, remitente, destinatario, id)
 
-                                movimientos += 1
+                                tiempos.write(f"{comando} --- {time.time() - start} segundos" + "\n")
 
-                            if comando in ["!huachibono", "!guild", "!huachito", "!huachilate", "!huachilote", "!rtd", "!long", "!short", "!comprar", "!vender"]:
+                            if comando in ["!huachibono", "!guild", "!huachito", "!huachilate", "!huachilote", "!rtd", "!deposito", "!retiro"]:
+
+                                start = time.time()
 
                                 tareas[comando](texto, remitente, id)
 
-                                movimientos += 1
+                                tiempos.write(f"{comando} --- {time.time() - start} segundos" + "\n")
 
-                            if comando in ["!saldo", "!saldazo", "!rank", "!rankme", "!rank25", "!build", "!portafolio", "!stonks"]:
+                            if comando in ["!saldo", "!saldazo", "!rank", "!rankme", "!rank25", "!build"]:
+
+                                start = time.time()
 
                                 tareas[comando](remitente, id)
 
-                                movimientos += 1
+                                tiempos.write(f"{comando} --- {time.time() - start} segundos" + "\n")
 
                             if comando in ["!asalto", "!atraco", "!levanton"]:
+
+                                start = time.time()
 
                                 if comando == "!levanton":
 
                                     tareas[comando](texto, remitente, id)
 
-                                    movimientos += 1
+                                    tiempos.write(f"{comando} --- {time.time() - start} segundos" + "\n")
 
                                 else:
 
@@ -108,21 +112,25 @@ def Jornada():
 
                                     tareas[comando](remitente, destinatario, tipo, id)
 
-                                    movimientos += 1
+                                    tiempos.write(f"{comando} --- {time.time() - start} segundos" + "\n")
 
                             if comando == "!poker":
 
+                                start = time.time()
+
                                 tareas[comando](remitente, destinatario, id)
 
-                                movimientos += 1
+                                tiempos.write(f"{comando} --- {time.time() - start} segundos" + "\n")
 
                             if comando == "!flair":
 
+                                start = time.time()
+
                                 tareas[comando](str(comment.body), remitente, id)
 
-                                movimientos += 1
+                                tiempos.write(f"{comando} --- {time.time() - start} segundos" + "\n")
 
-    return movimientos
+    tiempos.close()
 
 
 def servicio_al_cliente():
@@ -159,7 +167,7 @@ def servicio_al_cliente():
                     atraco_perdida = [
                         item for item in huachis.atracos if int(item[2]) < 0]
 
-                    chunk = f"__Saldo: {huachis.saldo_total} Huachicoin(s)__\n\n**Total de movimientos**\n\nDepositos: {len(huachis.depositos)}  |  Retiros: {len(huachis.retiros)}\n\nAsaltos | ganados: {len(asalto_victoria)} | perdidos: {len(asalto_perdida)}\n\nAtracos | ganados: {len(atraco_victoria)} | perdidos: {len(atraco_perdida)}\n\nHuachitos | Comprados: {len(huachis.huachitos)} | Ganados: {len(huachis.premios_huachito)}\n\nBuild: �{huachis.perk} (energia disponible: {huachis.power})  |  �{huachis.trait}  |  ⚔️{huachis.weapon}\n\nFecha | Nota | Cantidad | Destino / Origen\n:--|:--:|--:|:--:\n"
+                    chunk = f"__Cartera Principal: {huachis.saldo_total} huachicoin(s)__\n\n__Cuenta Bancadenas: {huachis.saldo_bancadenas} huachicoin(s)__\n\n**Transacciones**\n\nDepositos: {len(huachis.depositos)}  |  Retiros: {len(huachis.retiros)}\n\nAsaltos | ganados: {len(asalto_victoria)} | perdidos: {len(asalto_perdida)}\n\nAtracos | ganados: {len(atraco_victoria)} | perdidos: {len(atraco_perdida)}\n\nHuachitos | Comprados: {len(huachis.huachitos)} | Ganados: {len(huachis.premios_huachito)}\n\nBuild: �{huachis.perk} (energia disponible: {huachis.power})  |  �{huachis.trait}  |  ⚔️{huachis.weapon}\n\nFecha | Nota | Cantidad | Destino / Origen\n:--|:--:|--:|:--:\n"
 
                     for i, item in enumerate(huachis.historial, start=1):
 
@@ -201,12 +209,8 @@ if __name__ == "__main__":
 
         print("\nTermine mi trabajo patron!")
 
-        stats = f"--- {time.time() - start_time} seconds --- Movimientos: ({movs})"
+        stats = f"--- {time.time() - start_time} seconds"
 
         print(stats)
 
-        with open("./timelog.txt", "a", encoding="utf-8") as file:
-
-            file.write(stats + "\n")
-
-        time.sleep(30)
+        time.sleep(60)

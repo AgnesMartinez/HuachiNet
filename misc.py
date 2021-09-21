@@ -1,10 +1,9 @@
 
 shops = {
-  'stonks' : ("AAPL","AMZN","TSLA","MRNA","NFLX","NVDA","NIO","WMT","COST","TUP","GME","NTDOY","SNE","MSFT","INTC","AMD","BTC-USD","ETH-USD","LTC-USD","VET-USD","NANO-USD","DOGE-USD"),
 
-  'opciones shop' : ("monachina","trapo","furro","nalgotica","cura","corvido","galleta","huachito","chambeadora","valentin"),
+  'opciones shop' : ("monachina","trapo","furro","nalgotica","cura","corvido","galleta","huachito","chambeadora","valentin","viejo","paella","doujin"),
   
-  'menu shop' : ("Menu Shop","__HuachiStore - Abierto cuando llegamos, cerrado cuando nos vamos__\n\nEnvia un regalo usando el comando shop, seguido de una opcion del menu, todo a 5 huachis.\n\nRegalo | subcomando\n:--|--:\nMonas Chinas | monachina\nTrapitos | trapo\nFurros | furro\nHuachito | huachito\nNalgoticas | nalgotica\nMDLP | cura / corvido\nGanosas (Revistas para adultos) | chambeadora\nGalleta de la fortuna | galleta\n\nCompleta tu compra de la siguiente manera:\n\n    shop comando\n\n    Ejemplo: shop monachina\n\n    (no olvides el signo de exclamación)\n\nUsalo en la seccion de comentarios."),
+  'menu shop' : ("Menu Shop","__HuachiStore - Abierto cuando llegamos, cerrado cuando nos vamos__\n\nEnvia un regalo usando el comando shop, seguido de una opcion del menu, todo a 5 huachis.\n\nRegalo | subcomando\n:--|--:\nMonas Chinas | monachina\nTrapitos | trapo\nFurros | furro\nHuachito | huachito\nNalgoticas | nalgotica\nMDLP | cura / corvido\nGanosas (Revistas para adultos) | chambeadora\nGalleta de la fortuna | galleta\nBiejo Sabroso | viejo / paella\nDoujins (hentai) | doujin\n\nCompleta tu compra de la siguiente manera:\n\n    shop comando\n\n    Ejemplo: shop monachina\n\n    (no olvides el signo de exclamación)\n\nUsalo en la seccion de comentarios."),
 
   #Menus por guilds
   'AlianzaOtako' : ("Huachibonos - Alianza Otako","__Huachibonos - Kawaii desu ne! Tenemos los mejores precios de la region__\n\n[Informacion sobre huachibonos](https://www.reddit.com/r/TechoNegro/comments/oy3qdi/huachibonos_alianzaotako/)\n\nRecuerda que los huachibonos 🌀 consumen energia! Para recargar tu huachibono 🌀 necesitas comprar uno nuevo. La energia no es acumulable.\n\nCosto por huachibono: 🌀 = 800  🎭 = 400  ⚔️ = 200\n\nHuachibono | subcomando\n:--|--:\nGenkidama 🌀 | genkidama\nImpactTrueno 🌀 | pikachu\nPolvoDiamante 🌀 | diamante\nRasegan 🌀 | naruto\nOmaewamushinderu 🌀 | omaewa\nEsferaDragon 🎭 | dragonball\nPuerta Magica 🎭 | doraemon\nPiedraEvolutiva 🎭 | piedra\nSemilla Hermitaño 🎭 | semilla\nTesticulos Exodia 🎭 | exodia\nDakimakura ⚔️ | waifu\nMegaBuster ⚔️ | megaman\nCaparazol Azul ⚔️ | caparazon\nSakabato ⚔️ | sakabato\nShinigami ⚔️ | demonio\n\nCompleta tu compra de la siguiente manera:\n\n!huachibono waifu (comando <opcion>)\n\nUsa el comando en la seccion de comentarios."),
@@ -13,7 +12,7 @@ shops = {
   
   'ConductoresNocturnos' : ("Huachibonos - Conductores Nocturnos","__Huachibonos - Que quede claro, no nos gustan las femboys.__\n\n[Informacion sobre huachibonos](https://www.reddit.com/r/TechoNegro/comments/p8mhvv/huachibonos_conductores_nocturnos/)\n\nRecuerda que los huachibonos 🌀 consumen energia! Para recargar tu huachibono 🌀 necesitas comprar uno nuevo. La energia no es acumulable.\n\nCosto por huachibono: 🌀 = 800  🎭 = 400  ⚔️ = 200\n\nHuachibono | subcomando\n:--|--:\nLa Bendicion de Raquel 🌀 | raquel\nCero Miedo 🌀 | cocaina\nCampeon de Ajedrez 🌀 | ajedrez\nMona Inflable 🌀 | inflable\nMALVERDE 🌀 | malverde\nSemen Ardiente 🎭 | gonorrea\nProxeneta 🎭 | pimp\nAngeles de Charlie 🎭 | charlie\nRevistas Chambeadoras 🎭 | chambeadoras\nKing of the road 🎭 | king\nStiletto ⚔️ | stiletto\nBrazo de trailero ⚔️ | trailero\nMenage a Trapo ⚔️ | trio\nLa pastila azul ⚔️ | viagra\nDragon Drilldo ⚔️ | dildo\n\nCompleta tu compra de la siguiente manera:\n\n!huachibono dildo (comando <opcion>)\n\nUsa el comando en la seccion de comentarios."),
   
-  'Corvidos' : ("Huachibonos - Corvidos","__Huachibonos - La cura contra la pestilencia moderna__\n\n[Informacion sobre huachibonos](https://www.reddit.com/r/TechoNegro/comments/p8mjjj/huachibonos_corvidos/)\n\nRecuerda que los huachibonos 🌀 consumen energia! Para recargar tu huachibono 🌀 necesitas comprar uno nuevo. La energia no es acumulable.\n\nCosto por huachibono: 🌀 = 800  🎭 = 400  ⚔️ = 200\n\nHuachibono | subcomando\n:--|--:\nExorcismo de fantasmas en la sangre 🌀 | exorcismo\nParvada de Cuervos 🌀 | cuervos\nSapos Alucinogenos 🌀 | bufotoxina\nBitcoin Medieval 🎭 | bitcoin\nSapo 🎭 | sapo\nMascara MDLP 🎭 | mascara\nSanguijuela Goliat ⚔️ | sanguijuela\nPalo Medico ⚔️ | palo\nJeringa con cocaina ⚔️ | jeringa\n\nCompleta tu compra de la siguiente manera:\n\n!huachibono bitcoin (comando <opcion>)\n\nUsa el comando en la seccion de comentarios."),
+  'Corvidos' : ("Huachibonos - Corvidos","__Huachibonos - La cura contra la pestilencia moderna__\n\n[Informacion sobre huachibonos](https://www.reddit.com/r/TechoNegro/comments/p8mjjj/huachibonos_corvidos/)\n\nRecuerda que los huachibonos 🌀 consumen energia! Para recargar tu huachibono 🌀 necesitas comprar uno nuevo. La energia no es acumulable.\n\nCosto por huachibono: 🌀 = 800  🎭 = 400  ⚔️ = 200\n\nHuachibono | subcomando\n:--|--:\nExorcismo de fantasmas en la sangre 🌀 | exorcismo\nParvada de Cuervos 🌀 | cuervos\nSapos Alucinogenos 🌀 | bufotoxina\nTrepanacion 🌀 | trepanos\nSangria 🌀 | sangria\nBitcoin Medieval 🎭 | bitcoin\nSapo 🎭 | sapo\nMascara MDLP 🎭 | mascara\nBiblia Luis XIV 🎭 | biblia\nHierbasAromaticas 🎭 | hierbas\nSanguijuela Goliat ⚔️ | sanguijuela\nPalo Medico ⚔️ | palo\nJeringa con cocaina ⚔️ | jeringa\nSerrucho Oxidado ⚔️ | serrucho\nFlammenwerfer ⚔️ | fuego\n\nCompleta tu compra de la siguiente manera:\n\n!huachibono bitcoin (comando <opcion>)\n\nUsa el comando en la seccion de comentarios."),
   
   
   #huachibonos
@@ -34,7 +33,9 @@ shops = {
                    "malverde": "MALVERDE",
                    "exorcismo": "ExorcismoFantasmas",
                    "cuervos": "ParvadaCuervos",
-                   "bufotoxina": "SaposAlucinogenos"},
+                   "bufotoxina": "SaposAlucinogenos",
+                   "trepano": "Trepanacion",
+                   "sangria": "Sangria"},
                    
 
   'bonos traits' : {"dragonball" : "EsferaDragon", 
@@ -54,7 +55,9 @@ shops = {
                     "king": "KingoftheRoad",
                     "bitcoin": "BitcoinMedieval",
                     "sapo": "Sapo",
-                    "mascara": "MascaraMDLP"}
+                    "mascara": "MascaraMDLP",
+                    "biblia": "BibliaLuisXIV",
+                    "hierbas": "HierbasAromaticas"}
                     ,
 
   'bonos weapons' : {"waifu" : "Dakimakura", 
@@ -74,7 +77,9 @@ shops = {
                      "dildo": "DragonDrilldo",
                      "sanguijuela": "SanguijuelaGoliat",
                      "palo": "PaloMedico",
-                     "jeringa": "JeringaCocaina"},
+                     "jeringa": "JeringaCocaina",
+                     "serrucho": "SerruchoOxidado",
+                     "fuego": "Flammenwerfer"},
   
   'bonos guilds' : {"otakos" : "AlianzaOtako", 
                     "nalgoticas" : "DominioNalgoticas",
@@ -97,6 +102,8 @@ shops = {
                       "king","stiletto","trailero",
                       "trio","viagra","dildo",
                       "exorcismo","cuervos","bufotoxina",
+                      "trepano","sangria","biblia",
+                      "hierbas","serrucho","fuego",
                       "bitcoin","sapo","mascara",
                       "sanguijuela","palo","jeringa"]
 
@@ -104,11 +111,9 @@ shops = {
 
 }
 
-prohibido = ["Shop","HuachiSwap","Bodega","Huachicuenta"]
+prohibido = ["Shop","HuachiSwap","Bodega","Huachicuenta","Bancadenas"]
 
 vib = ["MarcoCadenas","Empleado_del_mes","Disentibot","AutoModerator","UnidadVictimasEsp"]
-
-stonks = shops['stonks']
 
 resp_saldo = open("./assets/frases/frases_saldo.txt", "r", encoding="utf-8").read().splitlines()
 
@@ -136,8 +141,6 @@ resp_levanton = open("./assets/frases/frases_levanton.txt", "r", encoding="utf-8
 
 resp_huachilate = open("./assets/frases/frases_huachilate.txt", "r", encoding="utf-8").read().splitlines()
 
-resp_huachiswap = open("./assets/frases/frases_huachiswap.txt","r",encoding="utf-8").read().splitlines()
-
 monaschinas = open("./assets/shop/monaschinas.txt", "r", encoding="utf-8").read().splitlines()
 
 trapos = open("./assets/shop/trapos.txt", "r", encoding="utf-8").read().splitlines()
@@ -154,3 +157,6 @@ galletas = open("./assets/shop/galletas.txt", "r", encoding="utf-8").read().spli
 
 valentines = open("./assets/shop/valentin.txt", "r", encoding="utf-8").read().splitlines()
 
+viejos = open("./assets/shop/viejos.txt", "r", encoding="utf-8").read().splitlines()
+
+doujins = open("./assets/shop/doujins.txt", "r", encoding="utf-8").read().splitlines()
