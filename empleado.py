@@ -9,7 +9,6 @@ tareas = {"!tip": cirilo.propina,
           "!saldo": cirilo.saldazo,
           "!saldazo": cirilo.saldazo,
           "!rankme": cirilo.rankme,
-          "!rank25": cirilo.rank25,
           "!rank": cirilo.rank,
           "!shop": cirilo.Shop,
           "!huachibono": cirilo.huachibonos,
@@ -25,11 +24,12 @@ tareas = {"!tip": cirilo.propina,
           "!rtd": cirilo.rollthedice,
           "!deposito": cirilo.deposito,
           "!retiro": cirilo.retiro,
-          "!flair": cirilo.flair
+          "!flair": cirilo.flair,
+          "!piratear": cirilo.piratear
           }
 
 
-def Jornada():
+def jornada():
     """El motor de nuestra huachieconomia"""
 
     # Cuidado con el futuro, es incierto.
@@ -88,7 +88,7 @@ def Jornada():
 
                                 tiempos.write(f"{comando} --- {time.time() - start} segundos" + "\n")
 
-                            if comando in ["!saldo", "!saldazo", "!rank", "!rankme", "!rank25", "!build"]:
+                            if comando in ["!saldo", "!saldazo", "!rank", "!rankme", "!build"]:
 
                                 start = time.time()
 
@@ -119,6 +119,14 @@ def Jornada():
                                 start = time.time()
 
                                 tareas[comando](remitente, destinatario, id)
+
+                                tiempos.write(f"{comando} --- {time.time() - start} segundos" + "\n")
+
+                            if comando == "!piratear":
+
+                                start = time.time()
+
+                                tareas[comando](texto,remitente,str(comment.submission.permalink),id)
 
                                 tiempos.write(f"{comando} --- {time.time() - start} segundos" + "\n")
 
@@ -196,16 +204,42 @@ def servicio_al_cliente():
 
                 mensaje.reply(random.choice(resp_empleado_error))
 
+def bancarrota():
+    """Avisar a los usuarios que quedaron en banca rota"""
+
+    huachis_master = HuachiNet("Bodega")
+
+    mujicanes = huachis_master.Mujicanos()
+
+    for mujicane in mujicanes:
+
+        huachis = HuachiNet(mujicane)
+
+        deuda = huachis.saldo_total
+
+        if huachis.saldo_total <= 0:
+
+            reddit.redditor(mujicane).message("Aviso Bancarrota","Mensaje automatizado para decirle que usted ha fallado en el juego de las huachis o(╥﹏╥)o\n\nEl saldo de su cuenta esta en ceros.")
+
+            if deuda < 0:
+            
+                huachis_master.Enviar_Bineros(mujicane,abs(huachis.saldo_total),nota="Bancarrota")
+
+                with open("./quiebralog.txt","a",encoding="utf-8") as file:
+
+                    file.write(f"{mujicane},{time.time()}\n")
 
 if __name__ == "__main__":
 
     while True:
-
+        
         start_time = time.time()
 
-        movs = Jornada()
+        jornada()
 
         servicio_al_cliente()
+
+        bancarrota()
 
         print("\nTermine mi trabajo patron!")
 
@@ -214,3 +248,11 @@ if __name__ == "__main__":
         print(stats)
 
         time.sleep(60)
+
+        
+
+
+
+
+
+

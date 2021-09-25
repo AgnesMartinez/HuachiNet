@@ -111,7 +111,9 @@ shops = {
 
 }
 
-prohibido = ["Shop","HuachiSwap","Bodega","Huachicuenta","Bancadenas"]
+cuenta_tesoreria = { "DominioNalgoticas" : "Banalgoticas" , "AlianzaOtako" : "Banotakos" , "Corvidos" : "Bancorvidos", "ConductoresNocturnos" : "Banocturnos" }
+
+prohibido = ["Shop","HuachiSwap","Bodega","Huachicuenta","Bancadenas","Banalgoticas","Banocturnos","Banotakos","Bancorvidos"]
 
 vib = ["MarcoCadenas","Empleado_del_mes","Disentibot","AutoModerator","UnidadVictimasEsp"]
 
